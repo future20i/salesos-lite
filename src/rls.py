@@ -19,7 +19,7 @@ CREATE POLICY tenant_isolation ON {table}
 
 BUSINESS_TABLES = [
     "users", "leads", "messages", "ai_jobs",
-    "approvals", "canned_responses",
+    "approvals", "canned_responses", "subscriptions",
 ]
 
 
