@@ -190,9 +190,11 @@ async def _process_job(job: AIJob) -> None:
             sum(len(v) for v in mapping.values()),
         )
 
-        # ── LLM call placeholder (M1) ──
-        # In M3 this will actually call an LLM with sanitized_text.
-        # For now, just set intent="cold" on the lead.
+        # ── LLM call (M3: real intent grading + profile extraction) ──
+        from src.llm_client import grade_intent
+
+        # Fetch the lead
+        import json
         lead_stmt = select(Lead).where(Lead.id == job.lead_id)
         lead_result = await session.execute(lead_stmt)
         lead: Lead | None = lead_result.scalar_one_or_none()
@@ -201,11 +203,27 @@ async def _process_job(job: AIJob) -> None:
             await _mark_failed(job.id)
             return
 
-        # Desanitize before persisting (not strictly needed for M1 placeholder
-        # since we don't pass anything back, but keeps the pattern correct).
-        desanitized_text = _desanitize_llm_output(sanitized_text, mapping)
+        llm_result = await grade_intent(sanitized_text)
 
-        lead.intent = Intent.COLD
+        # Map intent string to Intent enum
+        intent_map = {
+            "hot": Intent.HOT,
+            "warm": Intent.WARM,
+            "cold": Intent.COLD,
+            "dormant": Intent.DORMANT,
+        }
+        intent_enum = intent_map.get(llm_result.get("intent", "cold"), Intent.COLD)
+        lead.intent = intent_enum
+
+        # Store extracted profile fields
+        if llm_result.get("target_price"):
+            lead.target_price = llm_result["target_price"]
+        if llm_result.get("inquired_sku"):
+            lead.inquired_sku = llm_result["inquired_sku"]
+
+        # Desanitize before persisting
+        result_text = json.dumps(llm_result, ensure_ascii=False)
+        desanitized_text = _desanitize_llm_output(result_text, mapping)
 
         # ── Mark job DONE ──
         update_stmt = (
@@ -221,9 +239,10 @@ async def _process_job(job: AIJob) -> None:
         await session.commit()
 
         logger.info(
-            "Processed AI job %s (lead=%s, intent=cold)",
+            "Processed AI job %s (lead=%s, intent=%s)",
             job.id,
             job.lead_id,
+            llm_result.get("intent", "unknown"),
         )
 
 

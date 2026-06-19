@@ -28,6 +28,7 @@ from src.api.export_routes import router as export_router
 from src.api.billing_routes import router as billing_router
 from src.api.onboarding_routes import router as onboarding_router
 from src.api.dashboard_routes import router as dashboard_router
+from src.api.whatsapp_routes import router as whatsapp_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -115,6 +116,7 @@ app.include_router(export_router)
 app.include_router(billing_router)
 app.include_router(onboarding_router)
 app.include_router(dashboard_router)
+app.include_router(whatsapp_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")
