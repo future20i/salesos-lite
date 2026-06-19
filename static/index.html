@@ -51,6 +51,9 @@
   #login-box .btn-login:active{transform:scale(0.98)}
   #login-error{color:var(--danger);font-size:12px;margin-top:8px;display:none}
   .login-hint{font-size:11px;color:var(--text-quaternary);margin-top:20px;text-align:center;line-height:1.6}
+  .login-tabs{display:flex;background:var(--bg-subtle);border-radius:var(--radius-md);padding:2px;margin-bottom:18px}
+  .login-tab{flex:1;padding:7px;border:none;border-radius:6px;font-size:12px;font-weight:500;font-family:var(--font-sans);cursor:pointer;background:transparent;color:var(--text-tertiary);transition:all var(--duration-fast)}
+  .login-tab.active{background:var(--bg-surface);color:var(--text-primary);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
 
   /* ── Nav ── */
   #nav{width:52px;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:18px;box-shadow:var(--shadow-border);position:relative;z-index:2}
@@ -261,11 +264,24 @@
   <div id="login-box">
     <h1>SalesOS Lite</h1>
     <div class="login-sub">外贸 SME 统一收件箱</div>
+
+    <!-- Mode tabs -->
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchAuthMode('login')">登录</button>
+      <button class="login-tab" onclick="switchAuthMode('register')">注册</button>
+    </div>
+
+    <!-- Register-only fields -->
+    <div id="reg-fields" class="hidden">
+      <input id="reg-company" placeholder="公司名称" autocomplete="off">
+      <input id="reg-username" placeholder="用户名" autocomplete="off">
+    </div>
+
     <input id="login-user" placeholder="邮箱" autofocus autocomplete="off">
     <input id="login-pass" type="password" placeholder="密码" autocomplete="off">
-    <button class="btn-login" onclick="doLogin()">登录</button>
+    <button class="btn-login" id="btn-auth" onclick="doAuth()">登录</button>
     <p id="login-error"></p>
-    <div class="login-hint">测试: admin@test.com / admin123</div>
+    <div class="login-hint" id="login-hint">测试: admin@test.com / admin123</div>
   </div>
 </div>
 
@@ -386,6 +402,62 @@ function fmtDate(t) { if (!t) return ''; var d = new Date(t); return d.toLocaleS
 // ═══════════════════════════════════════════
 // Auth
 // ═══════════════════════════════════════════
+var _authMode = 'login';
+
+function switchAuthMode(mode) {
+  _authMode = mode;
+  var tabs = document.querySelectorAll('.login-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+  var regFields = $('reg-fields');
+  var btn = $('btn-auth');
+  var hint = $('login-hint');
+  if (mode === 'register') {
+    regFields.classList.remove('hidden');
+    btn.textContent = '注册';
+    hint.textContent = '注册即表示同意服务条款';
+  } else {
+    regFields.classList.add('hidden');
+    btn.textContent = '登录';
+    hint.textContent = '测试: admin@test.com / admin123';
+  }
+  $('login-error').style.display = 'none';
+  $('login-error').textContent = '';
+}
+
+function doAuth() {
+  if (_authMode === 'register') { doRegister(); }
+  else { doLogin(); }
+}
+
+async function doRegister() {
+  var company = $('reg-company').value.trim();
+  var username = $('reg-username').value.trim();
+  var email = $('login-user').value.trim();
+  var password = $('login-pass').value;
+  if (!company || !username || !email || !password) {
+    $('login-error').textContent = '请填写所有字段';
+    $('login-error').style.display = 'block';
+    return;
+  }
+  var r = await fetch('/api/auth/register', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({company_name:company, username:username, email:email, password:password})
+  });
+  var d = await r.json();
+  if (r.status !== 201) {
+    $('login-error').textContent = (d.detail || '注册失败');
+    $('login-error').style.display = 'block';
+    return;
+  }
+  // Auto-login after registration
+  _tk = d.token;
+  localStorage.setItem('salesos_lite_sess', JSON.stringify({tk:_tk}));
+  $('login-overlay').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await initAfterLogin();
+}
+
 async function doLogin() {
   var u = $('login-user').value, p = $('login-pass').value;
   var r = await fetch('/api/auth/login', {
@@ -399,12 +471,29 @@ async function doLogin() {
     return;
   }
   _tk = d.token;
-  var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+_tk}});
-  _user = await me.json();
   localStorage.setItem('salesos_lite_sess', JSON.stringify({tk:_tk}));
   $('login-overlay').classList.add('hidden');
   $('app').classList.remove('hidden');
+  await initAfterLogin();
+}
+
+async function initAfterLogin() {
+  // Fetch user info
+  var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+_tk}});
+  _user = await me.json();
   await loadLeads();
+  // If brand new (no leads), create a demo lead
+  if (!_leads.length) {
+    await api('/api/inbox/incoming', {
+      method:'POST',
+      body:JSON.stringify({
+        source:'web', customer_name:'欢迎使用 SalesOS Lite',
+        customer_email:'demo@salesos.io',
+        content:'👋 你好！这是你的第一条演示消息。试试回复我，体验完整的收件箱功能。'
+      })
+    });
+    await loadLeads();
+  }
 }
 
 function doLogout() {
@@ -419,10 +508,10 @@ async function tryRestore() {
   if (!d.tk) return;
   var r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+d.tk}});
   if (!r.ok) { localStorage.removeItem('salesos_lite_sess'); return; }
-  _tk = d.tk; _user = await r.json();
+  _tk = d.tk;
   $('login-overlay').classList.add('hidden');
   $('app').classList.remove('hidden');
-  await loadLeads();
+  await initAfterLogin();
 }
 
 // ═══════════════════════════════════════════
