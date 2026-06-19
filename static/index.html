@@ -55,6 +55,51 @@
   .login-tab{flex:1;padding:7px;border:none;border-radius:6px;font-size:12px;font-weight:500;font-family:var(--font-sans);cursor:pointer;background:transparent;color:var(--text-tertiary);transition:all var(--duration-fast)}
   .login-tab.active{background:var(--bg-surface);color:var(--text-primary);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
 
+  /* ── Landing Page ── */
+  #landing{background:var(--bg-root);min-height:100vh;overflow-y:auto}
+  .landing-container{max-width:960px;margin:0 auto;padding:0 24px}
+  .landing-hero{text-align:center;padding:80px 0 60px}
+  .landing-badge{display:inline-block;background:var(--accent-soft);color:var(--accent-text);padding:6px 16px;border-radius:var(--radius-pill);font-size:13px;font-weight:500;margin-bottom:24px}
+  .landing-hero h1{font-size:48px;font-weight:600;letter-spacing:-1.4px;line-height:1.15;color:var(--text-primary);margin-bottom:20px}
+  .landing-desc{font-size:16px;color:var(--text-tertiary);line-height:1.6;max-width:560px;margin:0 auto}
+  .landing-cta{display:flex;gap:12px;justify-content:center;margin-top:32px}
+  .landing-btn-primary{padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:500;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast);box-shadow:0 2px 8px rgba(108,92,231,0.25)}
+  .landing-btn-primary:hover{background:var(--accent-hover);transform:scale(1.03)}
+  .landing-btn-ghost{padding:12px 28px;background:var(--bg-surface);color:var(--text-primary);border:none;border-radius:var(--radius-md);font-size:15px;font-weight:500;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast);box-shadow:var(--shadow-border)}
+  .landing-btn-ghost:hover{background:var(--bg-hover)}
+  
+  .landing-features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:40px 0 60px}
+  .feature-card{background:var(--bg-surface);padding:28px 24px;border-radius:var(--radius-xl);box-shadow:var(--shadow-card);text-align:center}
+  .feature-icon{font-size:36px;margin-bottom:16px}
+  .feature-card h3{font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+  .feature-card p{font-size:13px;color:var(--text-tertiary);line-height:1.6}
+  
+  .landing-pricing{text-align:center;padding:40px 0 60px}
+  .landing-pricing h2{font-size:32px;font-weight:600;letter-spacing:-0.6px;margin-bottom:12px}
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+  .pricing-card{background:var(--bg-surface);padding:32px 24px;border-radius:var(--radius-xl);box-shadow:var(--shadow-card);text-align:center;position:relative}
+  .pricing-card.featured{border:2px solid var(--accent);box-shadow:var(--shadow-elevated)}
+  .pricing-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 14px;border-radius:var(--radius-pill);font-size:11px;font-weight:600}
+  .pricing-name{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+  .pricing-price{font-size:36px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px}
+  .pricing-price span{font-size:14px;font-weight:400;color:var(--text-tertiary)}
+  .pricing-seats{font-size:12px;color:var(--text-tertiary);margin:8px 0 20px}
+  .pricing-card ul{list-style:none;text-align:left}
+  .pricing-card ul li{padding:8px 0;font-size:13px;color:var(--text-secondary);border-bottom:1px solid rgba(0,0,0,0.04)}
+  .pricing-card ul li:last-child{border-bottom:none}
+  
+  .landing-footer{text-align:center;padding:60px 0 80px}
+  .landing-footer h2{font-size:28px;font-weight:600;letter-spacing:-0.5px;color:var(--text-primary);margin-bottom:24px}
+
+  @media (max-width: 767px) {
+    .landing-hero h1{font-size:32px;letter-spacing:-0.8px}
+    .landing-hero{padding:48px 0 40px}
+    .landing-features{grid-template-columns:1fr;gap:12px}
+    .pricing-grid{grid-template-columns:1fr;gap:12px}
+    .landing-cta{flex-direction:column;align-items:center}
+    #landing{overflow-y:auto}
+  }
+
   /* ── Nav ── */
   #nav{width:52px;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:18px;box-shadow:var(--shadow-border);position:relative;z-index:2}
   .nav-icon{width:34px;height:34px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;transition:all var(--duration-fast) var(--ease-out);cursor:pointer;color:var(--text-tertiary);position:relative}
@@ -259,8 +304,91 @@
 </head>
 <body>
 
+<!-- ═══ LANDING PAGE ═══ -->
+<div id="landing">
+  <div class="landing-container">
+    <!-- Hero -->
+    <section class="landing-hero">
+      <div class="landing-badge">外贸 SME 统一收件箱</div>
+      <h1>所有客户消息<br>一个地方搞定</h1>
+      <p class="landing-desc">Web · 邮件 · WhatsApp — 多渠道客户消息汇聚到一个收件箱。<br>AI 辅助回复，数据永不丢失，人手一套。</p>
+      <div class="landing-cta">
+        <button class="landing-btn-primary" onclick="showAuth('register')">免费开始使用</button>
+        <button class="landing-btn-ghost" onclick="showAuth('login')">已有账号？登录</button>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="landing-features">
+      <div class="feature-card">
+        <div class="feature-icon">📥</div>
+        <h3>统一收件箱</h3>
+        <p>Web 表单、邮件、WhatsApp — 所有渠道的消息汇聚一处，按客户自动分组，不再切换工具。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI 辅助回复</h3>
+        <p>AI 理解客户意图，生成专业回复建议。你可以直接发送、编辑后发送，或完全手动。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>数据自主权</h3>
+        <p>所有数据存储在你的账户下，随时一键导出 CSV。不锁定，不绑架，数据永远是你的。</p>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="landing-pricing">
+      <h2>简单定价</h2>
+      <p class="landing-desc">每席计费，按需扩容。14 天免费试用，无需信用卡。</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-name">Starter</div>
+          <div class="pricing-price">¥199<span>/月</span></div>
+          <div class="pricing-seats">3 个席位</div>
+          <ul>
+            <li>Web + 邮件渠道</li>
+            <li>WhatsApp 基础</li>
+            <li>AI 辅助回复</li>
+            <li>CSV 数据导出</li>
+          </ul>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-badge">推荐</div>
+          <div class="pricing-name">Growth</div>
+          <div class="pricing-price">¥499<span>/月</span></div>
+          <div class="pricing-seats">10 个席位</div>
+          <ul>
+            <li>全部渠道（含 WhatsApp 完整）</li>
+            <li>AI 意图识别 + 客户画像</li>
+            <li>报价单管理</li>
+            <li>优先支持</li>
+          </ul>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-name">Pro</div>
+          <div class="pricing-price">¥999<span>/月</span></div>
+          <div class="pricing-seats">30 个席位</div>
+          <ul>
+            <li>全部功能</li>
+            <li>自动跟进规则</li>
+            <li>API 对接</li>
+            <li>专属客户成功经理</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="landing-footer">
+      <h2>从今天开始，不再丢失任何客户</h2>
+      <button class="landing-btn-primary" onclick="showAuth('register')">免费试用 14 天</button>
+    </section>
+  </div>
+</div>
+
 <!-- ═══ LOGIN OVERLAY ═══ -->
-<div id="login-overlay">
+<div id="login-overlay" class="hidden">
   <div id="login-box">
     <h1>SalesOS Lite</h1>
     <div class="login-sub">外贸 SME 统一收件箱</div>
@@ -410,6 +538,12 @@ function fmtDate(t) { if (!t) return ''; var d = new Date(t); return d.toLocaleS
 // ═══════════════════════════════════════════
 var _authMode = 'login';
 
+function showAuth(mode) {
+  $('landing').classList.add('hidden');
+  $('login-overlay').classList.remove('hidden');
+  if (mode) switchAuthMode(mode);
+}
+
 function switchAuthMode(mode) {
   _authMode = mode;
   var tabs = document.querySelectorAll('.login-tab');
@@ -484,7 +618,9 @@ async function doLogin() {
 }
 
 async function initAfterLogin() {
-  // Fetch user info
+  $('landing').classList.add('hidden');
+  $('login-overlay').classList.add('hidden');
+  $('app').classList.remove('hidden');
   var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+_tk}});
   _user = await me.json();
   await loadLeads();
