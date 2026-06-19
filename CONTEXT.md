@@ -174,4 +174,20 @@ manager/admin 视角的数据面板。展示：
 
 ## 标记的歧义
 
-（项目初期，尚未产生术语混淆。）
+### 术语中英代码名对照
+
+| 中文术语 | 代码/API 名 | 数据库表 |
+|----------|------------|---------|
+| 租户 | `tenant` | `tenants` |
+| 用户 | `user` | `users` |
+| 询盘 | `inquiry` | `inquiries` |
+| 线索 | `lead` | `leads` |
+| 客户 | `client` | `clients` |
+| 消息 | `message` | `messages` |
+| 报价 | `quotation` | `quotations` |
+| 跟进 | `follow_up` | `follow_ups` |
+| 模板 | `canned_response` | `canned_responses` |
+| 审批 | `approval` | `approvals` |
+| 看板 | `dashboard` | —（聚合查询） |
+| 套餐 | `plan` | `plans` |
+| 订阅 | `subscription` | `subscriptions` |

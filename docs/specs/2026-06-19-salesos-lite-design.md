@@ -64,7 +64,24 @@ CREATE POLICY tenant_isolation ON leads
   USING (tenant_id = current_setting('app.current_tenant_id'));
 ```
 
-应用层在请求中间件设置 `app.current_tenant_id`。数据库层兜底——即使应用漏了 WHERE 条件，RLS 拒绝访问。
+**安全加固（三层防护）：**
+
+1. **中间件强制设置：** FastAPI 中间件对每个请求强制设置 `app.current_tenant_id`。
+   若无法确定租户（未登录/无效 token），立即返回 401——不允许在无租户上下文中执行查询。
+
+2. **SSE/LISTEN 路由：** NOTIFY payload 必须包含 `tenant_id` 字段，接收端据此设定
+   `current_setting` 后再查询。连接池中的 PG 会话在每次 NOTIFY 处理时切换租户上下文。
+
+3. **审计脚本：** 数据库初始化时运行以下查询，确保所有业务表已启用 RLS：
+   ```sql
+   SELECT relname FROM pg_class
+     WHERE relkind = 'r' AND relrowsecurity = false
+     AND relname NOT LIKE 'pg_%' AND relname NOT LIKE 'alembic_%';
+   ```
+   返回任何行 = 构建失败。CI 中强制执行。
+
+应用层中间件 + RLS 数据库层兜底——即使应用漏了 WHERE 条件，RLS 拒绝访问；
+即使 RLS 未启用，中间件也会拒绝无租户的请求。双重保险。
 
 ### AI 异步流水线
 
@@ -75,14 +92,29 @@ CREATE POLICY tenant_isolation ON leads
   ↓
 status=processing, locked_at=now()
   ↓
-调 LLM → 写入 Lead 画像字段 + 意向标签
+Prompt 脱敏 → 调 LLM → 结果映射 → 写入 Lead 画像
   ↓
-status=done
-  ↓
-SSE 推送前端刷新
+status=done → SSE 推送前端刷新
 ```
 
-容错：扫描 `locked_at > 5 分钟` 的 job → 重置为 pending。
+**容错：**
+- 扫描 `locked_at > 5 分钟` 的 job → 重置为 pending
+- `llm_request_id` 幂等字段 — 防止 LLM 返回超时后的重复写入
+
+**速率控制：**
+- `ai_jobs` 表含 `tenant_tier` 字段
+- Starter 租户：每分钟最多消费 5 条 job
+- Growth/Pro：按比例递增
+
+**数据脱敏：**
+调用第三方 LLM API 前，对话文本中的敏感字段用占位符替换：
+- 客户姓名 → `[CUST_NAME]`
+- 公司名 → `[COMPANY]`
+- 邮箱/电话 → `[CONTACT]`
+- 产品型号/价格 → 保留（画像提取必需）
+
+LLM 返回后再将占位符映射回原始值。脱敏配置存储在 `tenant_sanitize_rules` 中，
+租户可自定义脱敏粒度。此策略是合规底线——外贸数据涉及商业机密，不可明文飞出受控环境。
 
 ---
 
@@ -108,11 +140,14 @@ Tenant ──< Subscription
 |---|:--:|:--:|:--:|
 | 月费 | ¥199 | ¥499 | ¥999 |
 | 席位 | 3 | 10 | 30 |
-| 渠道 | Web + 邮件 | + WhatsApp | + WhatsApp 蓝 V 协助 |
+| 渠道 | Web + 邮件 + WhatsApp(基础) | 全渠道 + AI | 全渠道 + 蓝 V 协助 |
 | AI 画像 | 意向分级 | 完整画像 + 跟进建议 | 完整 + 自定义 |
 | 看板 | 基础 | 团队 + 人效 | 自定义报表 |
-| 导出 | CSV | CSV + JSON | API |
+| 导出 | JSON(月限1次) | JSON(周限1次) + CSV | API 导出 |
 | 支持 | 邮件 | 微信群 | 客户成功经理 |
+
+**阶梯逻辑：** Starter 给 WhatsApp 基础接入（收+发，无 AI 辅助），作为"渠道预览"——
+让老板看到所有消息进一个收件箱的价值，需要 AI 画像和自动分级时升级 Growth。
 
 ---
 
@@ -120,9 +155,48 @@ Tenant ──< Subscription
 
 | 里程碑 | 内容 | 验收 |
 |:--:|------|------|
-| **M1** (2周) | 核心收件箱 + Web(HTTP API,无Widget)/邮件渠道 + 线索列表看板 + PG | 单人可收发消息、看线索状态 |
-| **M2** (+1周) | 注册/试用/支付/导出 + 转化漏斗看板(效果指标) + Web Chat Widget | 陌生人可注册付钱使用 |
+| **M1** (2周) | 核心收件箱 + Web(HTTP API,无Widget)/邮件渠道 + 线索列表看板 + PG | 见下方 M1 验收清单 |
+
+### M1 验收清单
+
+- [ ] `POST /api/v1/inquiries` 写入数据库并返回 201
+- [ ] Mailgun Inbound Parse → 自动创建 Inquiry + Message
+- [ ] `GET /api/v1/leads` 按租户过滤，返回线索列表含状态和意向
+- [ ] SSE `/api/v1/stream` 推送新消息给同租户已认证用户
+- [ ] 所有业务表启用 RLS（审计脚本返回 0 行）
+- [ ] 租户 A 的 API 请求无法访问租户 B 的数据（集成测试）
+- [ ] `ai_jobs` 表轮询 + 脱敏 + 5 分钟超时重置 + 幂等保护
+- [ ] 线索列表看板显示：总量、新询盘、意向分布
+- [ ] PostgreSQL 连接池健康检查中间件就绪（>80% →降级）
+| **M2** (+1周) | 注册/试用/支付/导出 + 转化漏斗看板(效果指标) + Web Chat Widget + **Onboarding 向导** | 陌生人可注册付钱使用；3 步配置向导完成渠道接入 |
 | **M3** (+2周) | AI 画像提取/意向分级 + WhatsApp 接入 | Growth 套餐完整可卖 |
+
+### 订阅状态机
+
+```
+trialing (14天全功能)
+  ├→ active (付费开通)
+  ├→ past_due (续费失败，宽限期7天)
+  └→ canceled (主动取消)
+       └→ expired (数据保留30天)
+```
+
+中间件在每次请求时检查 `subscription_status`，拦截已过期租户的功能调用。
+
+### Onboarding 配置向导
+
+注册后首屏为 3 步引导：
+1. **添加邮件** — 复制专属收件地址 → 设置自动转发
+2. **嵌入 Web Chat** — 复制 JS 代码片段 → 粘贴到官网
+3. **邀请同事** — 输入邮箱发送邀请
+
+每完成一步，`onboarding_state` 推进。三步完成后进入收件箱。
+
+### 支付可靠性
+
+PayJs 回调 + 前端轮询 `/billing/status` 双重确认。
+回调失败时重试 3 次（指数退避），前端轮询每 2 秒一次持续 30 秒——
+确保用户扫码后 3 秒内看到"已激活"。
 
 ---
 

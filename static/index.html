@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>SalesOS Lite v1</title>
+<style>
+:root {
+  --bg: #0a0a0b;
+  --nav: #0f0f10;
+  --card: #131416;
+  --surface: #1a1b1e;
+  --text: #ededef;
+  --secondary: #a1a1aa;
+  --muted: #71717a;
+  --dim: #52525b;
+  --border: rgba(255,255,255,0.06);
+  --accent: #6c5ce7;
+  --accent-hover: #7c6ff0;
+  --accent-soft: rgba(108,92,231,0.10);
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f97316;
+  --yellow: #eab308;
+  --ff: system-ui, -apple-system, sans-serif;
+  --ff-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --br: 12px;
+  --brs: 8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+button{cursor:pointer;border:none;font-family:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--brs);padding:8px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.btn{padding:8px 16px;border-radius:var(--brs);font-size:13px;font-weight:500;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:#222327}
+.btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.btn-danger:hover{background:rgba(239,68,68,0.25)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.badge{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-admin{background:rgba(108,92,231,0.2);color:var(--accent)}
+.badge-mgr{background:rgba(59,130,246,0.2);color:#3b82f6}
+.badge-rep{background:rgba(34,197,94,0.2);color:var(--green)}
+.badge-pending{background:rgba(249,115,22,0.2);color:var(--orange)}
+/* Layout */
+#app{display:flex;height:100vh}
+#sidebar{width:220px;background:var(--nav);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--border);flex-shrink:0}
+#sidebar h2{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.sidebar-stat{font-size:12px;color:var(--secondary);display:flex;justify-content:space-between}
+.sidebar-stat span{color:var(--text);font-weight:600;font-family:var(--ff-mono)}
+#conv-list{width:340px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
+#conv-list-header{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1}
+#conv-list-items{display:flex;flex-direction:column}
+.conv-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.conv-item:hover{background:var(--surface)}
+.conv-item.active{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.conv-item .name{font-size:14px;font-weight:600;margin-bottom:2px}
+.conv-item .preview{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conv-item .meta{font-size:11px;color:var(--dim);margin-top:4px;display:flex;justify-content:space-between}
+#detail-panel{flex:1;display:flex;flex-direction:column}
+#detail-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:14px}
+#detail-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#detail-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+#detail-header h3{font-size:16px}
+#messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 14px;border-radius:var(--brs);max-width:75%;font-size:13px;line-height:1.5}
+.msg.customer{align-self:flex-start;background:var(--surface);border:1px solid var(--border)}
+.msg.agent{align-self:flex-end;background:var(--accent-soft);border:1px solid rgba(108,92,231,0.2)}
+.msg.system{align-self:center;background:transparent;color:var(--dim);font-size:11px;font-style:italic}
+.msg .sender{font-size:11px;color:var(--secondary);margin-bottom:3px}
+.msg .time{font-size:10px;color:var(--dim);margin-top:2px}
+#reply-box{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+#reply-box textarea{flex:1;resize:none;min-height:40px;max-height:120px}
+#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+#login-box{width:360px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:var(--br)}
+#login-box h1{font-size:20px;color:var(--accent);margin-bottom:24px}
+#login-box input{width:100%;margin-bottom:12px;padding:10px 14px}
+#login-error{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.hidden{display:none!important}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div id="login-box">
+    <h1>SalesOS Lite</h1>
+    <input id="login-user" placeholder="用户名" autofocus>
+    <input id="login-pass" type="password" placeholder="密码">
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">登录</button>
+    <p id="login-error"></p>
+    <p style="font-size:11px;color:var(--dim);margin-top:16px">
+      测试账号: admin/admin123 &nbsp;|&nbsp; manager/mgr123 &nbsp;|&nbsp; rep/rep123
+    </p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <h2>SalesOS Lite</h2>
+    <div class="sidebar-stat">待审批 <span id="stat-pending">0</span></div>
+    <div class="sidebar-stat">我的会话 <span id="stat-mine">0</span></div>
+    <div class="sidebar-stat">全部会话 <span id="stat-total">0</span></div>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="showNewConv()">+ 新建会话</button>
+    <select id="filter-status" onchange="loadConvs()" style="margin-top:8px">
+      <option value="">全部状态</option>
+      <option value="open">进行中</option>
+      <option value="closed">已关闭</option>
+    </select>
+    <label style="font-size:12px;color:var(--secondary);display:flex;align-items:center;gap:4px;margin-top:4px">
+      <input type="checkbox" id="filter-mine" onchange="loadConvs()"> 只看我的
+    </label>
+    <div style="flex:1"></div>
+    <div style="font-size:12px;color:var(--dim)">
+      <span id="current-user"></span>
+      <span id="current-role" class="badge" style="margin-left:6px"></span>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="doLogout()">退出</button>
+  </div>
+
+  <!-- Conversation List -->
+  <div id="conv-list">
+    <div id="conv-list-header">
+      <input id="search-customer" placeholder="搜索客户名..." style="width:100%" oninput="loadConvs()">
+    </div>
+    <div id="conv-list-items"></div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div id="detail-panel">
+    <div id="detail-empty">← 选择一个会话</div>
+    <div id="detail-content" class="hidden">
+      <div id="detail-header">
+        <h3 id="detail-name"></h3>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="detail-assign" onchange="doAssign()" style="display:none"></select>
+          <button class="btn btn-sm" id="btn-approval" onclick="submitApproval()">📋 提交审批</button>
+          <button class="btn btn-secondary btn-sm" id="btn-close" onclick="doClose()">关闭</button>
+        </div>
+      </div>
+      <div id="messages"></div>
+      <div id="reply-box">
+        <textarea id="reply-input" placeholder="输入回复..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doReply()}"></textarea>
+        <button class="btn btn-primary" onclick="doReply()">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Conversation Modal -->
+<div id="new-conv-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200">
+  <div style="width:400px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--br)">
+    <h3 style="margin-bottom:16px">新建会话</h3>
+    <input id="new-name" placeholder="客户名称" style="width:100%;margin-bottom:8px">
+    <select id="new-source" style="width:100%;margin-bottom:8px">
+      <option value="web">Web</option>
+      <option value="api">API</option>
+      <option value="telegram">Telegram</option>
+      <option value="whatsapp">WhatsApp</option>
+    </select>
+    <textarea id="new-msg" placeholder="首条消息（可选）" style="width:100%;margin-bottom:12px;min-height:60px"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="hideNewConv()">取消</button>
+      <button class="btn btn-primary" onclick="doCreateConv()">创建</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────
+var _tk='', _user=null, _convs=[], _activeId=null, _users=[];
+
+// ── API helpers ───────────────────────────────────────────────────
+async function api(path, opts={}) {
+  var h = opts.headers || {};
+  if(_tk) h['Authorization'] = 'Bearer '+_tk;
+  var r = await fetch(path, {headers: Object.assign({'Content-Type':'application/json'},h), ...opts});
+  if(r.status === 401){doLogout();throw new Error('Unauthorized')}
+  return r;
+}
+
+// ── Auth ──────────────────────────────────────────────────────────
+async function doLogin() {
+  var u = doc('login-user').value, p = doc('login-pass').value;
+  var r = await fetch('/api/auth/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username:u, password:p})
+  });
+  var d = await r.json();
+  if(r.status !== 200){doc('login-error').textContent=d.error||'登录失败';doc('login-error').style.display='block';return}
+  _tk=d.token;_user=d.user;
+  localStorage.setItem('salesos_lite_sess',JSON.stringify({tk:_tk,user:_user}));
+  doc('login-overlay').classList.add('hidden');
+  doc('app').classList.remove('hidden');
+  doc('current-user').textContent=_user.username;
+  var rc=doc('current-role');
+  rc.textContent=_user.role.toUpperCase();
+  rc.className='badge badge-'+(_user.role==='admin'?'admin':_user.role==='mgr'?'mgr':'rep');
+  if(_user.role==='admin'||_user.role==='mgr') doc('detail-assign').style.display='inline-block';
+  await loadConvs();
+  await loadStats();
+}
+
+function doLogout(){localStorage.removeItem('salesos_lite_sess');location.reload()}
+
+function tryRestore() {
+  var s = localStorage.getItem('salesos_lite_sess');
+  if(!s) return;
+  var d = JSON.parse(s);
+  if(!d.tk || !d.user) return;
+  fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+d.tk}})
+    .then(r => {if(r.ok) return r.json(); throw new Error()})
+    .then(u => {_tk=d.tk;_user=u;
+      doc('login-overlay').classList.add('hidden');doc('app').classList.remove('hidden');
+      doc('current-user').textContent=u.username;
+      var rc=doc('current-role');rc.textContent=u.role.toUpperCase();
+      rc.className='badge badge-'+(u.role==='admin'?'admin':u.role==='mgr'?'mgr':'rep');
+      if(u.role==='admin'||u.role==='mgr') doc('detail-assign').style.display='inline-block';
+      loadConvs();loadStats();
+    }).catch(()=>localStorage.removeItem('salesos_lite_sess'));
+}
+
+function doc(id){return document.getElementById(id)}
+
+// ── Conversations ─────────────────────────────────────────────────
+async function loadConvs() {
+  var p = new URLSearchParams();
+  var st = doc('filter-status').value; if(st) p.set('status',st);
+  if(doc('filter-mine').checked) p.set('mine','true');
+  var q = doc('search-customer').value; if(q) p.set('q',q);
+  var r = await api('/api/inbox/conversations?'+p);
+  var d = await r.json();
+  _convs = d.data || [];
+  renderConvList();
+}
+
+function renderConvList() {
+  var el = doc('conv-list-items'), html='';
+  _convs.forEach(function(c){
+    var cls = c.id===_activeId?'conv-item active':'conv-item';
+    html += '<div class="'+cls+'" onclick="selectConv('+c.id+')">'
+      +'<div class="name">'+esc(c.customer_name)+' <span class="badge badge-'+c.status+'" style="font-size:10px">'+c.status+'</span></div>'
+      +'<div class="preview">'+(c.last_message||'暂无消息')+'</div>'
+      +'<div class="meta"><span>'+c.source+'</span><span>'+(c.assignee_name||'未分配')+'</span></div>'
+      +'</div>';
+  });
+  el.innerHTML = html || '<div style="padding:20px;color:var(--dim);text-align:center">暂无会话</div>';
+}
+
+async function selectConv(id) {
+  _activeId = id;
+  var r = await api('/api/inbox/conversations/'+id);
+  var d = await r.json();
+  var c = d.data;
+  doc('detail-empty').classList.add('hidden');
+  doc('detail-content').classList.remove('hidden');
+  doc('detail-name').textContent = c.customer_name+' ('+c.source+')';
+  // Messages
+  var html='';
+  (c.messages||[]).forEach(function(m){
+    var cls = m.sender==='customer'?'customer':m.sender==='system'?'system':'agent';
+    html += '<div class="msg '+cls+'">';
+    if(m.sender!=='system') html += '<div class="sender">'+esc(m.sender)+'</div>';
+    html += esc(m.content);
+    html += '<div class="time">'+fmtTime(m.created_at)+'</div></div>';
+  });
+  doc('messages').innerHTML = html;
+  doc('messages').scrollTop = doc('messages').scrollHeight;
+  // Close button
+  doc('btn-close').style.display = c.status==='closed'?'none':'inline-block';
+  renderConvList();
+}
+
+async function doReply() {
+  var inp = doc('reply-input'), content = inp.value.trim();
+  if(!content||!_activeId) return;
+  inp.value='';
+  await api('/api/inbox/conversations/'+_activeId+'/reply', {method:'POST',body:JSON.stringify({content:content})});
+  await selectConv(_activeId);
+}
+
+async function doAssign() {
+  var uid = parseInt(doc('detail-assign').value);
+  if(!uid||!_activeId) return;
+  await api('/api/inbox/conversations/'+_activeId+'/assign', {method:'POST',body:JSON.stringify({user_id:uid})});
+  await selectConv(_activeId);
+}
+
+async function doClose() {
+  if(!_activeId) return;
+  await api('/api/inbox/conversations/'+_activeId+'/close', {method:'POST'});
+  await selectConv(_activeId);await loadConvs();
+}
+
+function showNewConv(){doc('new-conv-modal').classList.remove('hidden')}
+function hideNewConv(){doc('new-conv-modal').classList.add('hidden')}
+
+async function doCreateConv() {
+  var name=doc('new-name').value.trim(), src=doc('new-source').value, msg=doc('new-msg').value.trim();
+  if(!name) return;
+  await api('/api/inbox/conversations', {method:'POST',body:JSON.stringify({customer_name:name,source:src,initial_message:msg||null})});
+  hideNewConv();doc('new-name').value='';doc('new-msg').value='';
+  await loadConvs();await loadStats();
+}
+
+// ── Approvals ─────────────────────────────────────────────────────
+async function submitApproval() {
+  if(!_activeId) return;
+  var reason = prompt('审批原因（可选）:');
+  if(reason===null) return;
+  await api('/api/approvals/submit', {method:'POST',body:JSON.stringify({conversation_id:_activeId,reason:reason||null})});
+  alert('已提交审批');
+  loadStats();
+}
+
+// ── Stats ─────────────────────────────────────────────────────────
+async function loadStats() {
+  var r = await api('/api/inbox/stats'), d = await r.json();
+  doc('stat-total').textContent=d.open||0;
+  doc('stat-mine').textContent=d.assigned_to_me||0;
+  var ar = await api('/api/approvals/pending'), ad = await ar.json();
+  doc('stat-pending').textContent=(ad.data||[]).length;
+}
+
+// ── Utils ─────────────────────────────────────────────────────────
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtTime(t){if(!t)return'';var d=new Date(t);return d.toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+
+// ── Init ──────────────────────────────────────────────────────────
+tryRestore();
+</script>
+</body>
+</html>
