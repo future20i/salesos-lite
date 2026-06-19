@@ -1,0 +1,142 @@
+<h2>布局方向重选</h2>
+<p class="subtitle">三种主流收件箱布局结构 — 从最简到最全</p>
+
+<style>
+  .layout-card {
+    background: #151518;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .layout-card .preview {
+    padding: 16px;
+    background: #0d0d0f;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .layout-card .desc {
+    padding: 14px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .layout-card .desc .tag {
+    background: rgba(108,92,231,0.12);
+    color: #6c5ce7;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+</style>
+
+<div class="layout-card">
+  <div class="preview">
+    <div style="display:flex;height:200px;border:1px solid rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;font-size:10px;">
+      <div style="width:50px;background:#1a1a2e;color:#555;padding:8px 4px;display:flex;flex-direction:column;gap:10px;align-items:center;">≡<br>📥<br>⚙</div>
+      <div style="width:220px;background:#111118;border-right:1px solid rgba(255,255,255,0.04);padding:8px;">
+        <div style="color:#ededef;font-weight:600;margin-bottom:6px;">对话</div>
+        <div style="padding:5px;background:rgba(108,92,231,0.08);border-radius:4px;margin-bottom:3px;border-left:2px solid #6c5ce7;">
+          <div style="color:#fff;">John Smith</div><div style="color:#666;">WhatsApp · 2m</div>
+        </div>
+        <div style="padding:5px;margin-bottom:3px;"><div style="color:#ccc;">Maria Garcia</div><div style="color:#666;">邮件 · 8m</div></div>
+        <div style="padding:5px;"><div style="color:#ccc;">Ahmed Ltd.</div><div style="color:#666;">Web · 1h</div></div>
+      </div>
+      <div style="flex:1;background:#0a0a0b;padding:10px;display:flex;flex-direction:column;">
+        <div style="font-weight:600;color:#fff;font-size:11px;margin-bottom:6px;">John Smith</div>
+        <div style="align-self:flex-start;background:#131416;padding:6px 10px;border-radius:6px;color:#aaa;max-width:70%;font-size:10px;">Hello, PH-200 price?</div>
+        <div style="align-self:flex-end;background:rgba(108,92,231,0.12);padding:6px 10px;border-radius:6px;color:#aaa;max-width:70%;font-size:10px;margin-top:4px;">Sure, quantity?</div>
+        <div style="margin-top:auto;display:flex;gap:4px;"><input placeholder="回复..." style="flex:1;background:#131416;border:1px solid rgba(255,255,255,0.06);border-radius:4px;padding:5px;color:#888;font-size:9px;"><button style="background:#6c5ce7;color:#fff;border:none;padding:5px 10px;border-radius:4px;font-size:9px;">→</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="desc">
+    <span class="tag">A</span>
+    <div>
+      <h3 style="margin:0 0 4px;font-size:14px;">经典双栏</h3>
+      <p style="margin:0;color:#888;font-size:11px;">图标导航 → 对话列表 → 对话区。客户信息点开头像浮层查看。<br>参考：WhatsApp Business、Telegram、Chatwoot 移动端。<br><b>适合：</b>快速回复为主，信息密度低，移动端友好。</p>
+    </div>
+  </div>
+</div>
+
+<div class="layout-card">
+  <div class="preview">
+    <div style="display:flex;height:200px;border:1px solid rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;font-size:10px;">
+      <div style="width:50px;background:#1a1a2e;color:#555;padding:8px 4px;display:flex;flex-direction:column;gap:10px;align-items:center;">≡<br>📥<br>⚙</div>
+      <div style="width:200px;background:#111118;border-right:1px solid rgba(255,255,255,0.04);padding:8px;">
+        <div style="color:#ededef;font-weight:600;margin-bottom:6px;">收件箱</div>
+        <div style="padding:5px;background:rgba(108,92,231,0.08);border-radius:4px;margin-bottom:3px;border-left:2px solid #6c5ce7;">
+          <div style="color:#fff;font-size:10px;">John Smith</div><div style="color:#666;font-size:8px;">WhatsApp</div>
+        </div>
+        <div style="padding:5px;margin-bottom:3px;"><div style="color:#ccc;font-size:10px;">Maria Garcia</div><div style="color:#666;font-size:8px;">邮件</div></div>
+        <div style="padding:5px;"><div style="color:#ccc;font-size:10px;">Ahmed Ltd.</div><div style="color:#666;font-size:8px;">Web</div></div>
+      </div>
+      <div style="flex:1;background:#0a0a0b;padding:10px;display:flex;flex-direction:column;">
+        <div style="font-weight:600;color:#fff;font-size:11px;">John Smith</div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex:1;">
+          <div style="flex:2;display:flex;flex-direction:column;gap:4px;">
+            <div style="align-self:flex-start;background:#131416;padding:5px 8px;border-radius:6px;color:#aaa;font-size:9px;">Hello, price?</div>
+            <div style="align-self:flex-end;background:rgba(108,92,231,0.12);padding:5px 8px;border-radius:6px;color:#aaa;font-size:9px;">Sure</div>
+          </div>
+          <div style="width:120px;background:#111118;border-radius:6px;padding:8px;border:1px solid rgba(255,255,255,0.04);">
+            <div style="color:#888;font-size:8px;">客户 · 美国</div>
+            <div style="color:#666;font-size:8px;">历史 3 次询盘</div>
+            <div style="color:#22c55e;font-size:8px;">● 在线</div>
+          </div>
+        </div>
+        <div style="margin-top:4px;display:flex;gap:4px;"><input placeholder="回复..." style="flex:1;background:#131416;border:1px solid rgba(255,255,255,0.06);border-radius:4px;padding:5px;color:#888;font-size:9px;"><button style="background:#6c5ce7;color:#fff;border:none;padding:5px 10px;border-radius:4px;font-size:9px;">→</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="desc">
+    <span class="tag">B</span>
+    <div>
+      <h3 style="margin:0 0 4px;font-size:14px;">双栏 + 嵌入式客户卡片</h3>
+      <p style="margin:0;color:#888;font-size:11px;">选择对话 → 左侧对话 + 右侧嵌入客户摘要卡（一键收起）。无第三栏。<br>参考：Intercom、Front。<br><b>适合：</b>需要客户上下文但不能占满屏。</p>
+    </div>
+  </div>
+</div>
+
+<div class="layout-card">
+  <div class="preview">
+    <div style="display:flex;height:200px;border:1px solid rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;font-size:10px;">
+      <div style="width:50px;background:#1a1a2e;color:#555;padding:8px 4px;display:flex;flex-direction:column;gap:10px;align-items:center;">≡<br>📥<br>⚙</div>
+      <div style="width:180px;background:#111118;border-right:1px solid rgba(255,255,255,0.04);padding:8px;">
+        <div style="color:#ededef;font-weight:600;margin-bottom:6px;">收件箱</div>
+        <div style="padding:5px;background:rgba(108,92,231,0.08);border-radius:4px;margin-bottom:3px;border-left:2px solid #6c5ce7;">
+          <div style="color:#fff;font-size:10px;">John Smith</div><div style="color:#666;font-size:8px;">WhatsApp · 2m</div>
+        </div>
+        <div style="padding:5px;margin-bottom:3px;"><div style="color:#ccc;font-size:10px;">Maria Garcia</div><div style="color:#666;font-size:8px;">邮件 · 8m</div></div>
+      </div>
+      <div style="flex:1;background:#0a0a0b;padding:10px;display:flex;flex-direction:column;">
+        <div style="font-weight:600;color:#fff;font-size:11px;">John Smith</div>
+        <div style="align-self:flex-start;background:#131416;padding:5px 8px;border-radius:6px;color:#aaa;font-size:9px;margin-top:4px;">Hello, PH-200 price?</div>
+        <div style="align-self:flex-end;background:rgba(108,92,231,0.12);padding:5px 8px;border-radius:6px;color:#aaa;font-size:9px;margin-top:3px;">Sure, quantity?</div>
+        <div style="margin-top:auto;display:flex;gap:4px;"><input placeholder="回复..." style="flex:1;background:#131416;border:1px solid rgba(255,255,255,0.06);border-radius:4px;padding:5px;color:#888;font-size:9px;"><button style="background:#6c5ce7;color:#fff;border:none;padding:5px 10px;border-radius:4px;font-size:9px;">→</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="desc">
+    <span class="tag">C</span>
+    <div>
+      <h3 style="margin:0 0 4px;font-size:14px;">极简双栏</h3>
+      <p style="margin:0;color:#888;font-size:11px;">仅对话列表 + 对话区。所有额外信息（客户、属性）通过顶部栏 + 侧滑面板按需展开。<br>参考：Linear、Slack。<br><b>适合：</b>聚焦对话本身，界面最干净。</p>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>经典双栏</h3><p>信息密度适中，客户信息浮层展开</p></div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>双栏+客户卡片</h3><p>对话内嵌客户摘要，一键收起</p></div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>极简双栏</h3><p>侧滑面板按需展开，界面最干净</p></div>
+  </div>
+</div>

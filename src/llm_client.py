@@ -102,6 +102,63 @@ def _parse_llm_json(text: str) -> dict[str, Any]:
     return json.loads(text)
 
 
+# ── Reply suggestion ──────────────────────────────────────────────────────
+
+SUGGEST_PROMPT = """You are a sales assistant for a foreign trade company in China. Based on the conversation below, write a natural, professional reply in Chinese. Keep it concise (2-4 sentences), friendly, and focused on moving the sale forward. Include a clear next step or call to action.
+
+Conversation:
+{context}
+
+Reply:"""
+
+
+async def suggest_reply(context: str) -> str:
+    """Call LLM to generate a suggested reply based on conversation context.
+
+    Returns the suggested reply text, or a fallback message if unavailable.
+    """
+    if not API_KEY:
+        logger.warning("No LLM_API_KEY set — reply suggestion unavailable")
+        return "(AI suggestion unavailable — no API key configured)"
+
+    prompt = SUGGEST_PROMPT.format(context=context[:3000])
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{BASE_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": MODEL,
+                    "messages": [
+                        {"role": "system", "content": "You are a professional foreign trade sales assistant. Reply in Chinese."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 500,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        reply = data["choices"][0]["message"]["content"]
+        logger.info("Reply suggestion generated (%d chars)", len(reply))
+        return reply
+
+    except httpx.HTTPError as e:
+        logger.error("LLM HTTP error during suggest_reply: %s", e)
+        return "(AI suggestion unavailable — LLM service error)"
+    except (KeyError, json.JSONDecodeError) as e:
+        logger.error("LLM response parse error during suggest_reply: %s", e)
+        return "(AI suggestion unavailable — response parse error)"
+    except Exception:
+        logger.exception("Unexpected LLM error during suggest_reply")
+        return "(AI suggestion unavailable — unexpected error)"
+
+
 def _stub_result() -> dict[str, Any]:
     return {
         "intent": "cold",

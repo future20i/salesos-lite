@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import String, DateTime, ForeignKey, Enum as SAEnum, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from src.models.base import Base
 import enum
@@ -34,7 +34,12 @@ class Approval(Base):
     status: Mapped[ApprovalStatus] = mapped_column(
         SAEnum(ApprovalStatus), nullable=False, default=ApprovalStatus.PENDING
     )
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    lead: Mapped["Lead"] = relationship()
+
+    # Note: "Lead" forward ref is resolved via __init__.py imports at runtime
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

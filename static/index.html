@@ -253,6 +253,44 @@
   .tl-title{font-size:11px;color:var(--text-primary)}.tl-time{font-size:10px;color:var(--text-quaternary);margin-top:1px}
   .tl-title.muted{color:var(--text-tertiary)}
 
+  /* ── Template Picker ── */
+  #template-popup{position:absolute;bottom:100%;left:0;margin-bottom:8px;width:320px;max-width:calc(100vw - 32px);background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-elevated);max-height:300px;overflow-y:auto;z-index:50;display:none}
+  #template-popup.open{display:block}
+  #template-popup .tp-search{padding:10px 12px 6px}
+  #template-popup .tp-search input{width:100%;padding:7px 10px;background:var(--bg-subtle);border:none;border-radius:var(--radius-sm);font-size:12px;font-family:var(--font-sans);color:var(--text-primary);outline:none}
+  #template-popup .tp-search input::placeholder{color:var(--text-quaternary)}
+  #template-popup .tp-item{padding:10px 14px;cursor:pointer;transition:background var(--duration-fast);border-bottom:1px solid rgba(0,0,0,0.04)}
+  #template-popup .tp-item:last-child{border-bottom:none}
+  #template-popup .tp-item:hover{background:var(--bg-hover)}
+  #template-popup .tp-cat{font-size:10px;color:var(--text-quaternary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+  #template-popup .tp-title{font-size:13px;font-weight:500;color:var(--text-primary)}
+  #template-popup .tp-preview{font-size:11px;color:var(--text-tertiary);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #template-popup .tp-empty{padding:24px;text-align:center;color:var(--text-quaternary);font-size:12px}
+
+  /* ── Approval Overlay ── */
+  #approval-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:96;display:none;align-items:stretch;justify-content:flex-end}
+  #approval-overlay.open{display:flex}
+  #approval-panel{width:420px;max-width:100vw;background:var(--bg-surface);padding:28px;overflow-y:auto;box-shadow:var(--shadow-elevated);animation:slideIn 0.2s var(--ease-out)}
+  #approval-panel h3{font-size:18px;font-weight:600;margin-bottom:4px}
+  #approval-panel .appr-sub{font-size:12px;color:var(--text-tertiary);margin-bottom:20px}
+  .appr-card{background:var(--bg-subtle);border-radius:var(--radius-md);padding:14px;margin-bottom:12px}
+  .appr-card .appr-customer{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .appr-card .appr-meta{font-size:11px;color:var(--text-tertiary);margin:4px 0 8px}
+  .appr-card .appr-content{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--bg-surface);border-radius:var(--radius-sm)}
+  .appr-actions{display:flex;gap:8px}
+  .appr-actions button{flex:1;padding:7px 0;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:500;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast)}
+  .appr-btn-approve{background:var(--success);color:#fff}
+  .appr-btn-approve:hover{opacity:0.9}
+  .appr-btn-reject{background:rgba(239,68,68,0.1);color:var(--danger)}
+  .appr-btn-reject:hover{background:rgba(239,68,68,0.2)}
+  .appr-empty{padding:40px 16px;text-align:center;color:var(--text-quaternary);font-size:13px}
+
+  /* ── Productivity Table ── */
+  .dash-table{width:100%;border-collapse:collapse;font-size:12px}
+  .dash-table th{text-align:left;padding:6px 8px;font-weight:600;color:var(--text-tertiary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(0,0,0,0.06)}
+  .dash-table td{padding:6px 8px;color:var(--text-secondary);border-bottom:1px solid rgba(0,0,0,0.04)}
+  .dash-table tr:last-child td{border-bottom:none}
+
   /* ═══════════════════════════════════════════════
      Mobile Responsive (< 768px)
      ═══════════════════════════════════════════════ */
@@ -500,6 +538,9 @@
     <div class="nav-icon" title="数据" onclick="openDashboard()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="12" height="8" rx="2"/></svg>
     </div>
+    <div class="nav-icon" title="审批" onclick="openApprovals()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
     <div style="margin-top:auto;"></div>
     <div class="nav-logout" onclick="doLogout()" title="退出">退出</div>
   </nav>
@@ -549,7 +590,14 @@
       <div id="customer-panel" class="hidden"></div>
     </div>
     <div id="reply-area" class="hidden">
-      <div id="reply-row">
+      <div id="reply-row" style="position:relative">
+        <button class="btn-icon" id="btn-templates" title="常用回复" onclick="toggleTemplatePicker()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <div id="template-popup">
+          <div class="tp-search"><input id="tp-search-input" placeholder="搜索模板…" oninput="filterTemplates(this.value)"></div>
+          <div id="tp-list"></div>
+        </div>
         <button class="btn-icon" id="btn-ai-suggest" title="AI 生成回复" onclick="aiSuggest()">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
         </button>
@@ -601,6 +649,16 @@
       <h4>意向分布</h4>
       <div id="dash-intent"></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ Approval Overlay ═══ -->
+<div id="approval-overlay" onclick="if(event.target===this)closeApprovals()">
+  <div id="approval-panel">
+    <button class="dash-close" onclick="closeApprovals()">✕</button>
+    <h3>📝 审批队列</h3>
+    <div class="appr-sub">待审批的 AI 回复</div>
+    <div id="approval-list"></div>
   </div>
 </div>
 
@@ -1048,10 +1106,182 @@ function setMode(mode, btn) {
   renderMessages();
 }
 
-function aiSuggest() {
+async function aiSuggest() {
+  var btn = $('#btn-ai-suggest');
   var inp = $('reply-input');
-  inp.value = '[AI 建议回复功能将在 M2 对接 AI Pipeline]';
-  inp.focus();
+  // Show loading state
+  var origHtml = btn.innerHTML;
+  btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></circle></svg>';
+  btn.style.pointerEvents = 'none';
+  try {
+    var r = await api('/api/suggest/reply', {
+      method:'POST', body:JSON.stringify({lead_id: _activeId})
+    });
+    var d = await r.json();
+    inp.value = d.suggestion || '';
+    inp.focus();
+    // If in assist mode, also submit for approval
+    if (_mode === 'assist' && d.suggestion) {
+      try {
+        await api('/api/approvals', {
+          method:'POST', body:JSON.stringify({lead_id: _activeId, content: d.suggestion})
+        });
+        var toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text-primary);color:#fff;padding:10px 20px;border-radius:var(--radius-pill);font-size:13px;z-index:200;box-shadow:var(--shadow-elevated);animation:slideIn 0.2s var(--ease-out)';
+        toast.textContent = '✅ 已提交审批';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 2000);
+      } catch(e) {}
+    }
+  } catch(e) { console.error('AI suggest error', e); }
+  btn.innerHTML = origHtml;
+  btn.style.pointerEvents = '';
+}
+
+// ═══════════════════════════════════════════
+// Canned Response Templates
+// ═══════════════════════════════════════════
+var _templates = [];
+
+async function loadTemplates() {
+  try {
+    var r = await api('/api/canned');
+    var d = await r.json();
+    _templates = Array.isArray(d) ? d : (d.responses || []);
+  } catch(e) { _templates = []; }
+}
+
+function toggleTemplatePicker() {
+  var popup = $('#template-popup');
+  if (popup.classList.contains('open')) {
+    popup.classList.remove('open');
+    return;
+  }
+  popup.classList.add('open');
+  if (!_templates.length) {
+    loadTemplates().then(function() { renderTemplates(); });
+  }
+  renderTemplates();
+  // Focus search
+  setTimeout(function() { $('tp-search-input').focus(); }, 100);
+}
+
+function renderTemplates(filter) {
+  var list = $('#tp-list');
+  var items = _templates;
+  if (filter) {
+    var q = filter.toLowerCase();
+    items = items.filter(function(t) {
+      return (t.category||'').toLowerCase().indexOf(q) >= 0 ||
+             (t.title||'').toLowerCase().indexOf(q) >= 0 ||
+             (t.content||'').toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  if (!items.length) {
+    list.innerHTML = '<div class="tp-empty">暂无模板</div>';
+    return;
+  }
+  var html = '';
+  items.forEach(function(t) {
+    var preview = (t.content||'').substring(0, 60);
+    html += '<div class="tp-item" onclick="insertTemplate('+t.id+')">'+
+      '<div class="tp-cat">'+esc(t.category||'通用')+'</div>'+
+      '<div class="tp-title">'+esc(t.title)+'</div>'+
+      '<div class="tp-preview">'+esc(preview)+'</div></div>';
+  });
+  list.innerHTML = html;
+}
+
+function filterTemplates(val) {
+  renderTemplates(val);
+}
+
+function insertTemplate(id) {
+  var t = null;
+  for (var i = 0; i < _templates.length; i++) {
+    if (_templates[i].id === id) { t = _templates[i]; break; }
+  }
+  if (!t) return;
+  $('reply-input').value = t.content || '';
+  $('reply-input').focus();
+  $('#template-popup').classList.remove('open');
+}
+
+// Close template picker on outside click
+document.addEventListener('click', function(e) {
+  var popup = $('#template-popup');
+  if (!popup.classList.contains('open')) return;
+  var btn = $('#btn-templates');
+  if (!popup.contains(e.target) && !btn.contains(e.target)) {
+    popup.classList.remove('open');
+  }
+});
+
+// ═══════════════════════════════════════════
+// Approval Queue
+// ═══════════════════════════════════════════
+async function openApprovals() {
+  $('approval-overlay').classList.add('open');
+  await loadApprovals();
+}
+
+function closeApprovals() {
+  $('approval-overlay').classList.remove('open');
+}
+
+async function loadApprovals() {
+  $('approval-list').innerHTML = '<div class="appr-empty">加载中…</div>';
+  try {
+    var r = await api('/api/approvals');
+    var d = await r.json();
+    var items = Array.isArray(d) ? d : (d.approvals || []);
+    renderApprovals(items);
+  } catch(e) {
+    $('approval-list').innerHTML = '<div class="appr-empty">加载失败</div>';
+  }
+}
+
+function renderApprovals(approvals) {
+  var el = $('approval-list');
+  if (!approvals.length) {
+    el.innerHTML = '<div class="appr-empty">✅ 暂无待审批项</div>';
+    return;
+  }
+  var html = '';
+  approvals.forEach(function(a) {
+    var isPending = (a.status === 'pending');
+    html += '<div class="appr-card" data-id="'+a.id+'">'+
+      '<div class="appr-customer">'+esc(a.customer_name||'—')+'</div>'+
+      '<div class="appr-meta">提交人: '+esc(a.submitted_by_name||'—')+' · '+fmtTime(a.created_at)+'</div>'+
+      '<div class="appr-content">'+esc(a.content)+'</div>';
+    if (isPending) {
+      html += '<div class="appr-actions">'+
+        '<button class="appr-btn-approve" onclick="approveApproval(\''+a.id+'\')">✅ 通过</button>'+
+        '<button class="appr-btn-reject" onclick="rejectApproval(\''+a.id+'\')">❌ 拒绝</button></div>';
+    } else {
+      var statusLabel = a.status === 'approved' ? '✅ 已通过' : '❌ 已拒绝';
+      html += '<div style="font-size:11px;color:var(--text-tertiary)">'+statusLabel+'</div>';
+    }
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+async function approveApproval(id) {
+  try {
+    await api('/api/approvals/'+id+'/approve', {method:'POST', body:'{}'});
+    await loadApprovals();
+  } catch(e) { alert('审批失败'); }
+}
+
+async function rejectApproval(id) {
+  var reason = prompt('输入拒绝原因（可选）:');
+  if (reason === null) return;
+  var body = reason ? JSON.stringify({reason:reason}) : '{}';
+  try {
+    await api('/api/approvals/'+id+'/reject', {method:'POST', body:body});
+    await loadApprovals();
+  } catch(e) { alert('操作失败'); }
 }
 
 // ═══════════════════════════════════════════
@@ -1144,6 +1374,55 @@ function renderDashboard(d) {
     intHtml += '<span class="channel-tag web">'+label+' · '+d.by_intent[k]+'</span>';
   }
   $('dash-intent').innerHTML = intHtml || '<p style="color:var(--text-quaternary);font-size:12px">暂无数据</p>';
+
+  // Productivity — only for ADMIN/MANAGER
+  if (_user && (_user.role === 'ADMIN' || _user.role === 'MANAGER')) {
+    loadProductivity();
+  }
+}
+
+async function loadProductivity() {
+  var section = $('dash-productivity');
+  if (!section) {
+    var panel = $('dashboard-panel');
+    var div = document.createElement('div');
+    div.className = 'dash-section';
+    div.id = 'dash-productivity';
+    div.innerHTML = '<h4>👥 人效</h4><div id="dash-prod-table"></div>';
+    // Insert after intent section
+    var intentSection = $('dash-intent').parentNode;
+    intentSection.parentNode.insertBefore(div, intentSection.nextSibling);
+  }
+  var tableEl = $('dash-prod-table');
+  if (!tableEl) return;
+  tableEl.innerHTML = '<p style="color:var(--text-quaternary);font-size:12px">加载中…</p>';
+  try {
+    var r = await api('/api/dashboard/productivity');
+    var d = await r.json();
+    var items = Array.isArray(d) ? d : (d.productivity || []);
+    renderProductivity(items);
+  } catch(e) {
+    tableEl.innerHTML = '<p style="color:var(--text-quaternary);font-size:12px">暂无数据</p>';
+  }
+}
+
+function renderProductivity(prod) {
+  var el = $('dash-prod-table');
+  if (!el) return;
+  if (!prod.length) {
+    el.innerHTML = '<p style="color:var(--text-quaternary);font-size:12px">暂无成员数据</p>';
+    return;
+  }
+  var html = '<table class="dash-table"><thead><tr>'+
+    '<th>成员</th><th>线索</th><th>消息</th><th>平均响应</th><th>审批通过率</th></tr></thead><tbody>';
+  prod.forEach(function(p) {
+    var respTime = p.avg_response_time_minutes != null ? Math.round(p.avg_response_time_minutes)+'分' : '—';
+    var apprRate = p.approval_rate != null ? Math.round(p.approval_rate*100)+'%' : '—';
+    html += '<tr><td>'+esc(p.username)+'</td><td>'+(p.leads_handled||0)+'</td><td>'+(p.messages_sent||0)+
+      '</td><td>'+respTime+'</td><td>'+apprRate+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
 }
 async function exportCSV() {
   try {

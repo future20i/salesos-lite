@@ -1,0 +1,221 @@
+<h2>按钮重设计 — 去 emoji · 减重量 · 统一规格</h2>
+<p class="subtitle">三个原则：不用 emoji、主次分明、悬停态才有颜色</p>
+
+<style>
+  .premium-wrap {
+    background: #fafafa;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  }
+</style>
+
+<div class="premium-wrap">
+  <div style="display:flex;height:540px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;">
+    
+    <!-- 导航栏 -->
+    <div style="width:52px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:18px;border-right:1px solid rgba(0,0,0,0.04);">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#6c5ce7,#8b7cf0);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 2px 8px rgba(108,92,231,0.25);">S</div>
+      <div style="width:32px;height:32px;border-radius:9px;background:rgba(108,92,231,0.06);display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.8"><path d="M22 6 12 13 2 6"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+      </div>
+      <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <div style="margin-top:auto;width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" stroke-width="1.8"><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+    </div>
+
+    <!-- 对话列表 -->
+    <div style="width:250px;background:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(0,0,0,0.04);">
+      <div style="padding:18px 14px 10px;">
+        <div style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:12px;">收件箱</div>
+        <div style="position:relative;margin-bottom:10px;">
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4cc" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input placeholder="搜索" style="width:100%;padding:8px 12px 8px 30px;background:#f8f9fa;border:none;border-radius:8px;font-size:11px;outline:none;color:#495057;">
+        </div>
+        <div style="display:flex;gap:4px;">
+          <span style="background:#1a1a2e;color:#fff;padding:4px 10px;border-radius:7px;font-size:10px;">全部</span>
+          <span style="color:#868e96;padding:4px 10px;border-radius:7px;font-size:10px;">未读 5</span>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:2px 8px;">
+        <div style="padding:12px;background:rgba(108,92,231,0.03);border-radius:10px;position:relative;margin-bottom:1px;">
+          <div style="position:absolute;left:0;top:14px;bottom:14px;width:2px;background:#6c5ce7;border-radius:0 2px 2px 0;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6c5ce7,#a78bfa);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">JS</div>
+              <div>
+                <div style="font-weight:600;color:#1a1a2e;font-size:12px;">John Smith</div>
+                <div style="font-size:10px;color:#adb5bd;">WA · 14:22</div>
+              </div>
+            </div>
+            <div style="width:5px;height:5px;background:#6c5ce7;border-radius:50%;"></div>
+          </div>
+          <div style="color:#868e96;font-size:11px;padding-left:40px;">PH-200 报价 — 50台 Long Beach</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 对话区 ═══ -->
+    <div style="flex:1;display:flex;flex-direction:column;background:#fafafa;min-width:0;">
+      
+      <div style="padding:14px 28px;background:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,0,0,0.04);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#6c5ce7,#a78bfa);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;box-shadow:0 2px 8px rgba(108,92,231,0.2);">JS</div>
+          <div>
+            <div style="font-weight:700;color:#1a1a2e;font-size:14px;">John Smith</div>
+            <div style="color:#adb5bd;font-size:11px;">Pacific Imports · 🇺🇸 · WA</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="display:flex;background:#f1f3f5;border-radius:9px;padding:2px;">
+            <button style="padding:5px 10px;border-radius:7px;font-size:10px;font-weight:500;background:transparent;color:#868e96;border:none;">人工</button>
+            <button style="padding:5px 10px;border-radius:7px;font-size:10px;font-weight:500;background:#fff;color:#6c5ce7;border:none;box-shadow:0 1px 2px rgba(108,92,231,0.12);">AI 辅助</button>
+            <button style="padding:5px 10px;border-radius:7px;font-size:10px;font-weight:500;background:transparent;color:#868e96;border:none;">托管</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1;display:flex;overflow:hidden;">
+        
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+          <div style="flex:1;padding:32px 48px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;">
+            
+            <div style="text-align:center;margin:4px 0;">
+              <span style="color:#c0c4cc;font-size:11px;">6月19日 · 14:22</span>
+            </div>
+
+            <div style="align-self:flex-start;max-width:52%;">
+              <div style="background:#fff;padding:14px 20px;border-radius:16px;color:#1a1a2e;font-size:13px;line-height:1.7;box-shadow:0 1px 2px rgba(0,0,0,0.03);border-bottom-left-radius:6px;">
+                Hello, I'm interested in your PH-200 high-pressure pump. Could you send me the price list and technical specs?
+              </div>
+            </div>
+
+            <div style="align-self:flex-end;max-width:52%;">
+              <div style="background:linear-gradient(135deg,rgba(108,92,231,0.05),rgba(108,92,231,0.02));padding:14px 20px;border-radius:16px;color:#1a1a2e;font-size:13px;line-height:1.7;border-bottom-right-radius:6px;">
+                Sure! May I know the quantity and target delivery time?
+              </div>
+            </div>
+
+            <div style="align-self:flex-start;max-width:52%;">
+              <div style="background:#fff;padding:14px 20px;border-radius:16px;color:#1a1a2e;font-size:13px;line-height:1.7;box-shadow:0 1px 2px rgba(0,0,0,0.03);border-bottom-left-radius:6px;">
+                Around 50 units, delivery within 60 days to Long Beach port.
+              </div>
+            </div>
+
+            <!-- ═══ AI 建议区 — 按钮重设计 ═══ -->
+            <div style="align-self:flex-end;max-width:52%;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;justify-content:flex-end;">
+                <span style="color:#c0c4cc;font-size:10px;">AI 建议</span>
+              </div>
+              <div style="background:#fff;padding:16px 22px;border-radius:16px;color:#1a1a2e;font-size:13px;line-height:1.7;border:1.5px solid rgba(108,92,231,0.12);border-bottom-right-radius:6px;box-shadow:0 2px 12px rgba(108,92,231,0.04);">
+                Thank you, John! For 50 units PH-200 to Long Beach, our price is $1,200/unit FOB Shanghai, lead time 45 days. I'll prepare the formal quotation now.
+                
+                <!-- ── 按钮组：纯文字链接风格 ── -->
+                <div style="display:flex;align-items:center;gap:18px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.04);">
+                  <button style="background:none;border:none;color:#6c5ce7;font-size:12px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;letter-spacing:-0.1px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    采用并发送
+                  </button>
+                  <button style="background:none;border:none;color:#868e96;font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    编辑
+                  </button>
+                  <button style="background:none;border:none;color:#c0c4cc;font-size:12px;cursor:pointer;padding:0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          
+          <!-- ═══ 回复框 — 按钮重设计 ═══ -->
+          <div style="padding:18px 48px 22px;background:#fff;border-top:1px solid rgba(0,0,0,0.04);">
+            <div style="display:flex;gap:12px;align-items:flex-end;">
+              <textarea placeholder="输入回复..." style="flex:1;min-height:46px;max-height:120px;border:none;background:#f8f9fa;border-radius:14px;padding:13px 18px;font-size:13px;color:#1a1a2e;outline:none;resize:none;font-family:inherit;"></textarea>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <!-- AI 生成按钮 — ghost -->
+                <button style="background:none;border:none;padding:8px;color:#c0c4cc;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="AI 生成回复">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                </button>
+                <!-- 发送按钮 — 品牌紫 -->
+                <button style="background:#6c5ce7;color:#fff;border:none;padding:0;width:44px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(108,92,231,0.2);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 客户卡片 -->
+        <div style="width:190px;background:#fff;border-left:1px solid rgba(0,0,0,0.04);padding:16px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#adb5bd;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;">客户信息</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div><div style="color:#c0c4cc;font-size:9px;">邮箱</div><div style="color:#1a1a2e;font-size:11px;">john@imports.co</div></div>
+            <div><div style="color:#c0c4cc;font-size:9px;">公司</div><div style="color:#1a1a2e;font-size:11px;">Pacific Imports</div></div>
+            <div><div style="color:#c0c4cc;font-size:9px;">历史</div><div style="color:#1a1a2e;font-size:11px;">3次询盘 · $12K</div></div>
+          </div>
+          <div style="border-top:1px solid rgba(0,0,0,0.04);"></div>
+          <div>
+            <span style="background:rgba(250,176,5,0.08);color:#f59f00;padding:2px 8px;border-radius:5px;font-size:9px;font-weight:600;">待跟进</span>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+              <div><div style="color:#c0c4cc;font-size:9px;">负责人</div><div style="color:#1a1a2e;font-size:11px;">张经理</div></div>
+              <div><div style="color:#c0c4cc;font-size:9px;">产品</div><div style="color:#6c5ce7;font-size:11px;">PH-200</div></div>
+            </div>
+          </div>
+          <div style="border-top:1px solid rgba(0,0,0,0.04);"></div>
+          <button style="background:#1a1a2e;color:#fff;border:none;padding:8px;border-radius:7px;font-size:10px;">生成报价单</button>
+          <button style="background:none;color:#868e96;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:7px;font-size:10px;">添加跟进</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 按钮对比 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+  <div style="background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+    <div style="color:#adb5bd;font-size:10px;font-weight:600;margin-bottom:10px;">之前</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:6px;">
+        <span style="background:#6c5ce7;color:#fff;padding:6px 14px;border-radius:7px;font-size:11px;">✅ 发送</span>
+        <span style="border:1px solid #dee2e6;color:#868e96;padding:6px 14px;border-radius:7px;font-size:11px;">✏️ 编辑</span>
+        <span style="color:#c0c4cc;padding:6px 8px;font-size:11px;">✕</span>
+      </div>
+      <div style="color:#adb5bd;font-size:10px;">emoji 图标 · 重填充 · 参差不齐</div>
+    </div>
+  </div>
+  <div style="background:#fff;padding:16px;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+    <div style="color:#6c5ce7;font-size:10px;font-weight:600;margin-bottom:10px;">现在</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <span style="color:#6c5ce7;font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          采用并发送
+        </span>
+        <span style="color:#868e96;font-size:11px;display:flex;align-items:center;gap:3px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          编辑
+        </span>
+        <span style="color:#c0c4cc;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+      </div>
+      <div style="color:#6c5ce7;font-size:10px;">SVG 图标 · 无背景 · 统一基线对齐</div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="good" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content"><h3>按钮干净了</h3><p>无 emoji，纯 SVG 图标，主次分明。</p></div>
+  </div>
+  <div class="option" data-choice="tweak" onclick="toggleSelect(this)">
+    <div class="letter">△</div>
+    <div class="content"><h3>还需调整</h3><p>告诉我。</p></div>
+  </div>
+</div>

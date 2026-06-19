@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.models.lead import Lead, LeadStatus, Intent
-from src.models.user import User
-from src.auth import get_current_user
+from src.models.message import Message, MessageDirection
+from src.models.approval import Approval, ApprovalStatus
+from src.models.user import User, UserRole
+from src.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -113,3 +115,120 @@ async def dashboard_funnel(
     db: AsyncSession = Depends(get_db),
 ) -> DashboardResponse:
     return await _get_dashboard_data(current_user.tenant_id, db)
+
+
+# ── Productivity endpoint ────────────────────────────────────────────────
+
+
+class ProductivityItem(BaseModel):
+    user_id: str
+    username: str
+    leads_handled: int
+    messages_sent: int
+    avg_response_time_minutes: float | None
+    approval_rate: float | None  # 0.0–1.0
+
+
+@router.get("/productivity")
+async def dashboard_productivity(
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.MANAGER)),
+    db: AsyncSession = Depends(get_db),
+) -> list[ProductivityItem]:
+    """Per-rep productivity stats for the current tenant."""
+    tenant_id = current_user.tenant_id
+
+    # 1. All REP users in the tenant
+    result = await db.execute(
+        select(User).where(
+            User.tenant_id == tenant_id,
+            User.role == UserRole.REP,
+        )
+    )
+    reps = result.scalars().all()
+
+    items: list[ProductivityItem] = []
+    for rep in reps:
+        # leads_handled: count of leads assigned to this rep
+        result = await db.execute(
+            select(func.count(Lead.id)).where(
+                Lead.tenant_id == tenant_id,
+                Lead.assigned_to == rep.id,
+            )
+        )
+        leads_handled = result.scalar() or 0
+
+        # messages_sent: count of outbound messages where sender == rep.username
+        result = await db.execute(
+            select(func.count(Message.id)).where(
+                Message.tenant_id == tenant_id,
+                Message.sender == rep.username,
+                Message.direction == MessageDirection.OUTBOUND,
+            )
+        )
+        messages_sent = result.scalar() or 0
+
+        # avg_response_time: average time (minutes) between a lead's creation
+        # and the first outbound message sent by this rep on leads they own.
+        # Simplified: avg of (first_outbound.created_at - lead.created_at)
+        # for leads assigned to rep where there is at least one outbound message
+        # from that rep on the lead.
+        avg_response_time: float | None = None
+        # Get leads assigned to this rep
+        lead_result = await db.execute(
+            select(Lead.id, Lead.created_at).where(
+                Lead.tenant_id == tenant_id,
+                Lead.assigned_to == rep.id,
+            )
+        )
+        assigned_leads = lead_result.all()
+        response_diffs: list[float] = []
+        for lead_id, lead_created in assigned_leads:
+            # Find the earliest outbound message from this rep on this lead
+            msg_result = await db.execute(
+                select(Message.created_at)
+                .where(
+                    Message.tenant_id == tenant_id,
+                    Message.lead_id == lead_id,
+                    Message.sender == rep.username,
+                    Message.direction == MessageDirection.OUTBOUND,
+                )
+                .order_by(Message.created_at.asc())
+                .limit(1)
+            )
+            first_out = msg_result.scalar_one_or_none()
+            if first_out is not None and lead_created is not None:
+                diff = (first_out - lead_created).total_seconds() / 60.0
+                if diff >= 0:
+                    response_diffs.append(diff)
+        if response_diffs:
+            avg_response_time = round(sum(response_diffs) / len(response_diffs), 2)
+
+        # approval_rate: count of approved / total approvals submitted by rep
+        result = await db.execute(
+            select(
+                func.count(Approval.id).filter(
+                    Approval.status == ApprovalStatus.APPROVED
+                ),
+                func.count(Approval.id),
+            ).where(
+                Approval.tenant_id == tenant_id,
+                Approval.submitted_by == rep.id,
+            )
+        )
+        approved_count, total_count = result.one()
+        approval_rate: float | None = (
+            round(approved_count / total_count, 4) if total_count > 0 else None
+        )
+
+        items.append(
+            ProductivityItem(
+                user_id=str(rep.id),
+                username=rep.username,
+                leads_handled=leads_handled,
+                messages_sent=messages_sent,
+                avg_response_time_minutes=avg_response_time,
+                approval_rate=approval_rate,
+            )
+        )
+
+    return items

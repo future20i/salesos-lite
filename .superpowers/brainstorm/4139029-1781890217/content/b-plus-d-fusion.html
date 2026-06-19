@@ -1,0 +1,247 @@
+<h2>B+D 融合方案：对话 + 客户面板 + 操作上下文</h2>
+<p class="subtitle">左侧对话列表 · 中间聊天区 · 右侧双层信息面板（客户360° + 工单操作）</p>
+
+<div class="mockup">
+  <div class="mockup-header">SalesOS Lite 收件箱 — B+D 融合布局</div>
+  <div class="mockup-body">
+    <div style="display:flex;height:420px;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:11px;">
+
+      <!-- 第1栏：对话列表 -->
+      <div style="width:220px;background:#0f0f10;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;">
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-weight:700;color:#fff;font-size:12px;">📥 收件箱</div>
+          <div style="display:flex;gap:4px;margin-top:6px;">
+            <span style="background:rgba(108,92,231,0.12);color:#6c5ce7;padding:2px 6px;border-radius:8px;font-size:9px;">全部 23</span>
+            <span style="background:rgba(249,115,22,0.12);color:#f97316;padding:2px 6px;border-radius:8px;font-size:9px;">未读 5</span>
+            <span style="background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 6px;border-radius:8px;font-size:9px;">我的 8</span>
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;">
+          <!-- 选中项 -->
+          <div style="padding:8px 12px;background:rgba(108,92,231,0.08);border-left:3px solid #6c5ce7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:#fff;font-weight:600;font-size:12px;">John Smith</span>
+              <span style="background:rgba(239,68,68,0.8);color:#fff;width:6px;height:6px;border-radius:50%;"></span>
+            </div>
+            <div style="color:#888;font-size:10px;margin:2px 0;">PH-200 报价咨询</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:#555;font-size:9px;">WhatsApp · 2分钟前</span>
+              <span style="background:rgba(108,92,231,0.2);color:#6c5ce7;font-size:8px;padding:0 4px;border-radius:4px;">高</span>
+            </div>
+          </div>
+          <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#ccc;font-weight:600;font-size:12px;">Maria Garcia</span>
+              <span style="color:#555;font-size:9px;">8m</span>
+            </div>
+            <div style="color:#888;font-size:10px;">需要MOQ和交货期</div>
+            <div style="color:#555;font-size:9px;">邮件</div>
+          </div>
+          <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#ccc;font-weight:600;font-size:12px;">Ahmed Ltd.</span>
+              <span style="color:#555;font-size:9px;">1h</span>
+            </div>
+            <div style="color:#888;font-size:10px;">PI已确认</div>
+            <div style="color:#555;font-size:9px;">Web</div>
+          </div>
+          <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);">
+            <div style="color:#ccc;font-weight:600;font-size:12px;">TechSupply GmbH</div>
+            <div style="color:#888;font-size:10px;">技术参数确认</div>
+            <div style="color:#555;font-size:9px;">WhatsApp · 3h</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第2栏：对话详情 -->
+      <div style="flex:1;background:#0a0a0b;display:flex;flex-direction:column;">
+        <!-- 对话头部 -->
+        <div style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#fff;font-weight:600;font-size:13px;">John Smith — PH-200 报价咨询</div>
+            <div style="color:#888;font-size:10px;">john@imports.co · 🇺🇸 美国进口商</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="background:rgba(108,92,231,0.12);color:#6c5ce7;padding:3px 8px;border-radius:4px;font-size:10px;">高意向</span>
+            <span style="color:#555;font-size:10px;">#INQ-2024-0103</span>
+          </div>
+        </div>
+        <!-- 消息区 -->
+        <div style="flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:1px;height:16px;background:rgba(255,255,255,0.08);"></div>
+            <span style="color:#555;font-size:9px;">6月19日 14:22 · 来自 WhatsApp</span>
+          </div>
+          <div style="align-self:flex-start;background:#131416;padding:7px 12px;border-radius:8px;color:#ccc;max-width:70%;font-size:11px;">
+            <div style="color:#888;font-size:9px;margin-bottom:3px;">John Smith</div>
+            Hello, I'm interested in your PH-200 high-pressure pump. Could you send me the price list and technical specs?
+          </div>
+          <div style="align-self:flex-end;background:rgba(108,92,231,0.15);padding:7px 12px;border-radius:8px;color:#ccc;max-width:70%;font-size:11px;">
+            <div style="color:#6c5ce7;font-size:9px;margin-bottom:3px;">你 (张经理)</div>
+            Sure! May I know the quantity you need and your target delivery time?
+          </div>
+          <div style="align-self:flex-start;background:#131416;padding:7px 12px;border-radius:8px;color:#ccc;max-width:70%;font-size:11px;">
+            <div style="color:#888;font-size:9px;margin-bottom:3px;">John Smith</div>
+            Around 50 units, delivery within 60 days to Long Beach port.
+          </div>
+          <!-- AI 提示 -->
+          <div style="align-self:center;background:rgba(108,92,231,0.06);padding:6px 12px;border-radius:8px;border:1px solid rgba(108,92,231,0.12);max-width:80%;">
+            <div style="color:#6c5ce7;font-size:9px;margin-bottom:2px;">🤖 AI 建议</div>
+            <div style="color:#aaa;font-size:10px;">John 是重复询盘客户（历史3次），建议提供阶梯报价：50台 $1,200/台，100台 $1,050/台</div>
+          </div>
+        </div>
+        <!-- 回复框 -->
+        <div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:6px;align-items:flex-end;">
+          <textarea class="mock-input" placeholder="输入回复... (Ctrl+Enter 发送)" style="flex:1;min-height:36px;font-size:11px;background:#131416;color:#ccc;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:8px;"></textarea>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <button class="mock-button" style="font-size:10px;background:#6c5ce7;color:#fff;">发送</button>
+            <button class="mock-button" style="font-size:9px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888;">📎</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第3栏：双层信息面板 -->
+      <div style="width:240px;background:#0f0f10;border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;">
+
+        <!-- ═══ 上层：客户360° (Intercom风格) ═══ -->
+        <div style="padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#6c5ce7;font-weight:700;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">👤 客户信息</div>
+          
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">姓名</div>
+            <div style="color:#fff;font-size:11px;">John Smith</div>
+          </div>
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">邮箱</div>
+            <div style="color:#ccc;font-size:10px;">john@imports.co</div>
+          </div>
+          <div style="margin-bottom:6px;display:flex;gap:12px;">
+            <div>
+              <div style="color:#888;font-size:9px;">国家</div>
+              <div style="color:#ccc;font-size:10px;">🇺🇸 美国</div>
+            </div>
+            <div>
+              <div style="color:#888;font-size:9px;">公司</div>
+              <div style="color:#ccc;font-size:10px;">Pacific Imports</div>
+            </div>
+          </div>
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">意向等级</div>
+            <div>
+              <span style="background:rgba(108,92,231,0.15);color:#6c5ce7;padding:2px 6px;border-radius:4px;font-size:9px;">🔴 高意向</span>
+            </div>
+          </div>
+          <div style="margin-bottom:6px;display:flex;gap:12px;">
+            <div>
+              <div style="color:#888;font-size:9px;">历史询盘</div>
+              <div style="color:#ccc;font-size:10px;">3 次</div>
+            </div>
+            <div>
+              <div style="color:#888;font-size:9px;">成交</div>
+              <div style="color:#22c55e;font-size:10px;">1 单 $12K</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <div style="width:6px;height:6px;background:#22c55e;border-radius:50%;"></div>
+            <span style="color:#22c55e;font-size:9px;">在线</span>
+          </div>
+        </div>
+
+        <!-- ═══ 下层：工单操作 (Zendesk风格) ═══ -->
+        <div style="padding:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#f97316;font-weight:700;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">📋 线索属性</div>
+          
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">状态</div>
+            <span style="background:rgba(249,115,22,0.15);color:#f97316;padding:2px 6px;border-radius:4px;font-size:9px;">🟠 待跟进</span>
+          </div>
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">负责人</div>
+            <div style="color:#ccc;font-size:10px;">张经理</div>
+          </div>
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">渠道</div>
+            <div style="color:#ccc;font-size:10px;">💬 WhatsApp</div>
+          </div>
+          <div style="margin-bottom:6px;">
+            <div style="color:#888;font-size:9px;">关联产品</div>
+            <div style="color:#6c5ce7;font-size:10px;">PH-200 高压泵</div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div style="color:#888;font-size:9px;">SLA 剩余</div>
+            <div style="color:#f97316;font-size:10px;">⏱ 3h 42m</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;display:flex;flex-direction:column;gap:4px;">
+            <button style="background:rgba(108,92,231,0.15);color:#6c5ce7;border:none;padding:5px;border-radius:4px;font-size:10px;cursor:pointer;">📄 生成报价单</button>
+            <button style="background:rgba(255,255,255,0.04);color:#888;border:none;padding:5px;border-radius:4px;font-size:10px;cursor:pointer;">📝 添加跟进记录</button>
+            <button style="background:rgba(255,255,255,0.04);color:#888;border:none;padding:5px;border-radius:4px;font-size:10px;cursor:pointer;">📋 查看报价模板</button>
+          </div>
+        </div>
+
+        <!-- ═══ 最近活动时间线 ═══ -->
+        <div style="padding:10px;">
+          <div style="color:#22c55e;font-weight:700;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">📜 最近活动</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;gap:6px;">
+              <div style="width:2px;background:rgba(108,92,231,0.3);flex-shrink:0;"></div>
+              <div>
+                <div style="color:#ccc;font-size:10px;">发送报价单 PH-200</div>
+                <div style="color:#555;font-size:8px;">6月19日 14:25</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div style="width:2px;background:rgba(255,255,255,0.08);flex-shrink:0;"></div>
+              <div>
+                <div style="color:#888;font-size:10px;">John 发起询盘</div>
+                <div style="color:#555;font-size:8px;">6月19日 14:22</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div style="width:2px;background:rgba(34,197,94,0.3);flex-shrink:0;"></div>
+              <div>
+                <div style="color:#888;font-size:10px;">上次成交: PH-100 × 20台</div>
+                <div style="color:#555;font-size:8px;">2024年3月 · $12,000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>右侧面板信息分层</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div style="background:#131416;padding:12px;border-radius:8px;">
+      <div style="color:#6c5ce7;font-weight:600;font-size:12px;margin-bottom:6px;">👤 客户360°</div>
+      <div style="color:#888;font-size:11px;">姓名 · 邮箱 · 国家 · 公司 · 意向等级 · 历史询盘 · 成交记录 · 在线状态</div>
+    </div>
+    <div style="background:#131416;padding:12px;border-radius:8px;">
+      <div style="color:#f97316;font-weight:600;font-size:12px;margin-bottom:6px;">📋 线索属性</div>
+      <div style="color:#888;font-size:11px;">状态 · 负责人 · 渠道 · 产品 · SLA · 操作按钮（报价/跟进/模板）</div>
+    </div>
+    <div style="background:#131416;padding:12px;border-radius:8px;">
+      <div style="color:#22c55e;font-weight:600;font-size:12px;margin-bottom:6px;">📜 活动时间线</div>
+      <div style="color:#888;font-size:11px;">垂直时间线 · 关键事件（询盘/报价/成交）· 可折叠历史</div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="good" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>这个布局方向可以</h3>
+      <p>三栏 + 右侧双层面板符合预期，继续细化。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="adjust" onclick="toggleSelect(this)">
+    <div class="letter">△</div>
+    <div class="content">
+      <h3>方向对但需调整</h3>
+      <p>告诉我需要改什么——面板顺序、信息项、宽度比例？</p>
+    </div>
+  </div>
+</div>

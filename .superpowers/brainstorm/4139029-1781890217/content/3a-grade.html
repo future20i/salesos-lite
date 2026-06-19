@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SalesOS Lite — 收件箱</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════
+     SalesOS Lite Design System v3.0 — 3A Grade
+     Vercel shadow-as-border + Linear precision + Intercom warmth
+     ═══════════════════════════════════════════════ */
+  
+  :root {
+    /* ── Surface ── */
+    --bg-root: #fafafa;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f5f5f5;
+    --bg-hover: rgba(0,0,0,0.03);
+    --bg-active: rgba(0,0,0,0.05);
+    
+    /* ── Text ── */
+    --text-primary: #171717;
+    --text-secondary: #4d4d4d;
+    --text-tertiary: #808080;
+    --text-quaternary: #a3a3a3;
+    --text-disabled: #d4d4d4;
+    
+    /* ── Brand ── */
+    --accent: #6c5ce7;
+    --accent-hover: #5a4bd1;
+    --accent-soft: rgba(108,92,231,0.06);
+    --accent-text: #6c5ce7;
+    
+    /* ── Semantic ── */
+    --whatsapp: #25D366;
+    --email: #5B9CF5;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    /* ── Shadow-as-border (Vercel technique) ── */
+    --shadow-border: 0 0 0 1px rgba(0,0,0,0.06);
+    --shadow-card: 0 0 0 1px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 0 0 1px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px #fafafa inset;
+    --shadow-focus: 0 0 0 2px rgba(108,92,231,0.4);
+    
+    /* ── Spacing ── */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    
+    /* ── Radius ── */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
+    
+    /* ── Typography (Geist) ── */
+    --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+    
+    /* ── Transitions ── */
+    --ease-out: cubic-bezier(0.16,1,0.3,1);
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-root);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga' 1;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:2px}
+
+  /* ═══════════════════════════════════════════════
+     LAYOUT
+     ═══════════════════════════════════════════════ */
+  #app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Navigation ── */
+  #nav {
+    width: 52px;
+    background: var(--bg-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 18px;
+    box-shadow: var(--shadow-border);
+    position: relative;
+    z-index: 2;
+  }
+  .nav-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-fast) var(--ease-out);
+    cursor: pointer;
+    color: var(--text-tertiary);
+    position: relative;
+  }
+  .nav-icon:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .nav-icon.active { background: var(--accent-soft); color: var(--accent); }
+  .nav-icon.active::after {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-brand {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #6c5ce7, #8b7cf0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(108,92,231,0.25);
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .nav-brand:hover { transform: scale(1.05); }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 280px;
+    background: var(--bg-surface);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-border);
+    position: relative;
+    z-index: 1;
+  }
+  #sidebar-header {
+    padding: 20px 16px 12px;
+    flex-shrink: 0;
+  }
+  #sidebar-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.36px;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+  }
+  
+  /* ── Search ── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-quaternary);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .search-wrap:focus-within svg { color: var(--accent); }
+  .search-input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    background: var(--bg-subtle);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    outline: none;
+    transition: all var(--duration-fast) var(--ease-out);
+    box-shadow: 0 0 0 0px transparent;
+  }
+  .search-input::placeholder { color: var(--text-quaternary); }
+  .search-input:focus {
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* ── Filter tabs ── */
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+  .filter-tab {
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-out);
+    white-space: nowrap;
+  }
+  .filter-tab:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .filter-tab.active { background: var(--text-primary); color: #fff; }
+
+  /* ── Conversation list ── */
+  #conv-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px;
+  }
+  .conv-item {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    position: relative;
+    margin-bottom: 1px;
+  }
+  .conv-item:hover { background: var(--bg-hover); }
+  .conv-item:active { background: var(--bg-active); transform: scale(0.995); }
+  .conv-item.active { background: var(--accent-soft); }
+  .conv-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .conv-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5px;
+  }
+  .conv-avatar-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .conv-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .conv-avatar.wa { background: linear-gradient(135deg, #25D366, #4ade80); }
+  .conv-avatar.em { background: linear-gradient(135deg, #5B9CF5, #84b2f8); }
+  .conv-avatar.web { background: linear-gradient(135deg, #a3a3a3, #d4d4d4); }
+  .conv-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text-primary);
+    letter-spacing: -0.13px;
+  }
+  .conv-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .conv-preview {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    padding-left: 44px;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .channel-dot {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .channel-label {
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .channel-label.wa { color: var(--whatsapp); }
+  .channel-label.em { color: var(--email); }
+  .time-label {
+    font-size: 11px;
+    color: var(--text-quaternary);
+    font-feature-settings: 'tnum' 1;
+  }
+  .unread-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .ai-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(108,92,231,0.08);
+    color: var(--accent-text);
+  }
+
+  /* ── Main chat area ── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg-root);
+  }
+  #chat-header {
+    padding: 14px 32px;
+    background: var(--bg-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-border);
+    position: relative;
+    z-index: 1;
+  }
+  .chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #6c5ce7, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(108,92,231,0.2);
+    flex-shrink: 0;
+  }
+  .chat-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+  .chat-subtitle {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 1px;
+  }
+
+  /* ── Mode switch ── */
+  .mode-switch {
+    display: flex;
+    background: var(--bg-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px;
+  }
+  .mode-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    font-family: var(--font-sans);
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  .mode-btn:hover { color: var(--text-secondary); }
+  .mode-btn.active {
+    background: var(--bg-surface);
+    color: var(--accent);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* ── Chat body ── */
+  #chat-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  #messages-wrap {
+    flex: 1;
+    padding: 32px 48px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* ── Message bubbles ── */
+  .msg-row { max-width: 55%; }
+  .msg-row.in { align-self: flex-start; }
+  .msg-row.out { align-self: flex-end; }
+  .msg-bubble {
+    padding: 14px 20px;
+    border-radius: var(--radius-xl);
+    font-size: 13px;
+    line-height: 1.65;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  .msg-row.in .msg-bubble {
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-card);
+    border-bottom-left-radius: 6px;
+  }
+  .msg-row.out .msg-bubble {
+    background: var(--accent-soft);
+    border-bottom-right-radius: 6px;
+  }
+
+  /* ── AI suggestion card ── */
+  .ai-card {
+    align-self: flex-end;
+    max-width: 55%;
+    background: var(--bg-surface);
+    padding: 16px 22px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-elevated);
+    border-bottom-right-radius: 6px;
+  }
+  .ai-card-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    justify-content: flex-end;
+    font-size: 11px;
+    color: var(--text-quaternary);
+  }
+  .ai-card-body {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-primary);
+  }
+  .ai-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  .ai-action {
+    background: none;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  .ai-action.primary { color: var(--accent-text); font-weight: 600; }
+  .ai-action.primary:hover { color: var(--accent-hover); }
+  .ai-action.secondary { color: var(--text-tertiary); }
+  .ai-action.secondary:hover { color: var(--text-secondary); }
+  .ai-action.dismiss { color: var(--text-quaternary); }
+  .ai-action.dismiss:hover { color: var(--text-tertiary); }
+
+  /* ── Time divider ── */
+  .time-divider {
+    text-align: center;
+    margin: 4px 0;
+  }
+  .time-divider span {
+    font-size: 11px;
+    color: var(--text-quaternary);
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* ── AI mode banner ── */
+  .mode-banner {
+    align-self: center;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    font-weight: 500;
+  }
+
+  /* ── Reply box ── */
+  #reply-area {
+    padding: 18px 48px 22px;
+    background: var(--bg-surface);
+    box-shadow: 0 -1px 0 0 rgba(0,0,0,0.06);
+  }
+  #reply-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  #reply-input {
+    flex: 1;
+    min-height: 46px;
+    max-height: 120px;
+    border: none;
+    background: var(--bg-subtle);
+    border-radius: 14px;
+    padding: 13px 18px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    outline: none;
+    resize: none;
+    transition: all var(--duration-fast) var(--ease-out);
+    box-shadow: 0 0 0 0px transparent;
+  }
+  #reply-input::placeholder { color: var(--text-quaternary); }
+  #reply-input:focus {
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-focus);
+  }
+  .btn-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-quaternary);
+    transition: all var(--duration-fast) var(--ease-out);
+    display: flex;
+  }
+  .btn-icon:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .btn-send {
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(108,92,231,0.2);
+    transition: all var(--duration-fast) var(--ease-out);
+    flex-shrink: 0;
+  }
+  .btn-send:hover {
+    background: var(--accent-hover);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(108,92,231,0.3);
+  }
+  .btn-send:active { transform: scale(0.95); }
+  .btn-send:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── Customer panel ── */
+  #customer-panel {
+    width: 210px;
+    background: var(--bg-surface);
+    box-shadow: -1px 0 0 0 rgba(0,0,0,0.06);
+    padding: 18px 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .panel-field { margin-bottom: 7px; }
+  .panel-field-label { font-size: 10px; color: var(--text-quaternary); margin-bottom: 2px; }
+  .panel-field-value { font-size: 12px; color: var(--text-primary); }
+  .panel-divider { border-top: 1px solid rgba(0,0,0,0.05); }
+  
+  .btn-panel-primary {
+    width: 100%;
+    background: var(--text-primary);
+    color: #fff;
+    border: none;
+    padding: 9px;
+    border-radius: var(--radius-md);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  .btn-panel-primary:hover { background: #000; }
+  .btn-panel-secondary {
+    width: 100%;
+    background: none;
+    color: var(--text-tertiary);
+    border: none;
+    padding: 9px;
+    border-radius: var(--radius-md);
+    font-size: 11px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+    box-shadow: var(--shadow-border);
+  }
+  .btn-panel-secondary:hover { background: var(--bg-hover); color: var(--text-secondary); }
+
+  /* ── Status pills ── */
+  .status-pill {
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .status-pill.warning { background: rgba(245,158,11,0.08); color: var(--warning); }
+  .status-pill.online {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--success);
+    font-size: 11px;
+  }
+  .online-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(16,185,129,0.4);
+  }
+
+  /* ── Activity timeline ── */
+  .timeline-item {
+    display: flex;
+    gap: 8px;
+  }
+  .timeline-line {
+    width: 2px;
+    background: #e5e5e5;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+  .timeline-line.active { background: var(--accent); }
+  .timeline-content { font-size: 11px; }
+  .timeline-title { color: var(--text-primary); }
+  .timeline-time { color: var(--text-quaternary); font-size: 10px; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav id="nav">
+    <div class="nav-brand">S</div>
+    <div class="nav-icon active" title="收件箱">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 6 12 13 2 6"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+    </div>
+    <div class="nav-icon" title="联系人">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div class="nav-icon" title="数据分析">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="12" height="8" rx="2"/></svg>
+    </div>
+    <div class="nav-icon" style="margin-top:auto;" title="设置">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2"/></svg>
+    </div>
+  </nav>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
+    <div id="sidebar-header">
+      <h1>收件箱</h1>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" placeholder="搜索客户或消息" autocomplete="off">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active">全部</button>
+        <button class="filter-tab">未读 5</button>
+        <button class="filter-tab">待跟进</button>
+      </div>
+    </div>
+
+    <div id="conv-list">
+      <!-- Active conversation -->
+      <div class="conv-item active">
+        <div class="conv-row-top">
+          <div class="conv-avatar-group">
+            <div class="conv-avatar wa">JS</div>
+            <div>
+              <div class="conv-name">John Smith</div>
+              <div class="conv-meta-row">
+                <svg class="channel-dot" viewBox="0 0 24 24" fill="#25D366"><path d="M17.5 6.5A8.4 8.4 0 0 0 12 4a8.5 8.5 0 0 0-8 8.5c0 1.4.4 2.8 1 4L3 22l5.7-1.9a8.4 8.4 0 0 0 3.3.7 8.5 8.5 0 0 0 8.5-8 8.2 8.2 0 0 0-3-6.3zM12 19.2a6.9 6.9 0 0 1-3-.7l-.3-.2-3.3 1.1 1.1-3.2-.2-.3a7 7 0 0 1-1-3.5 7 7 0 0 1 7-7 7 7 0 0 1 5.2 2.2 7 7 0 0 1 2 5.2 7 7 0 0 1-7.2 6.4z"/><path d="M9.5 12.2 11 14l3.5-3.5" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="channel-label wa">WhatsApp</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <span class="time-label">14:22</span>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:4px;justify-content:flex-end;">
+              <span class="ai-badge">AI</span>
+              <div class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="conv-preview">PH-200 报价咨询 — 50台 Long Beach</div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-row-top">
+          <div class="conv-avatar-group">
+            <div class="conv-avatar em">MG</div>
+            <div>
+              <div class="conv-name">Maria Garcia</div>
+              <div class="conv-meta-row">
+                <svg class="channel-dot" viewBox="0 0 24 24" fill="none" stroke="#5B9CF5" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3 7 9 6 9-6"/></svg>
+                <span class="channel-label em">邮件</span>
+              </div>
+            </div>
+          </div>
+          <span class="time-label">14:14</span>
+        </div>
+        <div class="conv-preview">MOQ和交货期确认</div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-row-top">
+          <div class="conv-avatar-group">
+            <div class="conv-avatar wa" style="background:linear-gradient(135deg,#10b981,#34d399);">AL</div>
+            <div>
+              <div class="conv-name">Ahmed Ltd.</div>
+              <div class="conv-meta-row">
+                <svg class="channel-dot" viewBox="0 0 24 24" fill="#25D366"><path d="M17.5 6.5A8.4 8.4 0 0 0 12 4a8.5 8.5 0 0 0-8 8.5c0 1.4.4 2.8 1 4L3 22l5.7-1.9a8.4 8.4 0 0 0 3.3.7 8.5 8.5 0 0 0 8.5-8 8.2 8.2 0 0 0-3-6.3zM12 19.2a6.9 6.9 0 0 1-3-.7l-.3-.2-3.3 1.1 1.1-3.2-.2-.3a7 7 0 0 1-1-3.5 7 7 0 0 1 7-7 7 7 0 0 1 5.2 2.2 7 7 0 0 1 2 5.2 7 7 0 0 1-7.2 6.4z"/><path d="M9.5 12.2 11 14l3.5-3.5" fill="none" stroke="#fff" stroke-width="1"/></svg>
+                <span class="channel-label wa">WhatsApp</span>
+              </div>
+            </div>
+          </div>
+          <span class="time-label">12:30</span>
+        </div>
+        <div class="conv-preview">PI已确认</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CHAT ═══ -->
+  <main id="main">
+    <!-- Header -->
+    <div id="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar">JS</div>
+        <div>
+          <div class="chat-title">John Smith</div>
+          <div class="chat-subtitle">Pacific Imports · 🇺🇸 · WhatsApp</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="mode-switch">
+          <button class="mode-btn">人工</button>
+          <button class="mode-btn active">AI 辅助</button>
+          <button class="mode-btn">托管</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat body -->
+    <div id="chat-body">
+      <div id="messages-wrap">
+        
+        <div class="mode-banner">AI 辅助模式 · AI 会建议回复，由你确认后发送</div>
+
+        <div class="time-divider"><span>6月19日 · 14:22</span></div>
+
+        <!-- Incoming -->
+        <div class="msg-row in">
+          <div class="msg-bubble">
+            Hello, I'm interested in your PH-200 high-pressure pump. Could you send me the price list and technical specs?
+          </div>
+        </div>
+
+        <!-- Outgoing -->
+        <div class="msg-row out">
+          <div class="msg-bubble">
+            Sure! May I know the quantity you need and your target delivery time?
+          </div>
+        </div>
+
+        <!-- Incoming -->
+        <div class="msg-row in">
+          <div class="msg-bubble">
+            Around 50 units, delivery within 60 days to Long Beach port.
+          </div>
+        </div>
+
+        <!-- AI Suggestion -->
+        <div class="ai-card">
+          <div class="ai-card-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            AI 建议
+          </div>
+          <div class="ai-card-body">
+            Thank you, John! For 50 units PH-200 to Long Beach, our price is $1,200/unit FOB Shanghai, lead time 45 days. I'll prepare the formal quotation now.
+          </div>
+          <div class="ai-card-actions">
+            <button class="ai-action primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              采用并发送
+            </button>
+            <button class="ai-action secondary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              编辑
+            </button>
+            <button class="ai-action dismiss">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Customer panel -->
+      <aside id="customer-panel">
+        <div>
+          <div class="panel-section-label">客户信息</div>
+          <div class="panel-field"><div class="panel-field-label">邮箱</div><div class="panel-field-value">john@imports.co</div></div>
+          <div class="panel-field"><div class="panel-field-label">公司</div><div class="panel-field-value">Pacific Imports</div></div>
+          <div class="panel-field"><div class="panel-field-label">历史</div><div class="panel-field-value">3次询盘 · 成交 $12K</div></div>
+          <div class="status-pill online"><span class="online-dot"></span>在线</div>
+        </div>
+        <div class="panel-divider"></div>
+        <div>
+          <div class="panel-section-label">线索</div>
+          <span class="status-pill warning">待跟进</span>
+          <div class="panel-field" style="margin-top:8px;"><div class="panel-field-label">负责人</div><div class="panel-field-value">张经理</div></div>
+          <div class="panel-field"><div class="panel-field-label">产品</div><div class="panel-field-value" style="color:var(--accent-text);">PH-200</div></div>
+        </div>
+        <div class="panel-divider"></div>
+        <button class="btn-panel-primary">生成报价单</button>
+        <button class="btn-panel-secondary">添加跟进</button>
+        <div class="panel-divider"></div>
+        <div>
+          <div class="panel-section-label">活动</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div class="timeline-item">
+              <div class="timeline-line active"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">发送报价单</div>
+                <div class="timeline-time">14:25</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-line"></div>
+              <div class="timeline-content">
+                <div class="timeline-title" style="color:var(--text-tertiary);">发起询盘</div>
+                <div class="timeline-time">14:22</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Reply box -->
+    <div id="reply-area">
+      <div id="reply-row">
+        <button class="btn-icon" title="AI 生成回复">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </button>
+        <textarea id="reply-input" placeholder="输入回复…" rows="1"></textarea>
+        <button class="btn-send" title="发送">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>
