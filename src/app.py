@@ -24,6 +24,7 @@ from src.middleware import tenant_context_middleware
 from src.api.auth_routes import router as auth_router
 from src.api.inbox_routes import router as inbox_router
 from src.api.channel_routes import router as channel_router
+from src.api.export_routes import router as export_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -107,6 +108,7 @@ app.middleware("http")(tenant_context_middleware)
 app.include_router(auth_router)
 app.include_router(inbox_router)
 app.include_router(channel_router)
+app.include_router(export_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")
