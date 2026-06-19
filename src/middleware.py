@@ -6,7 +6,7 @@ from src.database import AsyncSessionLocal
 async def tenant_context_middleware(request: Request, call_next):
     """Extract tenant_id from request state or JWT, set PG runtime parameter for RLS."""
     # Public endpoints skip tenant context
-    public_paths = ["/api/health", "/api/auth/register", "/api/auth/login", "/api/inbox/incoming"]
+    public_paths = ["/api/health", "/api/auth/register", "/api/auth/login", "/api/inbox/incoming", "/"]
     if request.url.path in public_paths:
         return await call_next(request)
 

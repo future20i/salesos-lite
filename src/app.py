@@ -15,6 +15,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 
 from src.database import engine, AsyncSessionLocal
 from src.models.base import Base
@@ -106,6 +107,15 @@ app.middleware("http")(tenant_context_middleware)
 app.include_router(auth_router)
 app.include_router(inbox_router)
 app.include_router(channel_router)
+
+# Static SPA — serve index.html at root
+_static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")
+
+from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return _static_index
 
 
 @app.get("/api/health")

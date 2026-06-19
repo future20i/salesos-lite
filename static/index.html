@@ -2,339 +2,482 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>SalesOS Lite v1</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SalesOS Lite</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0a0a0b;
-  --nav: #0f0f10;
-  --card: #131416;
-  --surface: #1a1b1e;
-  --text: #ededef;
-  --secondary: #a1a1aa;
-  --muted: #71717a;
-  --dim: #52525b;
-  --border: rgba(255,255,255,0.06);
-  --accent: #6c5ce7;
-  --accent-hover: #7c6ff0;
-  --accent-soft: rgba(108,92,231,0.10);
-  --green: #22c55e;
-  --red: #ef4444;
-  --orange: #f97316;
-  --yellow: #eab308;
-  --ff: system-ui, -apple-system, sans-serif;
-  --ff-mono: 'JetBrains Mono', 'SF Mono', monospace;
-  --br: 12px;
-  --brs: 8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--ff);background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
-button{cursor:pointer;border:none;font-family:inherit}
-input,select,textarea{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--brs);padding:8px 12px;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--accent)}
-.btn{padding:8px 16px;border-radius:var(--brs);font-size:13px;font-weight:500;transition:all .15s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-hover)}
-.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{background:#222327}
-.btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
-.btn-danger:hover{background:rgba(239,68,68,0.25)}
-.btn-sm{padding:4px 10px;font-size:12px}
-.badge{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
-.badge-admin{background:rgba(108,92,231,0.2);color:var(--accent)}
-.badge-mgr{background:rgba(59,130,246,0.2);color:#3b82f6}
-.badge-rep{background:rgba(34,197,94,0.2);color:var(--green)}
-.badge-pending{background:rgba(249,115,22,0.2);color:var(--orange)}
-/* Layout */
-#app{display:flex;height:100vh}
-#sidebar{width:220px;background:var(--nav);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--border);flex-shrink:0}
-#sidebar h2{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:4px}
-.sidebar-stat{font-size:12px;color:var(--secondary);display:flex;justify-content:space-between}
-.sidebar-stat span{color:var(--text);font-weight:600;font-family:var(--ff-mono)}
-#conv-list{width:340px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
-#conv-list-header{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1}
-#conv-list-items{display:flex;flex-direction:column}
-.conv-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
-.conv-item:hover{background:var(--surface)}
-.conv-item.active{background:var(--accent-soft);border-left:3px solid var(--accent)}
-.conv-item .name{font-size:14px;font-weight:600;margin-bottom:2px}
-.conv-item .preview{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.conv-item .meta{font-size:11px;color:var(--dim);margin-top:4px;display:flex;justify-content:space-between}
-#detail-panel{flex:1;display:flex;flex-direction:column}
-#detail-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:14px}
-#detail-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-#detail-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-#detail-header h3{font-size:16px}
-#messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px}
-.msg{padding:8px 14px;border-radius:var(--brs);max-width:75%;font-size:13px;line-height:1.5}
-.msg.customer{align-self:flex-start;background:var(--surface);border:1px solid var(--border)}
-.msg.agent{align-self:flex-end;background:var(--accent-soft);border:1px solid rgba(108,92,231,0.2)}
-.msg.system{align-self:center;background:transparent;color:var(--dim);font-size:11px;font-style:italic}
-.msg .sender{font-size:11px;color:var(--secondary);margin-bottom:3px}
-.msg .time{font-size:10px;color:var(--dim);margin-top:2px}
-#reply-box{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
-#reply-box textarea{flex:1;resize:none;min-height:40px;max-height:120px}
-#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
-#login-box{width:360px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:var(--br)}
-#login-box h1{font-size:20px;color:var(--accent);margin-bottom:24px}
-#login-box input{width:100%;margin-bottom:12px;padding:10px 14px}
-#login-error{color:var(--red);font-size:13px;margin-top:8px;display:none}
-.hidden{display:none!important}
-/* Scrollbar */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px}
+  /* ═══════════════════════════════════════════════
+     SalesOS Lite Design System v3.0 — 3A Grade
+     Vercel shadow-as-border + Linear precision + Intercom warmth
+     ═══════════════════════════════════════════════ */
+  :root {
+    --bg-root: #fafafa; --bg-surface: #ffffff; --bg-subtle: #f5f5f5;
+    --bg-hover: rgba(0,0,0,0.03); --bg-active: rgba(0,0,0,0.05);
+    --text-primary: #171717; --text-secondary: #4d4d4d;
+    --text-tertiary: #808080; --text-quaternary: #a3a3a3; --text-disabled: #d4d4d4;
+    --accent: #6c5ce7; --accent-hover: #5a4bd1; --accent-soft: rgba(108,92,231,0.06); --accent-text: #6c5ce7;
+    --whatsapp: #25D366; --email: #5B9CF5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+    --shadow-border: 0 0 0 1px rgba(0,0,0,0.06);
+    --shadow-card: 0 0 0 1px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 0 0 1px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px #fafafa inset;
+    --shadow-focus: 0 0 0 2px rgba(108,92,231,0.4);
+    --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;
+    --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-pill:9999px;
+    --font-sans:'Geist',system-ui,-apple-system,sans-serif;
+    --font-mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+    --ease-out:cubic-bezier(0.16,1,0.3,1);
+    --duration-fast:150ms;--duration-normal:200ms;--duration-slow:300ms;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:'liga' 1}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:2px}
+
+  /* ── Layout ── */
+  #app{display:flex;height:100vh;overflow:hidden}
+  .hidden{display:none!important}
+
+  /* ── Login ── */
+  #login-overlay{position:fixed;inset:0;background:var(--bg-root);display:flex;align-items:center;justify-content:center;z-index:100}
+  #login-box{width:380px;padding:40px 36px;background:var(--bg-surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-elevated)}
+  #login-box h1{font-size:22px;font-weight:600;letter-spacing:-0.44px;color:var(--text-primary);margin-bottom:6px}
+  #login-box .login-sub{font-size:13px;color:var(--text-tertiary);margin-bottom:28px}
+  #login-box input{width:100%;padding:11px 14px;margin-bottom:10px;background:var(--bg-subtle);border:none;border-radius:var(--radius-md);font-size:13px;font-family:var(--font-sans);color:var(--text-primary);outline:none;transition:all var(--duration-fast) var(--ease-out);box-shadow:0 0 0 0px transparent}
+  #login-box input::placeholder{color:var(--text-quaternary)}
+  #login-box input:focus{background:var(--bg-surface);box-shadow:var(--shadow-focus)}
+  #login-box .btn-login{width:100%;padding:11px;margin-top:4px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:500;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast) var(--ease-out);box-shadow:0 2px 8px rgba(108,92,231,0.2)}
+  #login-box .btn-login:hover{background:var(--accent-hover);transform:scale(1.02);box-shadow:0 4px 12px rgba(108,92,231,0.3)}
+  #login-box .btn-login:active{transform:scale(0.98)}
+  #login-error{color:var(--danger);font-size:12px;margin-top:8px;display:none}
+  .login-hint{font-size:11px;color:var(--text-quaternary);margin-top:20px;text-align:center;line-height:1.6}
+
+  /* ── Nav ── */
+  #nav{width:52px;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:18px;box-shadow:var(--shadow-border);position:relative;z-index:2}
+  .nav-icon{width:34px;height:34px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;transition:all var(--duration-fast) var(--ease-out);cursor:pointer;color:var(--text-tertiary);position:relative}
+  .nav-icon:hover{background:var(--bg-hover);color:var(--text-secondary)}
+  .nav-icon.active{background:var(--accent-soft);color:var(--accent)}
+  .nav-icon.active::after{content:'';position:absolute;left:-16px;top:8px;bottom:8px;width:2px;background:var(--accent);border-radius:0 2px 2px 0}
+  .nav-brand{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6c5ce7,#8b7cf0);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;box-shadow:0 2px 8px rgba(108,92,231,0.25);cursor:pointer;transition:transform var(--duration-fast) var(--ease-out)}
+  .nav-brand:hover{transform:scale(1.05)}
+  .nav-logout{font-size:10px;color:var(--text-quaternary);cursor:pointer;padding:4px;transition:color var(--duration-fast)}
+  .nav-logout:hover{color:var(--danger)}
+
+  /* ── Sidebar ── */
+  #sidebar{width:280px;background:var(--bg-surface);display:flex;flex-direction:column;box-shadow:var(--shadow-border);position:relative;z-index:1}
+  #sidebar-header{padding:20px 16px 12px;flex-shrink:0}
+  #sidebar-header h1{font-size:18px;font-weight:600;letter-spacing:-0.36px;margin-bottom:14px}
+  .search-wrap{position:relative;margin-bottom:12px}
+  .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-quaternary);transition:color var(--duration-fast)}
+  .search-wrap:focus-within svg{color:var(--accent)}
+  .search-input{width:100%;padding:9px 12px 9px 34px;background:var(--bg-subtle);border:none;border-radius:var(--radius-md);font-size:13px;font-family:var(--font-sans);color:var(--text-primary);outline:none;transition:all var(--duration-fast)}
+  .search-input::placeholder{color:var(--text-quaternary)}
+  .search-input:focus{background:var(--bg-surface);box-shadow:var(--shadow-focus)}
+  .filter-tabs{display:flex;gap:6px;overflow-x:auto}
+  .filter-tab{padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-tertiary);font-family:var(--font-sans);transition:all var(--duration-fast);white-space:nowrap}
+  .filter-tab:hover{background:var(--bg-hover);color:var(--text-secondary)}
+  .filter-tab.active{background:var(--text-primary);color:#fff}
+  #lead-list{flex:1;overflow-y:auto;padding:4px 8px}
+  .lead-item{padding:12px;border-radius:var(--radius-lg);cursor:pointer;transition:all var(--duration-fast);position:relative;margin-bottom:1px}
+  .lead-item:hover{background:var(--bg-hover)}
+  .lead-item:active{background:var(--bg-active);transform:scale(0.995)}
+  .lead-item.active{background:var(--accent-soft)}
+  .lead-item.active::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:2px;background:var(--accent);border-radius:0 2px 2px 0}
+  .lead-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+  .lead-avatar-group{display:flex;align-items:center;gap:10px}
+  .lead-avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px;flex-shrink:0}
+  .lead-avatar.wa{background:linear-gradient(135deg,#25D366,#4ade80)}
+  .lead-avatar.em{background:linear-gradient(135deg,#5B9CF5,#84b2f8)}
+  .lead-avatar.web{background:linear-gradient(135deg,#a3a3a3,#d4d4d4)}
+  .lead-name{font-weight:500;font-size:13px;color:var(--text-primary);letter-spacing:-0.13px}
+  .lead-channel-row{display:flex;align-items:center;gap:5px}
+  .channel-dot{width:14px;height:14px;flex-shrink:0}
+  .ch-label{font-size:11px;font-weight:500}
+  .ch-label.wa{color:var(--whatsapp)}.ch-label.em{color:var(--email)}.ch-label.web{color:var(--text-quaternary)}
+  .lead-time{font-size:11px;color:var(--text-quaternary);font-feature-settings:'tnum' 1}
+  .lead-preview{font-size:12px;color:var(--text-tertiary);padding-left:44px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lead-empty{padding:32px 16px;text-align:center;color:var(--text-quaternary);font-size:13px}
+
+  /* ── Main ── */
+  #main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg-root)}
+  #chat-header{padding:14px 32px;background:var(--bg-surface);display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-border);z-index:1;min-height:60px}
+  .chat-header-left{display:flex;align-items:center;gap:12px}
+  .chat-avatar{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#6c5ce7,#a78bfa);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(108,92,231,0.2);flex-shrink:0}
+  .chat-title{font-weight:600;font-size:15px;letter-spacing:-0.2px}
+  .chat-subtitle{font-size:12px;color:var(--text-tertiary);margin-top:1px}
+  #chat-header-right{display:flex;align-items:center;gap:14px}
+  .mode-switch{display:flex;background:var(--bg-subtle);border-radius:var(--radius-md);padding:2px}
+  .mode-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-tertiary);font-family:var(--font-sans);transition:all var(--duration-fast)}
+  .mode-btn:hover{color:var(--text-secondary)}
+  .mode-btn.active{background:var(--bg-surface);color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+  #chat-body{flex:1;display:flex;overflow:hidden}
+  #messages-wrap{flex:1;padding:32px 48px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+  .msg-row{max-width:55%}.msg-row.in{align-self:flex-start}.msg-row.out{align-self:flex-end}
+  .msg-bubble{padding:14px 20px;border-radius:var(--radius-xl);font-size:13px;line-height:1.65}
+  .msg-row.in .msg-bubble{background:var(--bg-surface);box-shadow:var(--shadow-card);border-bottom-left-radius:6px}
+  .msg-row.out .msg-bubble{background:var(--accent-soft);border-bottom-right-radius:6px}
+  .time-divider{text-align:center;margin:4px 0}
+  .time-divider span{font-size:11px;color:var(--text-quaternary);font-feature-settings:'tnum' 1}
+  .mode-banner{align-self:center;padding:7px 16px;border-radius:var(--radius-pill);font-size:11px;color:var(--accent-text);background:var(--accent-soft);font-weight:500}
+  .empty-state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-quaternary);font-size:14px}
+  #reply-area{padding:18px 48px 22px;background:var(--bg-surface);box-shadow:0 -1px 0 0 rgba(0,0,0,0.06)}
+  #reply-row{display:flex;gap:12px;align-items:flex-end}
+  #reply-input{flex:1;min-height:46px;max-height:120px;border:none;background:var(--bg-subtle);border-radius:14px;padding:13px 18px;font-size:13px;font-family:var(--font-sans);color:var(--text-primary);outline:none;resize:none;transition:all var(--duration-fast)}
+  #reply-input::placeholder{color:var(--text-quaternary)}
+  #reply-input:focus{background:var(--bg-surface);box-shadow:var(--shadow-focus)}
+  .btn-icon{background:none;border:none;padding:8px;border-radius:var(--radius-md);cursor:pointer;color:var(--text-quaternary);transition:all var(--duration-fast);display:flex}
+  .btn-icon:hover{background:var(--bg-hover);color:var(--text-secondary)}
+  .btn-send{width:44px;height:44px;background:var(--accent);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(108,92,231,0.2);transition:all var(--duration-fast);flex-shrink:0}
+  .btn-send:hover{background:var(--accent-hover);transform:scale(1.05);box-shadow:0 4px 12px rgba(108,92,231,0.3)}
+  .btn-send:active{transform:scale(0.95)}
+  .btn-send:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* ── Customer panel ── */
+  #customer-panel{width:210px;background:var(--bg-surface);box-shadow:-1px 0 0 0 rgba(0,0,0,0.06);padding:18px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+  .panel-label{font-size:10px;font-weight:600;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.6px}
+  .panel-field{margin-bottom:7px}.panel-fld-lbl{font-size:10px;color:var(--text-quaternary);margin-bottom:2px}.panel-fld-val{font-size:12px;color:var(--text-primary)}
+  .panel-divider{border-top:1px solid rgba(0,0,0,0.05)}
+  .pill-warn{padding:3px 8px;border-radius:var(--radius-pill);font-size:10px;font-weight:500;background:rgba(245,158,11,0.08);color:var(--warning)}
+  .pill-online{display:inline-flex;align-items:center;gap:4px;color:var(--success);font-size:11px}
+  .pill-online .dot{width:5px;height:5px;background:var(--success);border-radius:50%;box-shadow:0 0 4px rgba(16,185,129,0.4)}
+  .btn-panel{width:100%;background:var(--text-primary);color:#fff;border:none;padding:9px;border-radius:var(--radius-md);font-size:11px;font-weight:500;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast)}
+  .btn-panel:hover{background:#000}
+  .btn-panel-ghost{width:100%;background:none;color:var(--text-tertiary);border:none;padding:9px;border-radius:var(--radius-md);font-size:11px;font-family:var(--font-sans);cursor:pointer;transition:all var(--duration-fast);box-shadow:var(--shadow-border)}
+  .btn-panel-ghost:hover{background:var(--bg-hover);color:var(--text-secondary)}
+  .timeline-item{display:flex;gap:8px}
+  .timeline-line{width:2px;background:#e5e5e5;border-radius:1px;flex-shrink:0}
+  .timeline-line.active{background:var(--accent)}
+  .tl-title{font-size:11px;color:var(--text-primary)}.tl-time{font-size:10px;color:var(--text-quaternary);margin-top:1px}
+  .tl-title.muted{color:var(--text-tertiary)}
 </style>
 </head>
 <body>
 
+<!-- ═══ LOGIN OVERLAY ═══ -->
 <div id="login-overlay">
   <div id="login-box">
     <h1>SalesOS Lite</h1>
-    <input id="login-user" placeholder="用户名" autofocus>
-    <input id="login-pass" type="password" placeholder="密码">
-    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">登录</button>
+    <div class="login-sub">外贸 SME 统一收件箱</div>
+    <input id="login-user" placeholder="邮箱" autofocus autocomplete="off">
+    <input id="login-pass" type="password" placeholder="密码" autocomplete="off">
+    <button class="btn-login" onclick="doLogin()">登录</button>
     <p id="login-error"></p>
-    <p style="font-size:11px;color:var(--dim);margin-top:16px">
-      测试账号: admin/admin123 &nbsp;|&nbsp; manager/mgr123 &nbsp;|&nbsp; rep/rep123
-    </p>
+    <div class="login-hint">测试: boss@acme.com / admin123</div>
   </div>
 </div>
 
+<!-- ═══ APP ═══ -->
 <div id="app" class="hidden">
-  <!-- Sidebar -->
-  <div id="sidebar">
-    <h2>SalesOS Lite</h2>
-    <div class="sidebar-stat">待审批 <span id="stat-pending">0</span></div>
-    <div class="sidebar-stat">我的会话 <span id="stat-mine">0</span></div>
-    <div class="sidebar-stat">全部会话 <span id="stat-total">0</span></div>
-    <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="showNewConv()">+ 新建会话</button>
-    <select id="filter-status" onchange="loadConvs()" style="margin-top:8px">
-      <option value="">全部状态</option>
-      <option value="open">进行中</option>
-      <option value="closed">已关闭</option>
-    </select>
-    <label style="font-size:12px;color:var(--secondary);display:flex;align-items:center;gap:4px;margin-top:4px">
-      <input type="checkbox" id="filter-mine" onchange="loadConvs()"> 只看我的
-    </label>
-    <div style="flex:1"></div>
-    <div style="font-size:12px;color:var(--dim)">
-      <span id="current-user"></span>
-      <span id="current-role" class="badge" style="margin-left:6px"></span>
+  <nav id="nav">
+    <div class="nav-brand">S</div>
+    <div class="nav-icon active" title="收件箱">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 6 12 13 2 6"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
     </div>
-    <button class="btn btn-secondary btn-sm" onclick="doLogout()">退出</button>
-  </div>
-
-  <!-- Conversation List -->
-  <div id="conv-list">
-    <div id="conv-list-header">
-      <input id="search-customer" placeholder="搜索客户名..." style="width:100%" oninput="loadConvs()">
+    <div class="nav-icon" title="联系人">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
     </div>
-    <div id="conv-list-items"></div>
-  </div>
+    <div class="nav-icon" title="数据">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="12" height="8" rx="2"/></svg>
+    </div>
+    <div style="margin-top:auto;"></div>
+    <div class="nav-logout" onclick="doLogout()" title="退出">退出</div>
+  </nav>
 
-  <!-- Detail Panel -->
-  <div id="detail-panel">
-    <div id="detail-empty">← 选择一个会话</div>
-    <div id="detail-content" class="hidden">
-      <div id="detail-header">
-        <h3 id="detail-name"></h3>
-        <div style="display:flex;gap:6px;align-items:center">
-          <select id="detail-assign" onchange="doAssign()" style="display:none"></select>
-          <button class="btn btn-sm" id="btn-approval" onclick="submitApproval()">📋 提交审批</button>
-          <button class="btn btn-secondary btn-sm" id="btn-close" onclick="doClose()">关闭</button>
+  <aside id="sidebar">
+    <div id="sidebar-header">
+      <h1>收件箱</h1>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" id="search-input" placeholder="搜索客户或消息" autocomplete="off" oninput="loadLeads()">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all',this)">全部</button>
+        <button class="filter-tab" onclick="setFilter('unread',this)">未读</button>
+        <button class="filter-tab" onclick="setFilter('mine',this)">我的</button>
+      </div>
+    </div>
+    <div id="lead-list"></div>
+  </aside>
+
+  <main id="main">
+    <div id="chat-header">
+      <div class="chat-header-left" id="chat-header-info">
+        <div class="empty-state" style="font-size:13px;padding:0;flex:none">← 选择一个线索</div>
+      </div>
+      <div id="chat-header-right" class="hidden">
+        <div class="mode-switch" id="mode-switch">
+          <button class="mode-btn" onclick="setMode('manual',this)">人工</button>
+          <button class="mode-btn active" onclick="setMode('assist',this)">AI 辅助</button>
+          <button class="mode-btn" onclick="setMode('auto',this)">托管</button>
         </div>
       </div>
-      <div id="messages"></div>
-      <div id="reply-box">
-        <textarea id="reply-input" placeholder="输入回复..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doReply()}"></textarea>
-        <button class="btn btn-primary" onclick="doReply()">发送</button>
+    </div>
+    <div id="chat-body">
+      <div id="messages-wrap">
+        <div class="empty-state">← 选择一个线索开始对话</div>
+      </div>
+      <div id="customer-panel" class="hidden"></div>
+    </div>
+    <div id="reply-area" class="hidden">
+      <div id="reply-row">
+        <button class="btn-icon" id="btn-ai-suggest" title="AI 生成回复" onclick="aiSuggest()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </button>
+        <textarea id="reply-input" placeholder="输入回复…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doReply()}"></textarea>
+        <button class="btn-send" onclick="doReply()" title="发送">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- New Conversation Modal -->
-<div id="new-conv-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200">
-  <div style="width:400px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--br)">
-    <h3 style="margin-bottom:16px">新建会话</h3>
-    <input id="new-name" placeholder="客户名称" style="width:100%;margin-bottom:8px">
-    <select id="new-source" style="width:100%;margin-bottom:8px">
-      <option value="web">Web</option>
-      <option value="api">API</option>
-      <option value="telegram">Telegram</option>
-      <option value="whatsapp">WhatsApp</option>
-    </select>
-    <textarea id="new-msg" placeholder="首条消息（可选）" style="width:100%;margin-bottom:12px;min-height:60px"></textarea>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-secondary" onclick="hideNewConv()">取消</button>
-      <button class="btn btn-primary" onclick="doCreateConv()">创建</button>
-    </div>
-  </div>
+  </main>
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────
-var _tk='', _user=null, _convs=[], _activeId=null, _users=[];
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+var _tk = '', _user = null, _leads = [], _activeId = null, _activeLead = null;
+var _mode = 'assist'; // manual | assist | auto
+var _filter = 'all';
 
-// ── API helpers ───────────────────────────────────────────────────
-async function api(path, opts={}) {
+// ═══════════════════════════════════════════
+// API helpers
+// ═══════════════════════════════════════════
+async function api(path, opts) {
+  opts = opts || {};
   var h = opts.headers || {};
-  if(_tk) h['Authorization'] = 'Bearer '+_tk;
-  var r = await fetch(path, {headers: Object.assign({'Content-Type':'application/json'},h), ...opts});
-  if(r.status === 401){doLogout();throw new Error('Unauthorized')}
+  if (_tk) h['Authorization'] = 'Bearer ' + _tk;
+  var r = await fetch(path, {headers:Object.assign({'Content-Type':'application/json'},h), ...opts});
+  if (r.status === 401) { doLogout(); throw new Error('Unauthorized'); }
   return r;
 }
 
-// ── Auth ──────────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtTime(t) { if (!t) return ''; var d = new Date(t); return d.toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtDate(t) { if (!t) return ''; var d = new Date(t); return d.toLocaleString('zh-CN',{month:'long',day:'numeric'}); }
+
+// ═══════════════════════════════════════════
+// Auth
+// ═══════════════════════════════════════════
 async function doLogin() {
-  var u = doc('login-user').value, p = doc('login-pass').value;
+  var u = $('login-user').value, p = $('login-pass').value;
   var r = await fetch('/api/auth/login', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({username:u, password:p})
+    body:JSON.stringify({email:u, password:p})
   });
   var d = await r.json();
-  if(r.status !== 200){doc('login-error').textContent=d.error||'登录失败';doc('login-error').style.display='block';return}
-  _tk=d.token;_user=d.user;
-  localStorage.setItem('salesos_lite_sess',JSON.stringify({tk:_tk,user:_user}));
-  doc('login-overlay').classList.add('hidden');
-  doc('app').classList.remove('hidden');
-  doc('current-user').textContent=_user.username;
-  var rc=doc('current-role');
-  rc.textContent=_user.role.toUpperCase();
-  rc.className='badge badge-'+(_user.role==='admin'?'admin':_user.role==='mgr'?'mgr':'rep');
-  if(_user.role==='admin'||_user.role==='mgr') doc('detail-assign').style.display='inline-block';
-  await loadConvs();
-  await loadStats();
+  if (r.status !== 200) {
+    $('login-error').textContent = (d.detail || '登录失败');
+    $('login-error').style.display = 'block';
+    return;
+  }
+  _tk = d.token;
+  var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+_tk}});
+  _user = await me.json();
+  localStorage.setItem('salesos_lite_sess', JSON.stringify({tk:_tk}));
+  $('login-overlay').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await loadLeads();
 }
 
-function doLogout(){localStorage.removeItem('salesos_lite_sess');location.reload()}
+function doLogout() {
+  localStorage.removeItem('salesos_lite_sess');
+  location.reload();
+}
 
-function tryRestore() {
+async function tryRestore() {
   var s = localStorage.getItem('salesos_lite_sess');
-  if(!s) return;
+  if (!s) return;
   var d = JSON.parse(s);
-  if(!d.tk || !d.user) return;
-  fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+d.tk}})
-    .then(r => {if(r.ok) return r.json(); throw new Error()})
-    .then(u => {_tk=d.tk;_user=u;
-      doc('login-overlay').classList.add('hidden');doc('app').classList.remove('hidden');
-      doc('current-user').textContent=u.username;
-      var rc=doc('current-role');rc.textContent=u.role.toUpperCase();
-      rc.className='badge badge-'+(u.role==='admin'?'admin':u.role==='mgr'?'mgr':'rep');
-      if(u.role==='admin'||u.role==='mgr') doc('detail-assign').style.display='inline-block';
-      loadConvs();loadStats();
-    }).catch(()=>localStorage.removeItem('salesos_lite_sess'));
+  if (!d.tk) return;
+  var r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+d.tk}});
+  if (!r.ok) { localStorage.removeItem('salesos_lite_sess'); return; }
+  _tk = d.tk; _user = await r.json();
+  $('login-overlay').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await loadLeads();
 }
 
-function doc(id){return document.getElementById(id)}
-
-// ── Conversations ─────────────────────────────────────────────────
-async function loadConvs() {
-  var p = new URLSearchParams();
-  var st = doc('filter-status').value; if(st) p.set('status',st);
-  if(doc('filter-mine').checked) p.set('mine','true');
-  var q = doc('search-customer').value; if(q) p.set('q',q);
-  var r = await api('/api/inbox/conversations?'+p);
-  var d = await r.json();
-  _convs = d.data || [];
-  renderConvList();
+// ═══════════════════════════════════════════
+// Leads
+// ═══════════════════════════════════════════
+async function loadLeads() {
+  var q = $('search-input').value || '';
+  var params = new URLSearchParams();
+  if (q) params.set('search', q);
+  try {
+    var r = await api('/api/inbox/leads?' + params);
+    var data = await r.json();
+    _leads = data.leads || data || [];
+  } catch(e) { _leads = []; }
+  renderLeadList();
 }
 
-function renderConvList() {
-  var el = doc('conv-list-items'), html='';
-  _convs.forEach(function(c){
-    var cls = c.id===_activeId?'conv-item active':'conv-item';
-    html += '<div class="'+cls+'" onclick="selectConv('+c.id+')">'
-      +'<div class="name">'+esc(c.customer_name)+' <span class="badge badge-'+c.status+'" style="font-size:10px">'+c.status+'</span></div>'
-      +'<div class="preview">'+(c.last_message||'暂无消息')+'</div>'
-      +'<div class="meta"><span>'+c.source+'</span><span>'+(c.assignee_name||'未分配')+'</span></div>'
-      +'</div>';
+function renderLeadList() {
+  var el = $('lead-list'), html = '';
+  if (!_leads.length) {
+    html = '<div class="lead-empty">暂无线索<br><span style="font-size:11px">通过 Web Widget 或 API 接收消息</span></div>';
+    el.innerHTML = html; return;
+  }
+  _leads.forEach(function(l) {
+    var initials = (l.customer_name || '?').substring(0,2).toUpperCase();
+    var ch = (l.source || 'web').toLowerCase();
+    var chCls = ch === 'whatsapp' ? 'wa' : ch === 'email' ? 'em' : 'web';
+    var chLabel = ch === 'whatsapp' ? 'WhatsApp' : ch === 'email' ? '邮件' : 'Web';
+    var preview = (l.last_message || l.content || '暂无消息').substring(0,40);
+    var active = l.id === _activeId ? ' active' : '';
+    var time = l.updated_at || l.created_at || '';
+
+    html += '<div class="lead-item'+active+'" onclick="selectLead(\''+l.id+'\')">';
+    html += '<div class="lead-top">';
+    html += '<div class="lead-avatar-group">';
+    html += '<div class="lead-avatar '+chCls+'">'+esc(initials)+'</div>';
+    html += '<div><div class="lead-name">'+esc(l.customer_name)+'</div>';
+    html += '<div class="lead-channel-row">';
+    if (ch === 'whatsapp') {
+      html += '<svg class="channel-dot" viewBox="0 0 24 24" fill="#25D366"><path d="M17.5 6.5A8.4 8.4 0 0 0 12 4a8.5 8.5 0 0 0-8 8.5c0 1.4.4 2.8 1 4L3 22l5.7-1.9a8.4 8.4 0 0 0 3.3.7 8.5 8.5 0 0 0 8.5-8 8.2 8.2 0 0 0-3-6.3z"/><path d="M9.5 12.2 11 14l3.5-3.5" fill="none" stroke="#fff" stroke-width="1"/></svg>';
+    } else if (ch === 'email') {
+      html += '<svg class="channel-dot" viewBox="0 0 24 24" fill="none" stroke="#5B9CF5" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3 7 9 6 9-6"/></svg>';
+    } else {
+      html += '<svg class="channel-dot" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg>';
+    }
+    html += '<span class="ch-label '+chCls+'">'+chLabel+'</span></div></div></div>';
+    html += '<span class="lead-time">'+fmtTime(time)+'</span></div>';
+    html += '<div class="lead-preview">'+esc(preview)+'</div></div>';
   });
-  el.innerHTML = html || '<div style="padding:20px;color:var(--dim);text-align:center">暂无会话</div>';
+  el.innerHTML = html;
 }
 
-async function selectConv(id) {
+async function selectLead(id) {
   _activeId = id;
-  var r = await api('/api/inbox/conversations/'+id);
-  var d = await r.json();
-  var c = d.data;
-  doc('detail-empty').classList.add('hidden');
-  doc('detail-content').classList.remove('hidden');
-  doc('detail-name').textContent = c.customer_name+' ('+c.source+')';
-  // Messages
-  var html='';
-  (c.messages||[]).forEach(function(m){
-    var cls = m.sender==='customer'?'customer':m.sender==='system'?'system':'agent';
-    html += '<div class="msg '+cls+'">';
-    if(m.sender!=='system') html += '<div class="sender">'+esc(m.sender)+'</div>';
-    html += esc(m.content);
-    html += '<div class="time">'+fmtTime(m.created_at)+'</div></div>';
+  try {
+    var r = await api('/api/inbox/leads/' + id);
+    _activeLead = await r.json();
+  } catch(e) { return; }
+  renderChatHeader();
+  renderMessages();
+  renderCustomerPanel();
+  renderLeadList();
+  $('chat-header-right').classList.remove('hidden');
+  $('#reply-area').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════
+// Chat
+// ═══════════════════════════════════════════
+function renderChatHeader() {
+  var l = _activeLead; if (!l) return;
+  var initials = (l.customer_name||'?').substring(0,2).toUpperCase();
+  var ch = (l.source||'web').toLowerCase();
+  var chLabel = ch === 'whatsapp' ? 'WhatsApp' : ch === 'email' ? '邮件' : 'Web';
+  $('chat-header-info').innerHTML =
+    '<div class="chat-avatar">'+esc(initials)+'</div>'+
+    '<div><div class="chat-title">'+esc(l.customer_name)+'</div>'+
+    '<div class="chat-subtitle">'+(l.customer_email||'')+' · '+chLabel+'</div></div>';
+}
+
+function renderMessages() {
+  var l = _activeLead, wrap = $('messages-wrap');
+  if (!l) { wrap.innerHTML = '<div class="empty-state">← 选择一个线索</div>'; return; }
+  var msgs = l.messages || [];
+  if (!msgs.length) {
+    wrap.innerHTML = '<div class="empty-state">暂无消息</div>'; return;
+  }
+  var html = '';
+  if (_mode !== 'manual') {
+    var bannerText = _mode === 'assist' ? 'AI 辅助模式 · AI 会建议回复' : 'AI 托管模式 · AI 自动回复中';
+    html += '<div class="mode-banner">'+bannerText+'</div>';
+  }
+  var lastDate = '';
+  msgs.forEach(function(m) {
+    var mDate = fmtDate(m.created_at);
+    if (mDate && mDate !== lastDate) {
+      html += '<div class="time-divider"><span>'+mDate+' · '+fmtTime(m.created_at)+'</span></div>';
+      lastDate = mDate;
+    }
+    var dir = (m.sender === 'customer' || m.direction === 'in') ? 'in' : 'out';
+    html += '<div class="msg-row '+dir+'"><div class="msg-bubble">'+esc(m.content)+'</div></div>';
   });
-  doc('messages').innerHTML = html;
-  doc('messages').scrollTop = doc('messages').scrollHeight;
-  // Close button
-  doc('btn-close').style.display = c.status==='closed'?'none':'inline-block';
-  renderConvList();
+  wrap.innerHTML = html;
+  wrap.scrollTop = wrap.scrollHeight;
 }
 
 async function doReply() {
-  var inp = doc('reply-input'), content = inp.value.trim();
-  if(!content||!_activeId) return;
-  inp.value='';
-  await api('/api/inbox/conversations/'+_activeId+'/reply', {method:'POST',body:JSON.stringify({content:content})});
-  await selectConv(_activeId);
+  var inp = $('reply-input'), content = inp.value.trim();
+  if (!content || !_activeId) return;
+  inp.value = ''; inp.style.height = 'auto';
+  try {
+    await api('/api/inbox/leads/'+_activeId+'/reply', {
+      method:'POST', body:JSON.stringify({content:content})
+    });
+  } catch(e) { return; }
+  await selectLead(_activeId);
 }
 
-async function doAssign() {
-  var uid = parseInt(doc('detail-assign').value);
-  if(!uid||!_activeId) return;
-  await api('/api/inbox/conversations/'+_activeId+'/assign', {method:'POST',body:JSON.stringify({user_id:uid})});
-  await selectConv(_activeId);
+// ═══════════════════════════════════════════
+// AI Mode
+// ═══════════════════════════════════════════
+function setMode(mode, btn) {
+  _mode = mode;
+  var btns = $('#mode-switch').querySelectorAll('.mode-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var aiBtn = $('#btn-ai-suggest');
+  if (mode === 'manual') { aiBtn.style.display = 'none'; }
+  else { aiBtn.style.display = 'flex'; }
+  var input = $('reply-input');
+  if (mode === 'auto') { input.placeholder = 'AI 托管中，可随时输入接管…'; }
+  else if (mode === 'assist') { input.placeholder = '输入回复，或点击 AI 生成建议…'; }
+  else { input.placeholder = '输入回复…'; }
+  renderMessages();
 }
 
-async function doClose() {
-  if(!_activeId) return;
-  await api('/api/inbox/conversations/'+_activeId+'/close', {method:'POST'});
-  await selectConv(_activeId);await loadConvs();
+function aiSuggest() {
+  var inp = $('reply-input');
+  inp.value = '[AI 建议回复功能将在 M2 对接 AI Pipeline]';
+  inp.focus();
 }
 
-function showNewConv(){doc('new-conv-modal').classList.remove('hidden')}
-function hideNewConv(){doc('new-conv-modal').classList.add('hidden')}
-
-async function doCreateConv() {
-  var name=doc('new-name').value.trim(), src=doc('new-source').value, msg=doc('new-msg').value.trim();
-  if(!name) return;
-  await api('/api/inbox/conversations', {method:'POST',body:JSON.stringify({customer_name:name,source:src,initial_message:msg||null})});
-  hideNewConv();doc('new-name').value='';doc('new-msg').value='';
-  await loadConvs();await loadStats();
+// ═══════════════════════════════════════════
+// Customer Panel
+// ═══════════════════════════════════════════
+function renderCustomerPanel() {
+  var l = _activeLead;
+  if (!l) { $('customer-panel').classList.add('hidden'); return; }
+  $('customer-panel').classList.remove('hidden');
+  var ch = (l.source||'web').toLowerCase();
+  var statusLabel = (l.status === 'open' || !l.status) ? '待跟进' : l.status;
+  var html = '';
+  html += '<div><div class="panel-label">客户信息</div>';
+  html += '<div class="panel-field"><div class="panel-fld-lbl">邮箱</div><div class="panel-fld-val">'+esc(l.customer_email||'—')+'</div></div>';
+  html += '<div class="panel-field"><div class="panel-fld-lbl">渠道</div><div class="panel-fld-val">'+esc(ch)+'</div></div>';
+  html += '<div class="panel-field"><div class="panel-fld-lbl">ID</div><div class="panel-fld-val" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">'+esc((l.id||'').substring(0,8))+'</div></div>';
+  html += '<span class="pill-online"><span class="dot"></span>活跃</span>';
+  html += '</div><div class="panel-divider"></div>';
+  html += '<div><div class="panel-label">线索</div>';
+  html += '<span class="pill-warn">'+esc(statusLabel)+'</span>';
+  html += '<div class="panel-field" style="margin-top:8px;"><div class="panel-fld-lbl">负责人</div><div class="panel-fld-val">'+esc(l.assignee_name||_user.username||'—')+'</div></div>';
+  html += '</div><div class="panel-divider"></div>';
+  html += '<button class="btn-panel">生成报价单</button>';
+  html += '<button class="btn-panel-ghost">添加跟进</button>';
+  $('customer-panel').innerHTML = html;
 }
 
-// ── Approvals ─────────────────────────────────────────────────────
-async function submitApproval() {
-  if(!_activeId) return;
-  var reason = prompt('审批原因（可选）:');
-  if(reason===null) return;
-  await api('/api/approvals/submit', {method:'POST',body:JSON.stringify({conversation_id:_activeId,reason:reason||null})});
-  alert('已提交审批');
-  loadStats();
+// ═══════════════════════════════════════════
+// Filter
+// ═══════════════════════════════════════════
+function setFilter(f, btn) {
+  _filter = f;
+  var tabs = document.querySelectorAll('.filter-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  loadLeads();
 }
 
-// ── Stats ─────────────────────────────────────────────────────────
-async function loadStats() {
-  var r = await api('/api/inbox/stats'), d = await r.json();
-  doc('stat-total').textContent=d.open||0;
-  doc('stat-mine').textContent=d.assigned_to_me||0;
-  var ar = await api('/api/approvals/pending'), ad = await ar.json();
-  doc('stat-pending').textContent=(ad.data||[]).length;
-}
-
-// ── Utils ─────────────────────────────────────────────────────────
-function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function fmtTime(t){if(!t)return'';var d=new Date(t);return d.toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}
-
-// ── Init ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
 tryRestore();
 </script>
 </body>
