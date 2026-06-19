@@ -25,6 +25,9 @@ from src.api.auth_routes import router as auth_router
 from src.api.inbox_routes import router as inbox_router
 from src.api.channel_routes import router as channel_router
 from src.api.export_routes import router as export_router
+from src.api.billing_routes import router as billing_router
+from src.api.onboarding_routes import router as onboarding_router
+from src.api.dashboard_routes import router as dashboard_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -109,15 +112,23 @@ app.include_router(auth_router)
 app.include_router(inbox_router)
 app.include_router(channel_router)
 app.include_router(export_router)
+app.include_router(billing_router)
+app.include_router(onboarding_router)
+app.include_router(dashboard_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")
+_static_widget = (Path(__file__).parent.parent / "static" / "widget.js").read_text(encoding="utf-8")
 
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
     return _static_index
+
+@app.get("/widget.js")
+async def widget():
+    return Response(content=_static_widget, media_type="application/javascript")
 
 
 @app.get("/api/health")

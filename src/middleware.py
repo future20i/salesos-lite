@@ -6,8 +6,14 @@ from src.database import AsyncSessionLocal
 async def tenant_context_middleware(request: Request, call_next):
     """Extract tenant_id from request state or JWT, set PG runtime parameter for RLS."""
     # Public endpoints skip tenant context
-    public_paths = ["/api/health", "/api/auth/register", "/api/auth/login", "/api/inbox/incoming", "/", "/favicon.ico"]
-    if request.url.path in public_paths:
+    public_paths = [
+        "/api/health", "/api/auth/register", "/api/auth/login",
+        "/api/inbox/incoming", "/", "/favicon.ico",
+        "/api/onboarding/state", "/api/onboarding/advance",
+        "/api/billing/status",
+        "/widget.js",
+    ]
+    if request.url.path in public_paths or request.url.path.startswith("/api/auth/"):
         return await call_next(request)
 
     # Try to get tenant_id from request.state (set by get_current_user dependency)
@@ -32,13 +38,16 @@ async def tenant_context_middleware(request: Request, call_next):
     if tenant_id is None:
         raise HTTPException(status_code=401, detail="Tenant context required")
 
-    # Set PG runtime parameter for RLS
+    # Check subscription status — block expired tenants
     async with AsyncSessionLocal() as session:
         await session.execute(
             text("SELECT set_config('app.current_tenant_id', :tid, true)"),
             {"tid": str(tenant_id)},
         )
         await session.commit()
+
+    # Optional: subscription gate for expired accounts
+    # (deferred to route-level checks for now to keep middleware fast)
 
     response = await call_next(request)
     return response

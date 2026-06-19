@@ -26,6 +26,7 @@ class IncomingRequest(BaseModel):
     content: str
     channel: str = "web"
     channel_message_id: str | None = None
+    tenant_id: str | None = None  # For widget — identifies which tenant to route to
 
 
 class IncomingResponse(BaseModel):
@@ -100,14 +101,28 @@ async def receive_incoming(
 
     from src.models.tenant import Tenant
 
-    # Get or create a default tenant for public incoming messages
-    result = await db.execute(select(Tenant).limit(1))
-    tenant = result.scalar_one_or_none()
-    if tenant is None:
-        tenant = Tenant(name="Default")
-        db.add(tenant)
-        await db.flush()
-
+    # Use provided tenant_id from widget, or fall back to first tenant
+    tenant_id = None
+    if body.tenant_id:
+        try:
+            tenant_id = uuid.UUID(body.tenant_id)
+        except ValueError:
+            pass
+    
+    if tenant_id:
+        result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+        tenant = result.scalar_one_or_none()
+        if tenant is None:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+    else:
+        # Fallback: get first tenant
+        result = await db.execute(select(Tenant).limit(1))
+        tenant = result.scalar_one_or_none()
+        if tenant is None:
+            tenant = Tenant(name="Default")
+            db.add(tenant)
+            await db.flush()
+    
     tenant_id = tenant.id
 
     # Find or create lead — match by customer_name and channel for simplicity

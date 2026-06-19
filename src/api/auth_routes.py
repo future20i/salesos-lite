@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_db
 from src.models.tenant import Tenant
 from src.models.user import User, UserRole
+from src.models.subscription import Subscription
 from src.auth import (
     hash_password,
     verify_password,
@@ -70,9 +71,15 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)) ->
         role=UserRole.ADMIN,
     )
     db.add(user)
+
+    # Create trial subscription
+    sub = Subscription(tenant_id=tenant.id)
+    db.add(sub)
+
     await db.commit()
     await db.refresh(user)
 
+    # Include onboarding_step in response
     token = create_token(str(user.id), str(user.tenant_id), user.role.value)
     return AuthResponse(
         token=token,
@@ -82,6 +89,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)) ->
             "email": user.email,
             "role": user.role.value,
             "tenant_id": str(user.tenant_id),
+            "onboarding_step": 0,
         },
     )
 

@@ -6,6 +6,7 @@ from src.models.message import Message, MessageDirection
 from src.models.ai_job import AIJob, AIJobStatus
 from src.models.approval import Approval, ApprovalStatus
 from src.models.canned_response import CannedResponse, ResponseCategory
+from src.models.subscription import Subscription, SubscriptionStatus, Plan
 
 __all__ = [
     "Base",
@@ -15,4 +16,5 @@ __all__ = [
     "AIJob", "AIJobStatus",
     "Approval", "ApprovalStatus",
     "CannedResponse", "ResponseCategory",
+    "Subscription", "SubscriptionStatus", "Plan",
 ]
