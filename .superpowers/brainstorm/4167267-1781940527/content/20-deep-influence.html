@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>人脉兵法 — 深层影响力与决策驱动力</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root:#fafafa;--bg-surface:#fff;--bg-subtle:#f5f5f5;
+    --text-primary:#171717;--text-secondary:#4d4d4d;--text-tertiary:#808080;--text-quaternary:#a3a3a3;
+    --accent:#6c5ce7;--accent-hover:#5a4bd1;--accent-soft:rgba(108,92,231,0.06);
+    --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font:'Geist',system-ui,-apple-system,sans-serif;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:24px 36px;max-width:1100px;margin:0 auto;line-height:1.7}
+
+  h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+  h1 span{color:var(--accent)}
+  .sub{font-size:12px;color:var(--text-tertiary);margin-bottom:24px}
+
+  /* ═══════ DEPTH LAYERS ═══════ */
+  .depth-visual{display:flex;flex-direction:column;gap:0;margin:20px 0}
+  .depth-layer{padding:18px 24px;border-radius:var(--r-lg);position:relative}
+  .depth-layer .dl-num{font-size:28px;font-weight:800;color:rgba(0,0,0,0.04);position:absolute;right:20px;top:8px}
+  .depth-layer .dl-icon{font-size:18px;margin-bottom:4px}
+  .depth-layer .dl-title{font-size:14px;font-weight:700;margin-bottom:6px}
+  .depth-layer .dl-desc{font-size:10px;color:var(--text-secondary);line-height:1.8}
+
+  .l1{background:var(--bg-surface);box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
+  .l1 .dl-title{color:var(--text-primary)}
+  .l2{background:var(--bg-subtle);margin-top:4px}
+  .l2 .dl-title{color:var(--info)}
+  .l3{background:rgba(108,92,231,0.03);border:1px solid rgba(108,92,231,0.1);margin-top:4px}
+  .l3 .dl-title{color:var(--accent)}
+  .l4{background:rgba(239,68,68,0.02);border:1px dashed rgba(239,68,68,0.15);margin-top:4px}
+  .l4 .dl-title{color:var(--danger)}
+
+  /* ═══════ DECISION DRIVER DEEP DIVE ═══════ */
+  .section{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:20px 24px;margin-bottom:14px}
+  .section h3{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+  .driver-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .driver-card{background:var(--bg-subtle);border-radius:var(--r-md);padding:14px}
+  .driver-card .dc-icon{font-size:24px;margin-bottom:4px}
+  .driver-card .dc-title{font-size:11px;font-weight:600;margin-bottom:4px}
+  .driver-card .dc-body{font-size:10px;color:var(--text-secondary);line-height:1.7}
+
+  /* ═══════ RELATIONSHIP ACTIVITIES ═══════ */
+  .activity-flow{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:8px 0}
+  .act-node{flex:0 0 200px;background:var(--bg-subtle);border-radius:var(--r-md);padding:14px;text-align:center}
+  .act-node .an-icon{font-size:28px;margin-bottom:6px}
+  .act-node .an-title{font-size:11px;font-weight:600;margin-bottom:4px}
+  .act-node .an-desc{font-size:9px;color:var(--text-tertiary);line-height:1.5}
+  .act-connector{display:flex;align-items:center;justify-content:center;width:32px;flex-shrink:0;font-size:14px;color:var(--accent);padding-top:16px}
+
+  /* ═══════ PERSON DEEP PROFILE ═══════ */
+  .deep-profile{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:24px;margin-bottom:14px}
+  .dp-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
+  .dp-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a855f7);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#fff;flex-shrink:0}
+  .dp-info{flex:1}
+  .dp-info .dp-name{font-size:18px;font-weight:700}
+  .dp-info .dp-sub{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+  .dp-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+
+  .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .dp-block{background:var(--bg-subtle);border-radius:var(--r-md);padding:14px}
+  .dp-block .dpb-title{font-size:10px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+
+  .dp-field{display:flex;padding:2px 0;font-size:10px;line-height:1.6}
+  .dp-field .dpf-k{color:var(--text-quaternary);width:65px;flex-shrink:0;font-size:9px}
+  .dp-field .dpf-v{color:var(--text-primary);font-weight:500}
+  .dp-note{font-size:9px;color:var(--text-tertiary);margin-top:4px;padding:3px 6px;background:rgba(108,92,231,0.03);border-radius:3px;line-height:1.5}
+
+  .tag{font-size:9px;padding:3px 10px;border-radius:99px;font-weight:500}
+  .insight-box{background:linear-gradient(135deg,rgba(108,92,231,0.04),rgba(108,92,231,0.01));border:1px solid rgba(108,92,231,0.1);border-radius:var(--r-md);padding:14px 18px;font-size:10px;color:var(--text-secondary);line-height:1.8;margin:16px 0}
+
+  .flow-diagram{display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-subtle);border-radius:var(--r-lg);overflow-x:auto;font-size:10px}
+  .flow-step{flex:0 0 140px;text-align:center}
+  .flow-step .fs-icon{font-size:24px;margin-bottom:4px}
+  .flow-step .fs-label{font-weight:600;font-size:10px}
+  .flow-step .fs-desc{font-size:9px;color:var(--text-tertiary);margin-top:2px;line-height:1.4}
+  .flow-arrow{font-size:18px;color:var(--accent);flex-shrink:0;font-weight:700}
+</style>
+</head>
+<body>
+
+<h1><span>深层影响力</span> —— 理解决策背后的力量</h1>
+<p class="sub">真正推动一个决策的不是报价单上的数字。是恐惧、是野心、是信任、是一个人半夜睡不着在想的事。</p>
+
+<!-- ═══════ FOUR DEPTH LAYERS ═══════ -->
+<div class="depth-visual">
+  <div class="depth-layer l1">
+    <div class="dl-num">1</div>
+    <div class="dl-icon">📊</div>
+    <div class="dl-title">表层：商业需求</div>
+    <div class="dl-desc">他要什么产品、什么规格、什么价格、什么交期。<strong>这是所有 CRM 都在做的事。</strong></div>
+  </div>
+  <div class="depth-layer l2">
+    <div class="dl-num">2</div>
+    <div class="dl-icon">👤</div>
+    <div class="dl-title">第二层：个人画像</div>
+    <div class="dl-desc">他是什么样的人、怎么决策、喜欢什么、忌什么。麦凯66 覆盖的范围。<strong>这是大多数销售止步的地方。</strong></div>
+  </div>
+  <div class="depth-layer l3">
+    <div class="dl-num">3</div>
+    <div class="dl-icon">🎯</div>
+    <div class="dl-title">第三层：决策驱动力</div>
+    <div class="dl-desc"><strong>他真正怕什么？他真正要什么？</strong>不是他说出来的——是他深夜睡不着的时候想的。选错供应商会不会背责？老板怎么看这个项目？如果这个项目成了，对他个人意味着什么？<strong>理解这一层，才能真正推动决策。</strong></div>
+  </div>
+  <div class="depth-layer l4">
+    <div class="dl-num">4</div>
+    <div class="dl-icon">🔒</div>
+    <div class="dl-title">第四层：影响力杠杆</div>
+    <div class="dl-desc"><strong>什么能真正打动这个人？</strong>不是降价。可能是帮他解决一个跟项目无关的个人难题。可能是引荐一个对他职业生涯有帮助的人。可能是让他在行业里获得一次公开认可。可能是帮他女儿的职业发展出一份力。<strong>这一层的信息极其隐私，极其强大。</strong></div>
+  </div>
+</div>
+
+<!-- ═══════ DECISION DRIVERS ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>理解决策背后的五种力量</h3>
+  <div class="driver-grid">
+    <div class="driver-card">
+      <div class="dc-icon">😨</div>
+      <div class="dc-title" style="color:var(--danger)">恐惧驱动</div>
+      <div class="dc-body">"选错了怎么办？"<br>怕技术选型失误背责<br>怕项目延期被老板问责<br>怕被同事质疑判断力<br><strong>→ 不是说服他你有多好，是帮他降低犯错风险</strong></div>
+    </div>
+    <div class="driver-card">
+      <div class="dc-icon">🏆</div>
+      <div class="dc-title" style="color:var(--accent)">野心驱动</div>
+      <div class="dc-body">"这个项目对我意味着什么？"<br>升职的关键业绩<br>行业影响力的跳板<br>个人履历上的亮点<br><strong>→ 不是告诉他你的产品多好，是告诉他这个项目能帮他成就什么</strong></div>
+    </div>
+    <div class="driver-card">
+      <div class="dc-icon">🏛️</div>
+      <div class="dc-title" style="color:var(--info)">组织政治</div>
+      <div class="dc-body">"谁在推动？谁在挡路？"<br>采购部想压成本 vs 技术部要可靠性<br>新来的副总想推翻前任的方案<br>不同派系之间的微妙角力<br><strong>→ 不是跟一个人打交道，是跟一个组织生态打交道</strong></div>
+    </div>
+    <div class="driver-card">
+      <div class="dc-icon">🤝</div>
+      <div class="dc-title" style="color:var(--success)">信任惯性</div>
+      <div class="dc-body">"我信这个人吗？"<br>上次合作愉快带来的惯性<br>行业口碑和同行推荐<br>长期交往中建立的默契<br><strong>→ 不是一单生意的信任，是十年关系的惯性</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PERSON DEEP PROFILE EXAMPLE ═══════ -->
+<div class="deep-profile">
+  <div class="dp-header">
+    <div class="dp-avatar">张</div>
+    <div class="dp-info">
+      <div class="dp-name">张建国</div>
+      <div class="dp-sub">技术总监 · 台达电子 · 报价/谈判阶段</div>
+      <div class="dp-tags">
+        <span class="tag" style="background:rgba(16,185,129,0.06);color:var(--success)">技术型决策者</span>
+        <span class="tag" style="background:rgba(108,92,231,0.06);color:var(--accent)">champion（内部推动者）</span>
+        <span class="tag" style="background:rgba(245,158,11,0.06);color:var(--warning)">关系深度 7/10</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dp-grid">
+    <!-- Left column: Fear + Ambition -->
+    <div class="dp-block">
+      <div class="dpb-title">🔒 决策驱动力（仅创建者可见）</div>
+      <div class="dp-field"><span class="dpf-k">核心恐惧</span><span class="dpf-v" style="color:var(--danger)">技术选型失误背责。上一家供应商出过事，他差点被问责。</span></div>
+      <div class="dp-note">📝 2024年喝酒时提过："那次要不是我提前留了书面评估记录，锅就是我的"</div>
+      <div class="dp-field" style="margin-top:8px"><span class="dpf-k">核心野心</span><span class="dpf-v" style="color:var(--accent)">想升VP，这个项目是他证明自己"不只是技术人"的机会</span></div>
+      <div class="dp-note">📝 他需要的不只是参数——他需要一个能对CEO讲的完整故事：降本X%，可靠性提升Y%</div>
+      <div class="dp-field" style="margin-top:8px"><span class="dpf-k">组织处境</span><span class="dpf-v">新来的采购副总想推进口品牌。张总是在把我们的方案推进内部评审——他在替我们打仗。</span></div>
+      <div class="dp-field" style="margin-top:8px"><span class="dpf-k">信任基础</span><span class="dpf-v">3年合作、2个项目、零事故。他信我们的技术，但他需要弹药去说服别人。</span></div>
+    </div>
+
+    <!-- Right column: Leverage + Activities -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="dp-block">
+        <div class="dpb-title">🔒 影响力杠杆</div>
+        <div class="dp-field"><span class="dpf-k">情感杠杆</span><span class="dpf-v">女儿清华计算机系——我们有个客户的CTO也是清华计算机系毕业的，可以引荐认识，对她实习有帮助</span></div>
+        <div class="dp-field" style="margin-top:6px"><span class="dpf-k">事业杠杆</span><span class="dpf-v">他需要在行业里有声音。可以邀请他在电力电子学会年会上做联合演讲</span></div>
+        <div class="dp-field" style="margin-top:6px"><span class="dpf-k">社交杠杆</span><span class="dpf-v">他喜欢HiFi音响。深圳有一家私人音响俱乐部，老板是我朋友——可以带他去</span></div>
+        <div class="dp-field" style="margin-top:6px"><span class="dpf-k">信息杠杆</span><span class="dpf-v">他关心的行业趋势报告、竞品动态——我有的信息，他需要</span></div>
+      </div>
+      <div class="dp-block">
+        <div class="dpb-title">🔒 关系深化活动</div>
+        <div style="font-size:10px;color:var(--text-secondary);line-height:1.8">
+          <strong style="color:var(--accent)">近期已做：</strong><br>
+          • 3/15 生日祝福 + 行业资讯分享 ✓<br>
+          • 5/10 出差拜访 + 会后聊音响 ✓<br>
+          <br>
+          <strong style="color:var(--accent)">计划中：</strong><br>
+          • 7月 邀请参加行业峰会晚宴<br>
+          • 8月 安排女儿与陈教授（清华CTO）的引荐饭局<br>
+          • 10月 音响俱乐部活动
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FROM INSIGHT TO ACTION ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>从深层理解到策略行动：张总案例</h3>
+  
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="fs-icon">🔍</div>
+      <div class="fs-label">深层理解</div>
+      <div class="fs-desc">他怕背责<br>他需要升VP的故事<br>他在内部替我们打仗</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="fs-icon">🎯</div>
+      <div class="fs-label">策略转化</div>
+      <div class="fs-desc">不是"卖产品"<br>是"帮张总打赢内部仗"<br>给他弹药：数据+案例+ROI故事</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="fs-icon">📋</div>
+      <div class="fs-label">具体行动</div>
+      <div class="fs-desc">竞品对比文档（客观不贬低）<br>同行案例（数据中心的ROI）<br>一条他能转给CEO的消息</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="fs-icon">🤝</div>
+      <div class="fs-label">关系加持</div>
+      <div class="fs-desc">邀请峰会联合演讲<br>给他行业曝光<br>不是贿赂——是帮他成功</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="fs-icon">🏆</div>
+      <div class="fs-label">项目推进</div>
+      <div class="fs-desc">张总在采购会上<br>自信地论证选我们<br>因为他有弹药+有底气</div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="margin-top:16px">
+    <strong style="color:var(--accent)">🔑 这个案例揭示的核心逻辑：</strong><br><br>
+    张总选了我们的飞轮，不是因为飞轮比竞品好15%。<br>
+    是因为——<br><br>
+    • 我们有数据帮他在内部决策会上论证可靠性<br>
+    • 我们有案例帮他对 CEO 讲一个"降本增效"的故事<br>
+    • 我们帮他女儿引荐了清华的师兄<br>
+    • 我们邀请他在行业会议上做联合演讲，帮他在行业里建立个人品牌<br><br>
+    <strong>竞品能给他降价。我们不能给他这些。</strong><br>
+    这才是竞争性销售中真正的护城河——<strong>不是产品，是关系深度。</strong>
+  </div>
+</div>
+
+<!-- ═══════ ACTIVITY FRAMEWORK ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>关系深化活动框架</h3>
+  <div class="activity-flow">
+    <div class="act-node">
+      <div class="an-icon">🎂</div>
+      <div class="an-title">个人里程碑</div>
+      <div class="an-desc">生日、入职周年<br>子女升学/毕业<br>行业获奖/晋升</div>
+    </div>
+    <div class="act-connector">→</div>
+    <div class="act-node">
+      <div class="an-icon">⛳</div>
+      <div class="an-title">兴趣连接</div>
+      <div class="an-desc">高尔夫/音响/读书<br>共同的圈子<br>非商务场合的相处</div>
+    </div>
+    <div class="act-connector">→</div>
+    <div class="act-node">
+      <div class="an-icon">🏛️</div>
+      <div class="an-title">行业背书</div>
+      <div class="an-desc">联合演讲/圆桌<br>白皮书/案例署名<br>行业奖项推荐</div>
+    </div>
+    <div class="act-connector">→</div>
+    <div class="act-node">
+      <div class="an-icon">🔗</div>
+      <div class="an-title">资源引荐</div>
+      <div class="an-desc">人脉介绍<br>子女职业帮助<br>行业信息分享</div>
+    </div>
+    <div class="act-connector">→</div>
+    <div class="act-node">
+      <div class="an-icon">📊</div>
+      <div class="an-title">价值输出</div>
+      <div class="an-desc">行业报告/趋势<br>竞品动态更新<br>技术前沿分享</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PRIVACY WARNING ═══════ -->
+<div style="background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.12);border-radius:var(--r-md);padding:14px 18px;font-size:10px;color:var(--danger);line-height:1.7;display:flex;align-items:flex-start;gap:10px;margin-top:16px">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+  <div>
+    <strong>⚠️ 第三层和第四层的信息是最高密级。</strong><br>
+    决策驱动力和影响力杠杆一旦泄露，不是损失数据——是损失信任。<br>
+    系统必须保证：这些信息默认只有创建者可见。分享给他人需要显式授权。<br>
+    这是产品伦理的底线。
+  </div>
+</div>
+
+</body>
+</html>

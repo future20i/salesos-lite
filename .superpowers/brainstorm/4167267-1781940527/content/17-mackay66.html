@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SalesOS — 人脉画像 + 麦凯66</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root: #fafafa; --bg-surface: #ffffff; --bg-subtle: #f5f5f5;
+    --bg-hover: rgba(0,0,0,0.03);
+    --text-primary: #171717; --text-secondary: #4d4d4d;
+    --text-tertiary: #808080; --text-quaternary: #a3a3a3;
+    --accent: #6c5ce7; --accent-hover: #5a4bd1; --accent-soft: rgba(108,92,231,0.06);
+    --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font: 'Geist', system-ui, -apple-system, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.16,1,0.3,1);
+    --nav-w: 60px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;display:flex;height:100vh;overflow:hidden}
+
+  #nav{width:var(--nav-w);background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;box-shadow:1px 0 0 rgba(0,0,0,0.04);z-index:20}
+  .ni{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-tertiary);transition:all .15s var(--ease);background:transparent}
+  .ni:hover{background:var(--bg-hover);color:var(--text-primary)}
+  .ni.active{background:var(--accent-soft);color:var(--accent)}
+  .ni svg{width:20px;height:20px}
+  .ni .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  #top{display:flex;align-items:center;padding:0 28px;height:56px;background:var(--bg-surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);gap:12px;flex-shrink:0}
+  #top h2{font-size:16px;font-weight:600;letter-spacing:-0.32px}
+  .s{flex:1}
+  .hidden{display:none!important}
+
+  /* ═══════ CONTENT: FULL PAGE ═══════ */
+  #content{flex:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:20px;max-width:1000px}
+
+  /* ── Person header card ── */
+  .person-header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--bg-surface);border-radius:var(--r-xl);box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
+  .person-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a855f7);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600;color:#fff;flex-shrink:0}
+  .person-info{flex:1}
+  .person-info .pi-name{font-size:18px;font-weight:600;letter-spacing:-0.36px}
+  .person-info .pi-role{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+  .person-info .pi-company{font-size:11px;color:var(--text-quaternary)}
+  .person-tags{display:flex;gap:6px;margin-top:6px}
+  .person-tags .ptag{font-size:9px;padding:3px 10px;border-radius:99px;font-weight:500}
+  .person-stats{display:flex;gap:20px;text-align:center}
+  .person-stats .ps{-val{font-size:22px;font-weight:600;color:var(--accent)}}
+  .person-stats .ps-lbl{font-size:9px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.3px}
+
+  /* ── Section ── */
+  .section{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);overflow:hidden}
+  .section-header{padding:14px 18px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;box-shadow:0 1px 0 rgba(0,0,0,0.04)}
+  .section-body{padding:16px 18px}
+
+  /* ── Mackay 66 Grid ── */
+  .m66-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:900px){.m66-grid{grid-template-columns:1fr 1fr}}
+  .m66-card{background:var(--bg-subtle);border-radius:var(--r-md);padding:12px 14px}
+  .m66-card .m66-cat{font-size:9px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .m66-card .m66-field{display:flex;align-items:center;padding:3px 0;font-size:11px}
+  .m66-card .m66-field .f-lbl{color:var(--text-quaternary);width:55px;flex-shrink:0;font-size:10px}
+  .m66-card .m66-field .f-val{color:var(--text-primary);font-weight:500}
+  .m66-card .m66-field .f-empty{color:var(--text-disabled, #d4d4d4);font-style:italic}
+  .m66-card .m66-note{font-size:9px;color:var(--text-tertiary);margin-top:4px;padding:3px 6px;background:rgba(108,92,231,0.04);border-radius:3px;line-height:1.5}
+
+  /* ── Communication Strategy ── */
+  .strategy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .strat-card{background:var(--bg-subtle);border-radius:var(--r-md);padding:14px}
+  .strat-card .sc-title{font-size:11px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .strat-card .sc-item{font-size:11px;color:var(--text-secondary);line-height:1.7;padding:2px 0}
+  .strat-card .sc-item::before{content:'• ';color:var(--accent)}
+  .strat-card .sc-do{color:var(--success)}
+  .strat-card .sc-dont{color:var(--danger)}
+  .strat-card .sc-do::before{content:'✓ ';color:var(--success)}
+  .strat-card .sc-dont::before{content:'✗ ';color:var(--danger)}
+
+  /* ── Timeline of interactions ── */
+  .timeline{display:flex;flex-direction:column;gap:0}
+  .tl-item{display:flex;gap:12px;padding:10px 0;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+  .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+  .tl-body{flex:1;font-size:11px}
+  .tl-body .tl-date{font-size:10px;color:var(--text-quaternary);margin-bottom:2px}
+  .tl-body .tl-text{color:var(--text-secondary);line-height:1.5}
+  .tl-body .tl-tags{display:flex;gap:4px;margin-top:3px}
+  .tl-tag{font-size:8px;padding:1px 6px;border-radius:99px;font-weight:500}
+
+  /* ── Quick edit ── */
+  .edit-hint{font-size:10px;color:var(--text-quaternary);text-align:center;padding:8px;cursor:pointer;transition:color .15s}
+  .edit-hint:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <svg style="width:26px;height:26px;margin-bottom:18px" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="#6c5ce7"/><text x="13" y="17" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Geist">S</text></svg>
+  <div class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><div class="dot"></div></div>
+  <div class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/></svg></div>
+  <div class="ni active" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+  <div class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+  <div style="margin-top:auto"><div class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div></div>
+</nav>
+
+<div id="main">
+  <div id="top"><h2>人脉画像</h2><span style="font-size:12px;color:var(--text-quaternary)">张总 · 台达电子</span><div class="s"></div><span style="font-size:10px;color:var(--text-quaternary)">编辑</span></div>
+
+  <div id="content">
+
+    <!-- ═══════ PERSON HEADER ═══════ -->
+    <div class="person-header">
+      <div class="person-avatar">张</div>
+      <div class="person-info">
+        <div class="pi-name">张建国</div>
+        <div class="pi-role">技术总监 · 台达电子</div>
+        <div class="pi-company">台达AIDC飞轮项目 · 报价/谈判阶段 · ¥420万</div>
+        <div class="person-tags">
+          <span class="ptag" style="background:rgba(16,185,129,0.06);color:var(--success)">技术型决策者</span>
+          <span class="ptag" style="background:rgba(108,92,231,0.06);color:var(--accent)">老客户</span>
+          <span class="ptag" style="background:rgba(245,158,11,0.06);color:var(--warning)">决策链核心</span>
+        </div>
+      </div>
+      <div class="person-stats">
+        <div><div class="ps-val">3</div><div class="ps-lbl">合作年数</div></div>
+        <div><div class="ps-val">¥560万</div><div class="ps-lbl">累计成交</div></div>
+        <div><div class="ps-val">94%</div><div class="ps-lbl">回复率</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════ MACKAY 66 CORE ═══════ -->
+    <div class="section">
+      <div class="section-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>个人画像（麦凯66核心）</div>
+      <div class="section-body">
+        <div class="m66-grid">
+          <!-- Personal -->
+          <div class="m66-card">
+            <div class="m66-cat">👤 个人</div>
+            <div class="m66-field"><span class="f-lbl">生日</span><span class="f-val">1972.3.15</span></div>
+            <div class="m66-field"><span class="f-lbl">籍贯</span><span class="f-val">江苏南京</span></div>
+            <div class="m66-field"><span class="f-lbl">学历</span><span class="f-val">清华电机系硕士</span></div>
+            <div class="m66-field"><span class="f-lbl">性格</span><span class="f-val">理性 · 数据驱动 · 不喜寒暄</span></div>
+            <div class="m66-note">📝 2025/3/15 小王送了生日祝福，张总回复"谢谢还记得"</div>
+          </div>
+          <!-- Family -->
+          <div class="m66-card">
+            <div class="m66-cat">🏠 家庭</div>
+            <div class="m66-field"><span class="f-lbl">配偶</span><span class="f-val">陈老师（高中物理）</span></div>
+            <div class="m66-field"><span class="f-lbl">子女</span><span class="f-val">女儿大一（清华计算机）</span></div>
+            <div class="m66-field"><span class="f-lbl">居住</span><span class="f-val">深圳南山</span></div>
+            <div class="m66-note">📝 女儿考上清华时，小王发了祝贺。张总很骄傲，话题投缘可聊子女教育</div>
+          </div>
+          <!-- Interests -->
+          <div class="m66-card">
+            <div class="m66-cat">⛳ 兴趣</div>
+            <div class="m66-field"><span class="f-lbl">运动</span><span class="f-val">高尔夫（差点12）</span></div>
+            <div class="m66-field"><span class="f-lbl">爱好</span><span class="f-val">HiFi音响 · 古典音乐</span></div>
+            <div class="m66-field"><span class="f-lbl">阅读</span><span class="f-val">管理类 · 《创新者的窘境》</span></div>
+            <div class="m66-note">📝 2024年会后聊了半小时音响。推荐马勒第五交响曲时他眼睛亮了。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ BUSINESS PROFILE ═══════ -->
+    <div class="section">
+      <div class="section-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>职业画像</div>
+      <div class="section-body">
+        <div class="m66-grid">
+          <div class="m66-card">
+            <div class="m66-cat">💼 职业背景</div>
+            <div class="m66-field"><span class="f-lbl">现职</span><span class="f-val">台达技术总监（8年）</span></div>
+            <div class="m66-field"><span class="f-lbl">前职</span><span class="f-val">华为数据中心架构师</span></div>
+            <div class="m66-field"><span class="f-lbl">行业</span><span class="f-val">电力电子 22年</span></div>
+            <div class="m66-note">📝 华为背景 → 非常懂技术细节，不要拿 PPT 糊弄他</div>
+          </div>
+          <div class="m66-card">
+            <div class="m66-cat">🎯 决策模式</div>
+            <div class="m66-field"><span class="f-lbl">风格</span><span class="f-val">技术评估→说服自己→推采购</span></div>
+            <div class="m66-field"><span class="f-lbl">怕什么</span><span class="f-val">技术选型失误背责</span></div>
+            <div class="m66-field"><span class="f-lbl">要什么</span><span class="f-val">可靠性数据 · 同行案例</span></div>
+            <div class="m66-note">📝 上次 UPS 选型他说"搞错了我怎么跟老板交代"→ 安全感是真正的需求</div>
+          </div>
+          <div class="m66-card">
+            <div class="m66-cat">🔗 人脉网络</div>
+            <div class="m66-field"><span class="f-lbl">行业</span><span class="f-val">IEEE会员 · 电力电子学会</span></div>
+            <div class="m66-field"><span class="f-lbl">关键人</span><span class="f-val">李经理(采购) · 王总(老板)</span></div>
+            <div class="m66-field"><span class="f-lbl">竞品关系</span><span class="f-val">认识Active Power中国区负责人</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ COMMUNICATION STRATEGY ═══════ -->
+    <div class="section">
+      <div class="section-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>沟通策略（AI 基于画像生成）</div>
+      <div class="section-body">
+        <div class="strategy-grid">
+          <div class="strat-card">
+            <div class="sc-title"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 该做</div>
+            <div class="sc-item sc-do">开门见山，直接给数据。不寒暄不绕弯</div>
+            <div class="sc-item sc-do">每次沟通带一个新数据点或一个同行案例</div>
+            <div class="sc-item sc-do">技术参数用表格对比，不要长篇文字</div>
+            <div class="sc-item sc-do">提到"可靠性"和"行业验证"——这是他真正的安全感需求</div>
+            <div class="sc-item sc-do">3月15日发祝福。女儿的话题可以偶尔提起</div>
+          </div>
+          <div class="strat-card">
+            <div class="sc-title"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 忌做</div>
+            <div class="sc-item sc-dont">不要发"最近忙吗""在吗"——他反感无信息量的消息</div>
+            <div class="sc-item sc-dont">不要催"签了吗"——他会觉得你不尊重他的评估节奏</div>
+            <div class="sc-item sc-dont">不要贬低竞品——他技术出身，尊重客观对比</div>
+            <div class="sc-item sc-dont">不要在工作时间外打电话——他家庭时间边界清晰</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ TOUCHPOINT TIMELINE ═══════ -->
+    <div class="section">
+      <div class="section-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>互动时间线</div>
+      <div class="section-body">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-body">
+              <div class="tl-date">2026.6.20 — WhatsApp</div>
+              <div class="tl-text">客户询问飞轮 vs Active Power 对比。AI 起草回复后发出。提及竞品低价。</div>
+              <div class="tl-tags"><span class="tl-tag" style="background:var(--accent-soft);color:var(--accent)">技术探讨</span><span class="tl-tag" style="background:rgba(239,68,68,0.06);color:var(--danger)">竞品信号</span></div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--warning)"></div>
+            <div class="tl-body">
+              <div class="tl-date">2026.6.15 — WhatsApp</div>
+              <div class="tl-text">客户要求更新报价含5年维保，交期压缩到30天。小王确认收到。</div>
+              <div class="tl-tags"><span class="tl-tag" style="background:rgba(245,158,11,0.06);color:var(--warning)">报价变更</span></div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--success)"></div>
+            <div class="tl-body">
+              <div class="tl-date">2026.5.10 — 出差拜访 · 台达总部</div>
+              <div class="tl-text">小王去台达做了技术方案汇报。张总带技术团队参加。会后聊了半小时音响和女儿升学。</div>
+              <div class="tl-tags"><span class="tl-tag" style="background:rgba(16,185,129,0.06);color:var(--success)">关系深化</span><span class="tl-tag" style="background:var(--accent-soft);color:var(--accent)">私人话题</span></div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--text-quaternary)"></div>
+            <div class="tl-body">
+              <div class="tl-date">2025.3.15 — WhatsApp</div>
+              <div class="tl-text">张总生日。小王发送了技术行业资讯 + 生日祝福。张总回复感谢。</div>
+              <div class="tl-tags"><span class="tl-tag" style="background:var(--accent-soft);color:var(--accent)">生日触达</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ AI INSIGHT ═══════ -->
+    <div class="section" style="box-shadow:0 0 0 1px rgba(108,92,231,0.12)">
+      <div class="section-header" style="color:var(--accent)">🤖 AI 人脉洞察</div>
+      <div class="section-body" style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+        <strong style="color:var(--text-primary)">关于张总，AI 观察到的三点：</strong><br><br>
+        
+        <strong>1. 他不是「反对者」，他是「验证者」。</strong><br>
+        张总每次提出问题（"Active Power呢？""交期能到30天吗？"）不是为了拒绝，而是为了在内部决策会上有数据支撑。他需要你帮他准备好「弹药」——给他他能拿去跟采购、跟老板说的数据和案例。<br><br>
+        
+        <strong>2. 信任建立在专业尊重上，不是私人感情上。</strong><br>
+        他喜欢跟你聊音响是因为你懂，不是因为你热情。对他的策略应该是「每一次互动都是一次微型技术汇报」——带数据、带案例、给选择题不给结论。<br><br>
+        
+        <strong>3. 现在的阶段：他在内部推动，需要你的支持。</strong><br>
+        他问了竞品对比——这不是质疑，是他在准备内部汇报的材料。给他一份客观的、不带攻击性的对比文档，他会在采购会上用它来论证选你的理由。<br><br>
+
+        <span style="color:var(--accent);cursor:pointer">→ 基于这些洞察，AI 建议下一条消息的沟通策略</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

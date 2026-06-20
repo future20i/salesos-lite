@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>人脉兵法 — 指导思想与系统架构</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root:#fafafa;--bg-surface:#fff;--bg-subtle:#f5f5f5;
+    --text-primary:#171717;--text-secondary:#4d4d4d;--text-tertiary:#808080;--text-quaternary:#a3a3a3;
+    --accent:#6c5ce7;--accent-hover:#5a4bd1;--accent-soft:rgba(108,92,231,0.06);
+    --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font:'Geist',system-ui,-apple-system,sans-serif;
+    --mono:'Geist Mono',ui-monospace,monospace;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:28px 36px;max-width:1100px;margin:0 auto;line-height:1.7}
+
+  h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+  h1 span{color:var(--accent)}
+  .sub{font-size:13px;color:var(--text-tertiary);margin-bottom:32px}
+
+  /* Philosophy block */
+  .philosophy{background:linear-gradient(135deg,rgba(108,92,231,0.04),rgba(108,92,231,0.01));border:1px solid rgba(108,92,231,0.1);border-radius:var(--r-xl);padding:28px 32px;margin-bottom:24px}
+  .philosophy h2{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:12px}
+  .philosophy .principle{font-size:12px;padding:6px 0;color:var(--text-secondary);line-height:1.7;display:flex;gap:10px}
+  .philosophy .principle .num{color:var(--accent);font-weight:700;font-size:14px;flex-shrink:0;width:20px}
+
+  /* Architecture diagram */
+  .arch{background:var(--bg-surface);border-radius:var(--r-xl);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:28px;margin-bottom:24px}
+  .arch h3{font-size:14px;font-weight:600;margin-bottom:20px}
+  .arch-grid{display:flex;flex-direction:column;gap:12px}
+  .arch-layer{display:flex;align-items:stretch;gap:12px}
+  .arch-layer .layer-label{width:100px;flex-shrink:0;font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.3px;display:flex;align-items:center;justify-content:flex-end;padding-right:12px}
+  .arch-layer .layer-boxes{flex:1;display:flex;gap:10px}
+  .layer-box{flex:1;background:var(--bg-subtle);border-radius:var(--r-md);padding:14px 16px;font-size:11px;line-height:1.6}
+  .layer-box .lb-title{font-weight:600;font-size:12px;color:var(--text-primary);margin-bottom:4px}
+  .layer-box .lb-desc{color:var(--text-tertiary);font-size:10px}
+  .layer-box.private{border-left:3px solid var(--danger);background:rgba(239,68,68,0.02)}
+  .layer-box.private .lb-title{color:var(--danger)}
+  .layer-box.strategic{border-left:3px solid var(--accent);background:var(--accent-soft)}
+  .layer-box.strategic .lb-title{color:var(--accent)}
+  .layer-box.action{border-left:3px solid var(--success)}
+  .layer-box.action .lb-title{color:var(--success)}
+  .arch-arrows{display:flex;justify-content:center;gap:80px;padding:4px 0 4px 100px}
+  .arch-arrows span{font-size:10px;color:var(--text-quaternary)}
+
+  /* Privacy note */
+  .privacy-note{background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.1);border-radius:var(--r-md);padding:12px 16px;margin:12px 0;font-size:10px;color:var(--danger);display:flex;align-items:flex-start;gap:8px;line-height:1.6}
+
+  /* Section card */
+  .section{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:20px 24px;margin-bottom:14px}
+  .section h3{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section p{font-size:11px;color:var(--text-secondary);line-height:1.8}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:800px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+  .info-card{background:var(--bg-subtle);border-radius:var(--r-md);padding:14px}
+  .info-card h4{font-size:11px;font-weight:600;margin-bottom:6px}
+  .info-card .field{display:flex;padding:2px 0;font-size:10px}
+  .info-card .field .k{color:var(--text-quaternary);width:70px;flex-shrink:0}
+  .info-card .field .v{color:var(--text-primary);font-weight:500}
+
+  /* Competitive sales flow */
+  .sale-flow{display:flex;align-items:center;gap:0;margin:16px 0;font-size:10px}
+  .sale-step{flex:1;text-align:center;padding:12px 8px;background:var(--bg-subtle);border-radius:var(--r-md);position:relative}
+  .sale-step .ss-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
+  .sale-step .ss-title{font-weight:600;font-size:10px;color:var(--text-primary)}
+  .sale-step .ss-person{font-size:9px;color:var(--text-tertiary);margin-top:2px}
+  .sale-arrow{font-size:16px;color:var(--text-quaternary);flex-shrink:0;margin:0 4px}
+</style>
+</head>
+<body>
+
+<h1><span>人脉兵法</span> —— 指导思想与系统架构</h1>
+<p class="sub">人驱动事，不是事驱动人。理解人 → 引导关系 → 推动项目。</p>
+
+<!-- ═══════ GUIDING PHILOSOPHY ═══════ -->
+<div class="philosophy">
+  <h2>指导思想</h2>
+  <div class="principle"><span class="num">一</span><span><strong>人先于事。</strong> 在理解一个人之前，不要谈方案。先了解他怕什么、要什么、怎么决策、谁影响他。方案是对人的理解的外化。</span></div>
+  <div class="principle"><span class="num">二</span><span><strong>隐私即信任。</strong> 你记下的关于一个人的信息越多，你对他的理解越深——但这份理解必须被严密保护。不恰当的泄露不是失误，是背叛。</span></div>
+  <div class="principle"><span class="num">三</span><span><strong>关系即资产。</strong> 今天不成交的客户，三年后可能变成最大的项目。每一次互动都是对关系账户的存入或支取。不要透支。</span></div>
+  <div class="principle"><span class="num">四</span><span><strong>知己知彼，知人知局。</strong> 竞争性销售的本质不是比产品，是比谁更理解客户的决策地图——谁是真正的决策者、谁在推动、谁在阻挡、每个人的真实动机是什么。</span></div>
+  <div class="principle"><span class="num">五</span><span><strong>AI 是幕僚，不是代言人。</strong> AI 帮你整理情报、分析模式、建议策略。但真正的人际判断和情感连接，只能由人来做。</span></div>
+  <div class="principle"><span class="num">六</span><span><strong>长线经营，滴水穿石。</strong> 麦凯66不是为了成交一单填的。它是为了经营一个人十年二十年的关系。你今天记下的"女儿考上清华"，十年后可能是最值钱的一条信息。</span></div>
+</div>
+
+<!-- ═══════ SYSTEM ARCHITECTURE ═══════ -->
+<div class="arch">
+  <h3>系统架构：四层结构</h3>
+  <div class="privacy-note">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    <span><strong>隐私设计：</strong>第一层（人脉画像）是私有数据库，默认只有创建者和直属上级可见。第二层（权力地图）和第三层（互动策略）是团队共享的战略情报。第四层（行动执行）是日常工作流。</span>
+  </div>
+
+  <div class="arch-grid">
+    <!-- Layer 1 -->
+    <div class="arch-layer">
+      <div class="layer-label">第一层<br>人脉画像</div>
+      <div class="layer-boxes">
+        <div class="layer-box private">
+          <div class="lb-title">🔒 麦凯66 核心</div>
+          <div class="lb-desc">个人：生日、籍贯、学历、性格<br>家庭：配偶、子女、居住地<br>兴趣：运动、爱好、阅读<br>习惯：沟通偏好、作息时间</div>
+        </div>
+        <div class="layer-box private">
+          <div class="lb-title">🔒 职业深层</div>
+          <div class="lb-desc">前职背景与跳槽原因<br>引以为豪的成就<br>恐惧的事（背责/被否/超预算）<br>真正的决策动机</div>
+        </div>
+        <div class="layer-box private">
+          <div class="lb-title">🔒 关系档案</div>
+          <div class="lb-desc">初次接触的时间地点方式<br>关系转折点事件<br>私人话题涉及深度<br>信任度量表（1-10分）</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrows"><span>↑ 情报输入 ↑</span></div>
+
+    <!-- Layer 2 -->
+    <div class="arch-layer">
+      <div class="layer-label">第二层<br>权力地图</div>
+      <div class="layer-boxes">
+        <div class="layer-box strategic">
+          <div class="lb-title">🎯 决策网络</div>
+          <div class="lb-desc">决策人：谁签字<br>影响者：谁的建议被听<br>守门人：谁能挡住你<br>用户：谁实际用你的产品<br>敌友谱：champion/neutral/opponent</div>
+        </div>
+        <div class="layer-box strategic">
+          <div class="lb-title">🕸️ 人脉图谱</div>
+          <div class="lb-desc">张总认识李总？<br>谁可以帮我们引荐王总？<br>采购经理和谁关系好？<br>竞品在客户内部有谁的关系？</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrows"><span>↑ 分析输出 ↑</span></div>
+
+    <!-- Layer 3 -->
+    <div class="arch-layer">
+      <div class="layer-label">第三层<br>互动策略</div>
+      <div class="layer-boxes">
+        <div class="layer-box strategic">
+          <div class="lb-title">📋 沟通策略</div>
+          <div class="lb-desc">该说什么、忌说什么<br>什么时间联系、用什么渠道<br>什么话题能建立连接<br>什么信号说明关系在退化</div>
+        </div>
+        <div class="layer-box strategic">
+          <div class="lb-title">⚔️ 竞争推进</div>
+          <div class="lb-desc">当前阶段的关键人是谁<br>需要给他什么"弹药"<br>竞品可能在做什么<br>下一步行动建议</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrows"><span>↑ 策略转化 ↑</span></div>
+
+    <!-- Layer 4 -->
+    <div class="arch-layer">
+      <div class="layer-label">第四层<br>行动执行</div>
+      <div class="layer-boxes">
+        <div class="layer-box action">
+          <div class="lb-title">✅ 跟进项</div>
+          <div class="lb-desc">具体任务：起草报价、发送方案、安排拜访<br>关联到人 + 关联到商机<br>完成后回写互动时间线</div>
+        </div>
+        <div class="layer-box action">
+          <div class="lb-title">📡 提醒触达</div>
+          <div class="lb-desc">生日提醒、节日祝福<br>长时间未互动预警<br>关系节点事件提醒<br>（女儿毕业典礼前发祝福）</div>
+        </div>
+        <div class="layer-box action">
+          <div class="lb-title">📝 互动记录</div>
+          <div class="lb-desc">每次沟通自动归档<br>标签分类（技术探讨/私人话题/商务谈判）<br>AI 从对话中提取关键信息更新画像</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ COMPETITIVE SALES LOGIC ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>竞争性销售推进：人驱动事的五步逻辑</h3>
+  
+  <div class="sale-flow">
+    <div class="sale-step"><div class="ss-num">1</div><div class="ss-title">识人</div><div class="ss-person">填麦凯66</div></div>
+    <div class="sale-arrow">→</div>
+    <div class="sale-step"><div class="ss-num">2</div><div class="ss-title">绘图</div><div class="ss-person">权力地图</div></div>
+    <div class="sale-arrow">→</div>
+    <div class="sale-step"><div class="ss-num">3</div><div class="ss-title">定策</div><div class="ss-person">沟通策略</div></div>
+    <div class="sale-arrow">→</div>
+    <div class="sale-step"><div class="ss-num">4</div><div class="ss-title">推进</div><div class="ss-person">竞争推进</div></div>
+    <div class="sale-arrow">→</div>
+    <div class="sale-step"><div class="ss-num">5</div><div class="ss-title">复盘</div><div class="ss-person">更新画像</div></div>
+  </div>
+
+  <p style="margin-top:16px">
+    <strong>识人</strong> → 不是为了收集信息而收集。是为了回答一个问题：<strong>这个人凭什么要帮你？</strong><br>
+    <strong>绘图</strong> → 一个项目从来不是一个人决定的。找到真正推动的人、真正挡路的人、可以被争取的人。<br>
+    <strong>定策</strong> → 基于对每个人的理解，制定策略——对技术总监说数据，对老板说ROI，对采购说风险。<br>
+    <strong>推进</strong> → 每一步行动都指向一个具体的人。不是"推动项目"，是"帮张总准备好他需要的技术对比数据，让他能在采购会上说服李经理"。<br>
+    <strong>复盘</strong> → 每次互动后更新画像。这个人这次说了什么新信息？他的态度有没有变化？画像是一个活的文档。
+  </p>
+</div>
+
+<!-- ═══════ RELATIONSHIP NETWORK ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>人脉网络与资源库</h3>
+  <div class="grid-2">
+    <div class="info-card">
+      <h4 style="color:var(--accent)">🕸️ 人脉图谱</h4>
+      <p style="font-size:10px">
+        核心资产：<br>
+        • <strong>行业人脉</strong> — 谁认识谁，谁可以引荐谁<br>
+        • <strong>客户内部网络</strong> — 决策链上每个人的关系和立场<br>
+        • <strong>跨项目连接</strong> — 张总认识的王总可能成为下一个客户<br>
+        • <strong>校友/前同事/协会</strong> — 非商业关系中的连接点<br>
+        • <strong>AI 推荐：</strong>"您和张总都认识清华电机系的陈教授，这是可以用的连接点"
+      </p>
+    </div>
+    <div class="info-card">
+      <h4 style="color:var(--accent)">📚 资源库</h4>
+      <p style="font-size:10px">
+        可调用的弹药：<br>
+        • <strong>案例库</strong> — 按行业/规模/痛点分类的成功案例<br>
+        • <strong>技术文档</strong> — 竞品对比表、白皮书、认证文件<br>
+        • <strong>人脉引荐信</strong> — 老客户的推荐函、感谢信<br>
+        • <strong>社交货币</strong> — 行业报告、趋势分析、有价值的资讯<br>
+        • <strong>知识库连接</strong> — 与 SalesOS 三层知识库打通
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PRIVACY + ACCESS ═══════ -->
+<div class="section">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>隐私与权限设计</h3>
+  <div class="grid-3">
+    <div class="info-card" style="border-left:3px solid var(--danger)">
+      <h4 style="color:var(--danger)">🔒 个人私密</h4>
+      <p style="font-size:10px;color:var(--text-tertiary)">麦凯66核心数据<br>家庭信息、性格评估<br>信任度量表<br>私人话题记录<br><br><strong>仅创建者和直属上级可见</strong></p>
+    </div>
+    <div class="info-card" style="border-left:3px solid var(--warning)">
+      <h4 style="color:var(--warning)">🔓 团队共享</h4>
+      <p style="font-size:10px;color:var(--text-tertiary)">权力地图<br>决策网络<br>沟通策略<br>竞品情报<br><br><strong>同商机团队成员可见</strong></p>
+    </div>
+    <div class="info-card" style="border-left:3px solid var(--success)">
+      <h4 style="color:var(--success)">📊 管理者视图</h4>
+      <p style="font-size:10px;color:var(--text-tertiary)">人脉网络总览<br>跨项目关系图谱<br>团队人脉覆盖率<br>关键人互动健康度<br><br><strong>admin/manager 可见</strong></p>
+    </div>
+  </div>
+  <div class="privacy-note" style="margin-top:12px">
+    <strong>为什么隐私设计是产品的心脏：</strong>如果业务员担心自己辛苦积累的人脉信息被同事/老板不恰当地看到或使用，他就不会认真填。系统承诺隐私保护 → 业务员信任系统 → 数据质量提升 → AI 洞察更准 → 业务员更信任系统。这是人脉画像的增强回路。
+  </div>
+</div>
+
+<!-- ═══════ INTEGRATION WITH SALESOS ═══════ -->
+<div class="section" style="box-shadow:0 0 0 1px rgba(108,92,231,0.15)">
+  <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>人脉兵法 × SalesOS 产品融合</h3>
+  <div class="grid-2">
+    <div>
+      <p style="font-size:10px;color:var(--text-secondary);line-height:1.8">
+        <strong style="color:var(--text-primary)">收件箱侧栏（对话中）</strong><br>
+        → 快速显示当前对话者的关键画像摘要<br>
+        → 沟通策略提示（该做/忌做）<br>
+        → 上次互动中的重要私人信息<br>
+        → "张总女儿今年大一，可以问适应得怎么样"
+      </p>
+    </div>
+    <div>
+      <p style="font-size:10px;color:var(--text-secondary);line-height:1.8">
+        <strong style="color:var(--text-primary)">人脉画像页（独立视图）</strong><br>
+        → 完整的麦凯66 + AI 洞察<br>
+        → 权力地图可视化<br>
+        → 互动时间线<br>
+        → 竞争推进策略
+      </p>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:8px">
+    <div>
+      <p style="font-size:10px;color:var(--text-secondary);line-height:1.8">
+        <strong style="color:var(--text-primary)">管道看板</strong><br>
+        → 每个商机关联的权力地图<br>
+        → 关键人互动健康度指示灯<br>
+        → "李经理 14 天未互动 ⚠"
+      </p>
+    </div>
+    <div>
+      <p style="font-size:10px;color:var(--text-secondary);line-height:1.8">
+        <strong style="color:var(--text-primary)">AI 幕僚</strong><br>
+        → 从对话中自动提取个人信息更新画像<br>
+        → 建议互动时机和话题<br>
+        → 分析关系健康度趋势<br>
+        → "建议本周联系张总，他上周在行业会议上发言"
+      </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

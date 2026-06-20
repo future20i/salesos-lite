@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SalesOS Lite — 收件箱 + AI 辅助</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root: #fafafa; --bg-surface: #ffffff; --bg-subtle: #f5f5f5;
+    --bg-hover: rgba(0,0,0,0.03); --bg-active: rgba(0,0,0,0.05);
+    --text-primary: #171717; --text-secondary: #4d4d4d;
+    --text-tertiary: #808080; --text-quaternary: #a3a3a3;
+    --accent: #6c5ce7; --accent-hover: #5a4bd1; --accent-soft: rgba(108,92,231,0.06);
+    --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font: 'Geist', system-ui, -apple-system, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.16,1,0.3,1);
+    --nav-w: 60px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;display:flex;height:100vh;overflow:hidden}
+
+  /* ═══════ NAV ═══════ */
+  #nav{width:var(--nav-w);background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;box-shadow:1px 0 0 rgba(0,0,0,0.04);z-index:20}
+  .ni{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-tertiary);transition:all .15s var(--ease);position:relative;background:transparent}
+  .ni:hover{background:var(--bg-hover);color:var(--text-primary)}
+  .ni.active{background:var(--accent-soft);color:var(--accent)}
+  .ni svg{width:20px;height:20px}
+  .ni .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+  /* ═══════ MAIN ═══════ */
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .hidden{display:none!important}
+  #top{display:flex;align-items:center;padding:0 28px;height:56px;background:var(--bg-surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);gap:16px;flex-shrink:0}
+  #top h2{font-size:16px;font-weight:600;letter-spacing:-0.32px}
+  .s{flex:1}
+
+  /* ═══════ INBOX ═══════ */
+  #inbox-panel{display:flex;overflow:hidden;flex:1}
+  .inbox-list{width:340px;min-width:300px;background:var(--bg-surface);box-shadow:1px 0 0 rgba(0,0,0,0.04);display:flex;flex-direction:column;overflow:hidden}
+  .inbox-list-header{padding:16px 20px 12px;flex-shrink:0}
+  .inbox-list-header h3{font-size:13px;font-weight:600;margin-bottom:10px}
+  .inbox-search{width:100%;padding:8px 12px;border-radius:var(--r-md);border:none;background:var(--bg-subtle);font-size:12px;font-family:var(--font);outline:none;transition:all .15s var(--ease);box-shadow:0 0 0 0 transparent}
+  .inbox-search:focus{box-shadow:0 0 0 2px rgba(108,92,231,0.3);background:var(--bg-surface)}
+  .inbox-items{flex:1;overflow-y:auto;padding:0 12px 8px}
+  .inbox-item{padding:14px 12px;border-radius:var(--r-md);cursor:pointer;transition:all .1s var(--ease);margin-bottom:2px}
+  .inbox-item:hover{background:var(--bg-hover)}
+  .inbox-item.active{background:var(--accent-soft)}
+  .inbox-item .ii-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .inbox-item .ii-name{font-size:13px;font-weight:500}
+  .inbox-item .ii-channel{font-size:10px;color:var(--text-quaternary)}
+  .inbox-item .ii-time{font-size:10px;color:var(--text-quaternary);margin-left:auto}
+  .inbox-item .ii-preview{font-size:12px;color:var(--text-tertiary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .inbox-item .ii-tags{display:flex;gap:6px;margin-top:6px}
+  .ii-tag{font-size:9px;padding:1px 7px;border-radius:99px;font-weight:500}
+  .unread-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+  /* ═══════ CONVERSATION PANE ═══════ */
+  .conv-pane{flex:1;display:flex;flex-direction:column;background:var(--bg-root);overflow:hidden}
+  .conv-header{padding:12px 24px;background:var(--bg-surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .conv-header .ch-name{font-size:14px;font-weight:600}
+  .conv-header .ch-info{font-size:11px;color:var(--text-tertiary)}
+  .conv-header .ch-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+  /* Customer Profile Card (collapsible) */
+  .cust-card{background:var(--bg-surface);margin:12px 24px 0;border-radius:var(--r-lg);padding:14px 18px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);display:flex;align-items:center;gap:16px;flex-shrink:0;font-size:11px}
+  .cust-card .cust-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:var(--accent);flex-shrink:0}
+  .cust-card .cust-detail{flex:1;line-height:1.6}
+  .cust-card .cust-detail strong{color:var(--text-primary)}
+  .cust-card .cust-detail .dim{color:var(--text-tertiary)}
+  .cust-card .cust-stage{text-align:right}
+  .cust-card .cust-stage .stage-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:500}
+
+  .conv-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:62%;font-size:13px;line-height:1.65}
+  .msg.in{background:var(--bg-surface);border-radius:var(--r-lg) var(--r-lg) var(--r-lg) 4px;padding:12px 16px;align-self:flex-start;box-shadow:0 0 0 1px rgba(0,0,0,0.04)}
+  .msg.out{background:var(--accent);color:#fff;border-radius:var(--r-lg) var(--r-lg) 4px var(--r-lg);padding:12px 16px;align-self:flex-end}
+  .msg .msg-time{font-size:10px;opacity:.5;margin-top:6px;text-align:right}
+
+  /* AI System Messages */
+  .msg-ai{background:rgba(108,92,231,0.03);border:1px solid rgba(108,92,231,0.1);border-radius:var(--r-lg);padding:14px 18px;align-self:stretch;font-size:12px}
+  .msg-ai .ai-label{font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .msg-ai .ai-label svg{width:13px;height:13px}
+  .msg-ai .ai-body{color:var(--text-secondary);line-height:1.6}
+  .msg-ai .ai-actions{display:flex;gap:8px;margin-top:10px}
+  .ai-btn{padding:5px 12px;border-radius:var(--r-sm);font-size:11px;font-weight:500;font-family:var(--font);cursor:pointer;border:none;transition:all .1s var(--ease)}
+  .ai-btn.primary{background:var(--accent);color:#fff}
+  .ai-btn.primary:hover{background:var(--accent-hover)}
+  .ai-btn.secondary{background:var(--bg-subtle);color:var(--text-secondary)}
+  .ai-btn.secondary:hover{background:var(--bg-hover)}
+  .ai-btn.warn{background:rgba(239,68,68,0.06);color:var(--danger)}
+
+  /* AI Draft Preview */
+  .msg-draft{background:var(--bg-surface);border:1px dashed rgba(108,92,231,0.25);border-radius:var(--r-lg);padding:14px 18px;align-self:stretch;font-size:12px;line-height:1.7}
+  .msg-draft .draft-label{font-size:10px;font-weight:600;color:var(--warning);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .msg-draft .draft-body{color:var(--text-secondary);padding:10px 14px;background:var(--bg-subtle);border-radius:var(--r-md);font-style:italic}
+  .msg-draft .draft-context{font-size:10px;color:var(--text-quaternary);margin-top:8px;padding:4px 8px;background:rgba(108,92,231,0.03);border-radius:4px}
+  .msg-draft .draft-actions{display:flex;gap:8px;margin-top:10px}
+
+  /* Human Review Gate */
+  .msg-review{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:var(--r-lg);padding:14px 18px;align-self:stretch;font-size:12px}
+  .msg-review .review-label{font-size:10px;font-weight:600;color:var(--warning);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .msg-review .review-body{color:var(--text-secondary);line-height:1.6}
+
+  /* Quick Action Chip */
+  .quick-chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:4px 10px;border-radius:99px;cursor:pointer;transition:all .1s;font-family:var(--font);border:none}
+  .quick-chip.pipeline{background:var(--accent-soft);color:var(--accent)}
+  .quick-chip.pipeline:hover{background:var(--accent);color:#fff}
+  .quick-chip.voice{background:rgba(16,185,129,0.06);color:var(--success)}
+  .quick-chip.voice:hover{background:var(--success);color:#fff}
+
+  .conv-composer{padding:12px 24px;background:var(--bg-surface);box-shadow:0 -1px 0 rgba(0,0,0,0.04);flex-shrink:0}
+  .composer-top{display:flex;gap:8px;margin-bottom:8px}
+  .composer-input{display:flex;gap:10px}
+  .composer-input textarea{flex:1;padding:10px 14px;border-radius:var(--r-lg);border:none;background:var(--bg-subtle);font-size:13px;font-family:var(--font);resize:none;outline:none;min-height:42px;max-height:120px;line-height:1.5;transition:all .15s}
+  .composer-input textarea:focus{box-shadow:0 0 0 2px rgba(108,92,231,0.3);background:var(--bg-surface)}
+  .send-btn{width:42px;height:42px;border-radius:var(--r-lg);border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+  .send-btn:hover{background:var(--accent-hover)}
+  .send-btn:active{transform:scale(0.94)}
+
+  /* ═══════ PIPELINE ═══════ */
+  #pipeline-panel{flex:1;overflow-x:auto;overflow-y:hidden;padding:20px 24px}
+  .board{display:flex;gap:16px;height:100%;min-width:max-content;align-items:flex-start}
+  .col{width:300px;min-width:280px;background:var(--bg-subtle);border-radius:var(--r-lg);display:flex;flex-direction:column;max-height:100%;overflow:hidden}
+  .col-head{padding:16px 18px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .col-head .col-name{font-size:13px;font-weight:600}
+  .col-head .col-count{font-size:11px;color:var(--text-quaternary);margin-left:auto;background:var(--bg-surface);padding:2px 8px;border-radius:99px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)}
+  .col-body{padding:0 12px 12px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--bg-surface);border-radius:var(--r-md);padding:14px 16px;box-shadow:0 0 0 1px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.03);cursor:pointer;transition:all .15s var(--ease)}
+  .card:hover{box-shadow:0 0 0 1px rgba(108,92,231,0.15),0 2px 6px rgba(0,0,0,0.06);transform:translateY(-1px)}
+  .card .card-customer{font-size:12px;font-weight:500;margin-bottom:3px}
+  .card .card-company{font-size:11px;color:var(--text-quaternary);margin-bottom:10px}
+  .card .card-body{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px}
+  .card .card-source{font-size:10px;color:var(--text-quaternary);margin-bottom:10px;padding:3px 8px;background:var(--bg-subtle);border-radius:4px;display:inline-block}
+  .card .card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card .card-meta .tag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500}
+  .card .card-meta .age{font-size:10px;color:var(--text-quaternary);margin-left:auto}
+  .card .card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;box-shadow:0 -1px 0 rgba(0,0,0,0.04)}
+  .card .card-actions button{font-size:10px;padding:4px 10px;border-radius:var(--r-sm);border:none;font-family:var(--font);font-weight:500;cursor:pointer;transition:all .1s var(--ease);background:var(--bg-subtle);color:var(--text-secondary)}
+  .card .card-actions button:hover{background:var(--accent);color:#fff}
+  .col-bar{width:3px;height:16px;border-radius:2px;margin-right:4px}
+  .bar-purple{background:var(--accent)}.bar-blue{background:var(--info)}.bar-orange{background:var(--warning)}.bar-green{background:var(--success)}
+
+  @media(max-width:768px){.col{width:260px}.inbox-list{width:280px}}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <svg style="width:26px;height:26px;margin-bottom:18px" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="#6c5ce7"/><text x="13" y="17" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Geist">S</text></svg>
+  <div class="ni active" id="nav-inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><div class="dot"></div></div>
+  <div class="ni" id="nav-pipeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/></svg></div>
+  <div class="ni" id="nav-approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+  <div class="ni" id="nav-knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+  <div style="margin-top:auto;padding-top:12px"><div class="ni" id="nav-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div></div>
+</nav>
+
+<div id="main">
+  <div id="top"><h2>收件箱</h2><span style="font-size:12px;color:var(--text-quaternary)">5 个会话</span><div class="s"></div><button class="quick-chip voice" style="margin-right:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>语音速记</button></div>
+
+  <div id="inbox-panel" class="panel">
+    <!-- Inbox list -->
+    <div class="inbox-list">
+      <div class="inbox-list-header"><h3>全部消息</h3><input class="inbox-search" placeholder="搜索..."></div>
+      <div class="inbox-items">
+        <div class="inbox-item active">
+          <div class="ii-top"><div class="unread-dot"></div><span class="ii-name">张总</span><span class="ii-channel">WhatsApp</span><span class="ii-time">2分钟前</span></div>
+          <div class="ii-preview">更新报价含5年维保。交期压缩到30天？竞品低15%？</div>
+          <div class="ii-tags"><span class="ii-tag" style="background:rgba(239,68,68,0.06);color:#ef4444">hot</span><span class="ii-tag" style="background:var(--accent-soft);color:var(--accent)">台达</span></div>
+        </div>
+        <div class="inbox-item">
+          <div class="ii-top"><div class="unread-dot"></div><span class="ii-name">李总</span><span class="ii-channel">邮件</span><span class="ii-time">1小时前</span></div>
+          <div class="ii-preview">技术方案收到。Active Power说他们也5ms？</div>
+          <div class="ii-tags"><span class="ii-tag" style="background:rgba(245,158,11,0.06);color:#f59e0b">warm</span></div>
+        </div>
+        <div class="inbox-item">
+          <div class="ii-top"><span class="ii-name">王总</span><span class="ii-channel">WhatsApp</span><span class="ii-time">昨天</span></div>
+          <div class="ii-preview">安排现场考察，下周三带技术团队。</div>
+          <div class="ii-tags"><span class="ii-tag" style="background:rgba(59,130,246,0.06);color:#3b82f6">warm</span></div>
+        </div>
+        <div class="inbox-item">
+          <div class="ii-top"><span class="ii-name">陈总</span><span class="ii-channel">Facebook</span><span class="ii-time">2天前</span></div>
+          <div class="ii-preview">Saw your flywheel UPS. Send specs for 10kV model?</div>
+          <div class="ii-tags"><span class="ii-tag" style="background:rgba(245,158,11,0.06);color:#f59e0b">warm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ CONVERSATION (with AI features) ═══════ -->
+    <div class="conv-pane">
+      <div class="conv-header">
+        <span class="ch-name">张总</span><span class="ch-info">台达电子 · 技术总监 · WhatsApp</span>
+        <div class="ch-actions">
+          <span style="font-size:10px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:4px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/></svg>
+            台达AIDC飞轮项目
+          </span>
+        </div>
+      </div>
+
+      <!-- Customer Profile Card -->
+      <div class="cust-card">
+        <div class="cust-avatar">张</div>
+        <div class="cust-detail">
+          <strong>张总</strong> <span class="dim">· 技术总监 · 台达电子</span><br>
+          <span class="dim">上次成交：2025年 飞轮UPS试点项目 ¥180万</span>
+        </div>
+        <div class="cust-stage">
+          <span class="stage-badge" style="background:rgba(108,92,231,0.08);color:var(--accent)">报价/谈判</span><br>
+          <span style="font-size:10px;color:var(--text-quaternary);margin-top:4px;display:block">¥420万 · 80%</span>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="conv-msgs">
+        <!-- Client message -->
+        <div class="msg in">
+          上次发的飞轮UPS方案我们内部讨论过了。技术参数没问题，但需要更新一版报价，这次要含5年维保服务。另外交期能不能压缩到30天？我们项目时间比较紧。
+          <div class="msg-time">14:32</div>
+        </div>
+
+        <!-- AI Intent Detection -->
+        <div class="msg-ai">
+          <div class="ai-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>AI 分析</div>
+          <div class="ai-body">
+            检测到客户意向 <strong style="color:#ef4444">hot</strong> — 主动要报价<br>
+            需求提取：<strong>更新报价 + 5年维保 + 交期30天</strong><br>
+            关联商机：<strong>台达AIDC飞轮项目</strong>（当前阶段：报价/谈判）<br>
+            建议：创建跟进项「更新报价含5年维保」，关联到台达商机
+          </div>
+          <div class="ai-actions">
+            <button class="ai-btn primary">✓ 自动创建跟进项</button>
+            <button class="ai-btn secondary">忽略</button>
+          </div>
+        </div>
+
+        <!-- Rep response (manual) -->
+        <div class="msg out">
+          收到张总。我马上更新报价方案，5年维保没问题。交期需要和李博确认排产计划，稍后答复您。
+          <div class="msg-time">14:35</div>
+        </div>
+
+        <!-- System: follow-up created -->
+        <div class="msg-ai">
+          <div class="ai-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>已加入跟进管道</div>
+          <div class="ai-body">
+            跟进项「更新报价含5年维保」已创建，状态：<strong>待跟进</strong> · 分配给 <strong>@小王</strong><br>
+            <span style="color:var(--accent);cursor:pointer">→ 去管道查看</span>
+          </div>
+        </div>
+
+        <!-- Client follow-up -->
+        <div class="msg in">
+          好的。另外你们和Active Power比，主要优势在哪些方面？我们采购那边也在对比。
+          <div class="msg-time">14:40</div>
+        </div>
+
+        <!-- AI: competitor signal detected -->
+        <div class="msg-ai">
+          <div class="ai-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>竞品信号</div>
+          <div class="ai-body">
+            客户提及竞品 <strong>Active Power</strong><br>
+            已记录到台达商机的竞品追踪<br>
+            知识库中有飞轮 vs Active Power 技术对比文档，建议引用
+          </div>
+          <div class="ai-actions">
+            <button class="ai-btn primary">AI 起草对比回复</button>
+            <button class="ai-btn secondary">手动回复</button>
+          </div>
+        </div>
+
+        <!-- AI Draft (with review gate) -->
+        <div class="msg-draft">
+          <div class="draft-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>AI 起草 — 待审核</div>
+          <div class="draft-body">
+            张总您好，关于飞轮UPS与Active Power的对比，我们的核心优势在于：<br><br>
+            1. <strong>响应时间</strong>：我们实测≤3ms，Active Power标称5ms但在高负载下实际7-8ms<br>
+            2. <strong>寿命</strong>：飞轮转子设计寿命20年，免维护。Active Power需5年更换轴承<br>
+            3. <strong>国内服务</strong>：我们在深圳有备件库，24小时响应。进口品牌通常72小时以上<br><br>
+            我整理了一份详细的技术对比文档，方便的话可以发给您和采购同事参考。
+          </div>
+          <div class="draft-context">📎 引用了：6/15对话 · 飞轮vs超级电容对比表 · 竞品追踪记录</div>
+          <div class="draft-actions">
+            <button class="ai-btn primary">✓ 批准发送</button>
+            <button class="ai-btn secondary">✎ 编辑后发送</button>
+            <button class="ai-btn warn">↩ 驳回重写</button>
+          </div>
+        </div>
+
+        <!-- Human approves, message sent -->
+        <div class="msg-ai">
+          <div class="ai-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>已审核通过 · 消息已发送</div>
+          <div class="ai-body" style="color:var(--text-quaternary)">
+            小王审核通过并发送了 AI 起草的对比回复。<br>
+            跟进项「竞品对比回复」→ 已标记完成。
+          </div>
+        </div>
+      </div>
+
+      <!-- Composer -->
+      <div class="conv-composer">
+        <div class="composer-top">
+          <button class="quick-chip voice"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>语音</button>
+          <button class="quick-chip pipeline"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/></svg>加入管道</button>
+          <span style="margin-left:auto;font-size:10px;color:var(--text-quaternary)">AI 建议回复</span>
+        </div>
+        <div class="composer-input">
+          <textarea placeholder="输入回复或使用 AI 建议..." rows="1">感谢您的确认。关于交期，我已和李博确认排产计划——</textarea>
+          <button class="send-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline (hidden) -->
+  <div id="pipeline-panel" class="panel hidden">
+    <div class="board">
+      <div class="col"><div class="col-head"><div class="col-bar bar-blue"></div><span class="col-name">需求确认</span><span class="col-count">2</span></div><div class="col-body"><div class="card"><div class="card-customer">王总</div><div class="card-company">国电投 · 调频项目</div><div class="card-body">需要 10kV 飞轮UPS，关心响应时间和并网认证。下周现场考察。</div><div class="card-meta"><span class="tag" style="background:rgba(239,68,68,0.06);color:var(--danger)">P0</span><span class="age">2天</span></div></div><div class="card"><div class="card-customer">赵总</div><div class="card-company">中广核 · 备用电源</div><div class="card-body">核电站应急备用电源升级，需核安全级认证。</div><div class="card-meta"><span class="tag" style="background:rgba(245,158,11,0.06);color:var(--warning)">P1</span><span class="age">1天</span></div></div></div></div>
+      <div class="col"><div class="col-head"><div class="col-bar bar-purple"></div><span class="col-name">技术交流</span><span class="col-count">2</span></div><div class="col-body"><div class="card"><div class="card-customer">李总</div><div class="card-company">华能集团 · 储能配套</div><div class="card-body">飞轮+电池混合储能方案评审。关键：15秒切换窗口的容量论证。</div><div class="card-meta"><span class="tag" style="background:rgba(59,130,246,0.06);color:var(--info)">P1</span><span class="age">3天</span></div></div><div class="card"><div class="card-customer">陈总</div><div class="card-company">南方电网 · 数据中心</div><div class="card-body">数据中心 UPS 招标第二轮。竞品 Active Power 报价低12%。</div><div class="card-meta"><span class="tag" style="background:rgba(245,158,11,0.06);color:var(--warning)">P1</span><span class="tag" style="background:rgba(239,68,68,0.06);color:var(--danger)">竞品⚠</span><span class="age">5天</span></div></div></div></div>
+      <div class="col"><div class="col-head"><div class="col-bar bar-orange"></div><span class="col-name">报价 / 谈判</span><span class="col-count">1</span></div><div class="col-body"><div class="card"><div class="card-customer">张总</div><div class="card-company">台达电子 · AIDC飞轮项目</div><div class="card-body">更新报价含5年维保，交期30天。竞品价低15%，需要技术对比支撑。</div><div class="card-source">📎 来自 WhatsApp</div><div class="card-meta"><span class="tag" style="background:rgba(239,68,68,0.06);color:var(--danger)">P0</span><span class="tag" style="background:rgba(239,68,68,0.06);color:var(--danger)">竞品⚠</span><span class="age">5天</span></div><div class="card-actions"><button>AI 起草报价</button><button style="color:var(--danger)">催一下</button></div></div></div></div>
+      <div class="col"><div class="col-head"><div class="col-bar bar-green"></div><span class="col-name">合同</span><span class="col-count">1</span></div><div class="col-body"><div class="card"><div class="card-customer">刘总</div><div class="card-company">三峡集团 · 抽蓄配套</div><div class="card-body">合同条款已确认，法务审批中。预计两周内签章。</div><div class="card-meta"><span class="tag" style="background:rgba(16,185,129,0.06);color:var(--success)">P2</span><span class="age">1天</span></div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.ni').forEach(el => {
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+      this.classList.add('active');
+      const id = this.id;
+      document.getElementById('inbox-panel').classList.toggle('hidden', id !== 'nav-inbox');
+      document.getElementById('pipeline-panel').classList.toggle('hidden', id !== 'nav-pipeline');
+    });
+  });
+</script>
+</body>
+</html>

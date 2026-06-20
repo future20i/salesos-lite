@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>人脉兵法 — 资源匹配引擎</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root:#fafafa;--bg-surface:#fff;--bg-subtle:#f5f5f5;
+    --text-primary:#171717;--text-secondary:#4d4d4d;--text-tertiary:#808080;--text-quaternary:#a3a3a3;
+    --accent:#6c5ce7;--accent-hover:#5a4bd1;--accent-soft:rgba(108,92,231,0.06);
+    --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font:'Geist',system-ui,-apple-system,sans-serif;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:28px 36px;max-width:1000px;margin:0 auto;line-height:1.7}
+
+  h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+  .sub{font-size:12px;color:var(--text-tertiary);margin-bottom:24px}
+
+  /* Story flow */
+  .story{background:var(--bg-surface);border-radius:var(--r-xl);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:24px;margin-bottom:16px}
+  .story-step{display:flex;gap:14px;padding:10px 0;align-items:flex-start}
+  .story-step .ss-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+  .story-step .ss-content{flex:1;font-size:11px;line-height:1.7}
+  .story-step .ss-content .ss-label{font-weight:600;font-size:12px;color:var(--text-primary);margin-bottom:2px}
+  .story-divider{height:1px;background:rgba(0,0,0,0.04);margin:4px 0 4px 42px}
+
+  /* Engine visualization */
+  .engine{display:flex;gap:12px;align-items:stretch;margin:16px 0}
+  .engine-box{flex:1;background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:18px;text-align:center}
+  .engine-box .eb-icon{font-size:32px;margin-bottom:8px}
+  .engine-box .eb-title{font-size:12px;font-weight:600;margin-bottom:4px}
+  .engine-box .eb-desc{font-size:9px;color:var(--text-tertiary);line-height:1.5}
+  .engine-arrow{display:flex;align-items:center;font-size:22px;color:var(--accent);flex-shrink:0}
+
+  /* Alert card */
+  .alert-card{background:var(--bg-surface);border:1px solid rgba(108,92,231,0.15);border-radius:var(--r-lg);overflow:hidden;margin:16px 0}
+  .alert-card .ac-header{padding:14px 18px;background:var(--accent-soft);font-size:11px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px}
+  .alert-card .ac-body{padding:16px 18px;font-size:11px;line-height:1.8;color:var(--text-secondary)}
+  .alert-card .ac-body .match{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg-subtle);border-radius:var(--r-md);margin:8px 0}
+  .alert-card .ac-body .match-arrow{font-size:18px;color:var(--accent)}
+
+  .insight{background:linear-gradient(135deg,rgba(108,92,231,0.04),rgba(108,92,231,0.01));border:1px solid rgba(108,92,231,0.1);border-radius:var(--r-md);padding:14px 18px;font-size:10px;color:var(--text-secondary);line-height:1.8;margin:16px 0}
+
+  .privacy{background:rgba(239,68,68,0.02);border:1px solid rgba(239,68,68,0.1);border-radius:var(--r-md);padding:12px 16px;font-size:10px;color:var(--danger);line-height:1.6;margin:16px 0;display:flex;align-items:flex-start;gap:8px}
+  
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+</head>
+<body>
+
+<h1>资源匹配引擎：在需要对的时候，提醒你有能力帮这个人</h1>
+<p class="sub">系统不执行人情。系统只做一件事——把「他需要的」和「你拥有的」匹配起来。剩下的，是人做的事。</p>
+
+<!-- ═══════ THE STORY ═══════ -->
+<div class="story">
+  <div style="font-size:13px;font-weight:600;margin-bottom:16px">📖 张总妈妈的手术 —— 一个真实案例</div>
+
+  <div class="story-step">
+    <div class="ss-badge" style="background:var(--text-quaternary)">1</div>
+    <div class="ss-content">
+      <div class="ss-label">你记下了一条信息</div>
+      上次出差拜访，张总提到他妈妈心脏不好，最近在找三甲医院的心外科。你说"我帮你问问"。你在系统里记下了：<br>
+      <span style="color:var(--accent);font-size:10px">张总 · 家庭需求 · 妈妈心脏手术 · 找三甲心外科 · 时间紧迫</span>
+    </div>
+  </div>
+  <div class="story-divider"></div>
+  <div class="story-step">
+    <div class="ss-badge" style="background:var(--accent)">2</div>
+    <div class="ss-content">
+      <div class="ss-label">系统自动匹配</div>
+      系统扫描了你的资源网络：<br>
+      <span style="color:var(--accent);font-size:10px">王医生（高中同学·心外科·深圳三甲医院）</span> ← 匹配成功<br>
+      系统弹出提醒：<strong>"张总妈妈需要心外科手术。你的联系人王医生恰好是心外科的。要不要打个电话？"</strong>
+    </div>
+  </div>
+  <div class="story-divider"></div>
+  <div class="story-step">
+    <div class="ss-badge" style="background:var(--success)">3</div>
+    <div class="ss-content">
+      <div class="ss-label">你采取了行动</div>
+      你给王医生打了电话。王医生帮忙安排了床位和手术时间。<br>
+      你告诉张总安排好了。张总说"谢谢，真的谢谢"。<br>
+      你没有提项目。没有提采购。没有任何交换条件。
+    </div>
+  </div>
+  <div class="story-divider"></div>
+  <div class="story-step">
+    <div class="ss-badge" style="background:var(--warning)">4</div>
+    <div class="ss-content">
+      <div class="ss-label">下周采购会</div>
+      张总的项目进入采购评审。竞品在压价。新来的副总倾向于进口品牌。<br>
+      张总在会上说："我建议选飞轮方案。技术可靠，服务也好。我接触他们三年了——他们值得信任。"<br>
+      <br>
+      他没有说"因为他们帮我妈安排了手术"。他说的是"信任"。<br>
+      但他知道。你也知道。
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ THE ENGINE ═══════ -->
+<h2 style="font-size:16px;font-weight:600;margin:24px 0 12px">资源匹配引擎：三个输入 → 一个提醒</h2>
+
+<div class="engine">
+  <div class="engine-box">
+    <div class="eb-icon">🔒</div>
+    <div class="eb-title">客户需求库</div>
+    <div class="eb-desc">从对话和互动中提取<br>家庭需求、事业需求、个人困境<br>隐私保护，仅创建者可见</div>
+  </div>
+  <div class="engine-arrow">+</div>
+  <div class="engine-box">
+    <div class="eb-icon">🤝</div>
+    <div class="eb-title">你的资源网络</div>
+    <div class="eb-desc">你的人脉：同学、朋友、前同事<br>你的资源：行业、医疗、教育<br>隐私保护，仅自己可见</div>
+  </div>
+  <div class="engine-arrow">+</div>
+  <div class="engine-box">
+    <div class="eb-icon">📅</div>
+    <div class="eb-title">时机信号</div>
+    <div class="eb-desc">项目进入关键阶段<br>竞品在压价<br>决策窗口期</div>
+  </div>
+  <div class="engine-arrow">→</div>
+  <div class="engine-box" style="border:1px solid rgba(108,92,231,0.2)">
+    <div class="eb-icon">💡</div>
+    <div class="eb-title" style="color:var(--accent)">匹配提醒</div>
+    <div class="eb-desc">"张总需要心外科医生。<br>王医生可以做。<br>项目下周采购评审。<br>——现在是最好的时机。"</div>
+  </div>
+</div>
+
+<!-- ═══════ THE ALERT ═══════ -->
+<div class="alert-card">
+  <div class="ac-header">💡 资源匹配提醒</div>
+  <div class="ac-body">
+    <strong>张建国 · 台达技术总监</strong> 的<span style="color:var(--danger)">家庭需求</span>和你的<span style="color:var(--accent)">资源网络</span>发生了匹配：<br><br>
+    <div class="match">
+      <div style="flex:1;text-align:center">
+        <div style="font-weight:600;margin-bottom:2px">🔒 客户需要</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">妈妈心脏手术<br>三甲医院心外科<br>时间紧迫</div>
+      </div>
+      <div class="match-arrow">⟷</div>
+      <div style="flex:1;text-align:center">
+        <div style="font-weight:600;margin-bottom:2px">🤝 你可以用</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">王医生（高中同学）<br>心外科 · 深圳三甲<br>关系紧密</div>
+      </div>
+    </div>
+    <strong style="color:var(--accent)">时机信号：</strong>台达AIDC项目下周采购评审。竞品在压价。现在是建立深度信任的最佳窗口。<br><br>
+    <span style="color:var(--text-quaternary);font-size:10px">系统不会替你打电话。系统只是提醒你——你有能力帮这个人。</span>
+  </div>
+</div>
+
+<!-- ═══════ WHAT THE SYSTEM DOES vs DOESN'T ═══════ -->
+<div class="grid-2">
+  <div style="background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:18px">
+    <div style="font-size:12px;font-weight:600;color:var(--success);margin-bottom:8px">✅ 系统做的事</div>
+    <div style="font-size:10px;color:var(--text-secondary);line-height:2">
+      ✓ 记录客户需求（加密、私密）<br>
+      ✓ 维护你的资源网络<br>
+      ✓ 在匹配发生时提醒你<br>
+      ✓ 标注时机信号<br>
+      ✓ 追踪互动效果<br>
+      ✓ 不替你做任何事
+    </div>
+  </div>
+  <div style="background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:18px">
+    <div style="font-size:12px;font-weight:600;color:var(--danger);margin-bottom:8px">✗ 系统不做的事</div>
+    <div style="font-size:10px;color:var(--text-secondary);line-height:2">
+      ✗ 不自动联系你的资源<br>
+      ✗ 不替你做任何承诺<br>
+      ✗ 不把人情和项目挂钩<br>
+      ✗ 不记录交换条件<br>
+      ✗ 不让任何人看到这些匹配<br>
+      ✗ 不把关系变成交易
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ETHICS ═══════ -->
+<div class="privacy">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+  <div>
+    <strong>⚠️ 伦理边界：</strong>系统只匹配「他需要的」和「你拥有的」。系统不追踪「你帮了他之后他有没有回报」。<br>
+    帮人是帮人。项目是项目。两件事在系统里是分开的。<br>
+    如果系统把人情和项目挂钩，它就变成了一个腐败工具。绝不做这个。
+  </div>
+</div>
+
+<div class="insight">
+  <strong style="color:var(--accent)">🔑 为什么「隐形资产驱动项目」是不可复制的护城河：</strong><br><br>
+  竞品可以复制你的报价。可以复制你的产品参数。可以复制你的销售流程。<br>
+  竞品无法复制：<br>
+  • 你和张总三年建立的信任<br>
+  • 你知道他妈妈需要手术<br>
+  • 你有一个心外科的医生朋友<br>
+  • 你在最需要的时候帮了他<br>
+  • 他记住了<br><br>
+  <strong>这条护城河的宽度，等于你经营的关系的深度。</strong>
+</div>
+
+</body>
+</html>

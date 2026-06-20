@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SalesOS Lite — SPA 管道面板设计</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:system-ui,-apple-system,sans-serif;padding:20px;max-width:1300px;margin:0 auto}
+  h2{font-size:18px;font-weight:600;margin-bottom:4px}
+  .sub{font-size:10px;color:#71717a;margin-bottom:16px}
+  
+  .spa-frame{border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;background:#0f0f10}
+  .spa-topbar{display:flex;align-items:center;gap:12px;padding:8px 14px;background:rgba(19,20,22,0.8);border-bottom:1px solid rgba(255,255,255,0.06);font-size:10px}
+  .spa-topbar .brand{font-weight:600;color:#6c5ce7;font-size:11px}
+  .spa-topbar .tabs{display:flex;gap:2px;margin-left:24px}
+  .spa-topbar .tab{padding:5px 12px;border-radius:6px;cursor:pointer;font-size:10px;color:#71717a;transition:all .15s}
+  .spa-topbar .tab.active{background:rgba(108,92,231,0.12);color:#6c5ce7;font-weight:500}
+  .spa-topbar .tab:hover:not(.active){color:#a1a1aa;background:rgba(255,255,255,0.03)}
+  .spa-topbar .user{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:9px;color:#a1a1aa}
+  .spa-topbar .role-badge{padding:2px 7px;border-radius:8px;font-size:8px;font-weight:500}
+  
+  .spa-body{display:flex;height:calc(100vh - 140px)}
+  
+  /* ── Left sidebar ── */
+  .spa-sidebar{width:200px;min-width:200px;border-right:1px solid rgba(255,255,255,0.06);padding:12px 0;overflow-y:auto;font-size:10px}
+  .sidebar-section{padding:6px 14px;color:#71717a;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-top:8px}
+  .sidebar-item{padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;color:#a1a1aa;transition:all .1s}
+  .sidebar-item:hover{background:rgba(255,255,255,0.03);color:#ededef}
+  .sidebar-item.active{background:rgba(108,92,231,0.08);color:#6c5ce7;border-right:2px solid #6c5ce7}
+  .sidebar-item .count{margin-left:auto;font-size:9px;color:#52525b;background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:8px}
+  .sidebar-item .count.warn{color:#f97316;background:rgba(249,115,22,0.08)}
+  .sidebar-item .count.bad{color:#ef4444;background:rgba(239,68,68,0.08)}
+  
+  /* ── Main content ── */
+  .spa-main{flex:1;overflow-y:auto;padding:16px}
+  
+  /* ── Pipeline header ── */
+  .pipe-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .pipe-title{font-size:14px;font-weight:600}
+  .pipe-stats{display:flex;gap:8px;font-size:9px;color:#71717a}
+  .pipe-stat{padding:3px 8px;background:rgba(255,255,255,0.03);border-radius:4px}
+  .pipe-stat strong{color:#ededef}
+  .pipe-actions{margin-left:auto;display:flex;gap:6px}
+  .btn{padding:5px 12px;border-radius:6px;font-size:10px;font-family:inherit;cursor:pointer;border:none;transition:all .15s}
+  .btn-primary{background:#6c5ce7;color:#fff}
+  .btn-primary:hover{background:#5a4bd1}
+  .btn-ghost{background:rgba(255,255,255,0.04);color:#a1a1aa}
+  .btn-ghost:hover{background:rgba(255,255,255,0.06);color:#ededef}
+  
+  /* ── Pipeline table ── */
+  .pipe-table{width:100%;border-collapse:collapse;font-size:10px}
+  .pipe-table th{text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.08);color:#71717a;font-weight:500;font-size:9px}
+  .pipe-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:#a1a1aa;line-height:1.4}
+  .pipe-table tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
+  .pipe-table tr.selected td{background:rgba(108,92,231,0.06)}
+  .stage-pill{padding:2px 7px;border-radius:8px;font-size:8px;font-weight:500}
+  .prob-bar{width:48px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;display:inline-block;margin-right:4px}
+  .prob-bar-fill{height:100%;border-radius:2px}
+  
+  /* ── Opportunity detail (bottom panel) ── */
+  .opp-detail{margin-top:12px;border:1px solid rgba(108,92,231,0.12);border-radius:8px;background:rgba(19,20,22,0.4);overflow:hidden}
+  .opp-detail-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(108,92,231,0.04);border-bottom:1px solid rgba(255,255,255,0.04);font-size:10px}
+  .opp-detail-close{margin-left:auto;cursor:pointer;color:#71717a;font-size:14px}
+  .opp-detail-body{padding:12px 14px}
+  
+  /* ── 4-column followup grid ── */
+  .followup-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+  .followup-col{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px}
+  .followup-col-header{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:600;margin-bottom:6px;padding-bottom:6px;border-bottom:2px solid}
+  .followup-card{background:rgba(19,20,22,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:8px;margin-bottom:6px;font-size:9px;cursor:pointer;transition:all .1s}
+  .followup-card:hover{border-color:rgba(108,92,231,0.2)}
+  .followup-card-meta{display:flex;gap:6px;margin-top:4px;font-size:8px;color:#71717a}
+  .followup-card-action{display:flex;gap:4px;margin-top:6px}
+  .action-btn{padding:2px 7px;border-radius:4px;font-size:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:#71717a;transition:all .1s}
+  .action-btn:hover{background:rgba(108,92,231,0.1);color:#6c5ce7;border-color:rgba(108,92,231,0.2)}
+  .action-btn.primary{background:rgba(108,92,231,0.12);color:#6c5ce7;border-color:rgba(108,92,231,0.2)}
+  
+  /* ── From-message card (收件箱联动) ── */
+  .from-msg{border-left:2px solid #22c55e;padding-left:8px;margin-top:2px;font-size:8px;color:#71717a;line-height:1.4}
+  
+  .design-note{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.12);border-radius:6px;padding:8px 12px;margin-top:12px;font-size:9px;color:#f59e0b;line-height:1.6}
+</style>
+</head>
+<body>
+
+<h2>SalesOS Lite SPA — 管道面板布局设计</h2>
+<p class="sub">扩展现有 index.html，新增「管道」标签页。三栏布局：侧栏(阶段筛选) + 主区域(商机表格+展开跟进项)</p>
+
+<div class="spa-frame">
+  <!-- Top bar -->
+  <div class="spa-topbar">
+    <span class="brand">SalesOS Lite</span>
+    <div class="tabs">
+      <div class="tab">📨 收件箱</div>
+      <div class="tab active">📊 管道</div>
+      <div class="tab">📝 审批</div>
+    </div>
+    <div class="user">
+      <span class="role-badge" style="background:rgba(108,92,231,0.12);color:#6c5ce7">ADMIN</span>
+      <span>admin</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="spa-body">
+    <!-- Left sidebar -->
+    <div class="spa-sidebar">
+      <div class="sidebar-section">阶段筛选</div>
+      <div class="sidebar-item active">全部 <span class="count">8</span></div>
+      <div class="sidebar-item">🔍 线索验证 <span class="count">1</span></div>
+      <div class="sidebar-item">📋 需求确认 <span class="count">2</span></div>
+      <div class="sidebar-item">🔧 技术交流 <span class="count">2</span></div>
+      <div class="sidebar-item">💰 报价/谈判 <span class="count">2</span></div>
+      <div class="sidebar-item">📝 合同 <span class="count">1</span></div>
+      <div class="sidebar-section">快捷视图</div>
+      <div class="sidebar-item">⚡ 需要跟进 <span class="count warn">3</span></div>
+      <div class="sidebar-item">⏳ 等客户回复 <span class="count bad">2</span></div>
+      <div class="sidebar-item">👤 我的商机 <span class="count">5</span></div>
+    </div>
+
+    <!-- Main -->
+    <div class="spa-main">
+      <div class="pipe-header">
+        <div class="pipe-title">跟进管道</div>
+        <div class="pipe-stats">
+          <span class="pipe-stat">活跃 <strong>6</strong></span>
+          <span class="pipe-stat">本月预测 <strong style="color:#6c5ce7">¥320万</strong></span>
+          <span class="pipe-stat">达成率 <strong>71%</strong></span>
+        </div>
+        <div class="pipe-actions">
+          <button class="btn btn-ghost">📥 导出</button>
+          <button class="btn btn-primary">+ 新建商机</button>
+        </div>
+      </div>
+
+      <!-- Pipeline table -->
+      <table class="pipe-table">
+        <thead>
+          <tr><th>客户</th><th>商机</th><th>阶段</th><th>金额</th><th>把握</th><th>预计成交</th><th>沉默</th><th>跟进项</th></tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td style="font-weight:500;color:#ededef">张总 · 台达电子</td>
+            <td style="color:#ededef">台达AIDC飞轮项目</td>
+            <td><span class="stage-pill" style="background:rgba(108,92,231,0.1);color:#6c5ce7">报价/谈判</span></td>
+            <td style="font-weight:500">¥420万</td>
+            <td><span class="prob-bar"><span class="prob-bar-fill" style="width:80%;background:#22c55e"></span></span>80%</td>
+            <td>7/15</td>
+            <td style="color:#f59e0b">5天</td>
+            <td><span style="background:rgba(108,92,231,0.08);color:#6c5ce7;padding:1px 6px;border-radius:8px">3项</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500;color:#ededef">李总 · 华能集团</td>
+            <td>华能储能配套</td>
+            <td><span class="stage-pill" style="background:rgba(249,115,22,0.1);color:#f97316">技术交流</span></td>
+            <td>¥230万</td>
+            <td><span class="prob-bar"><span class="prob-bar-fill" style="width:60%;background:#f59e0b"></span></span>60%</td>
+            <td>8/1</td>
+            <td style="color:#22c55e">1天</td>
+            <td><span style="background:rgba(108,92,231,0.08);color:#6c5ce7;padding:1px 6px;border-radius:8px">2项</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500;color:#ededef">王总 · 国电投</td>
+            <td>国电投调频项目</td>
+            <td><span class="stage-pill" style="background:rgba(59,130,246,0.1);color:#3b82f6">需求确认</span></td>
+            <td>¥580万</td>
+            <td><span class="prob-bar"><span class="prob-bar-fill" style="width:40%;background:#f59e0b"></span></span>40%</td>
+            <td>8/30</td>
+            <td style="color:#ef4444">14天⚠</td>
+            <td><span style="background:rgba(108,92,231,0.08);color:#6c5ce7;padding:1px 6px;border-radius:8px">1项</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Expanded: Opportunity detail -->
+      <div class="opp-detail">
+        <div class="opp-detail-header">
+          <span style="font-weight:600">台达AIDC飞轮项目</span>
+          <span class="stage-pill" style="background:rgba(108,92,231,0.1);color:#6c5ce7">报价/谈判</span>
+          <span style="color:#71717a;font-size:9px">¥420万 · 80% · 预计7/15</span>
+          <span style="color:#71717a;font-size:9px">竞品: 某进口品牌</span>
+          <span style="margin-left:auto;font-size:9px;color:#71717a">决策: 张总(技术) / 李经理(采购)</span>
+          <span class="opp-detail-close">✕</span>
+        </div>
+        <div class="opp-detail-body">
+          <!-- 4 columns -->
+          <div class="followup-grid">
+            <!-- Col 1: 待跟进 -->
+            <div class="followup-col">
+              <div class="followup-col-header" style="border-bottom-color:#71717a;color:#71717a">📥 待跟进 <span style="font-weight:400;margin-left:auto">1</span></div>
+              <div class="followup-card">
+                <div style="font-weight:500">更新报价含5年维保</div>
+                <div class="from-msg">📎 来自 WhatsApp — 张总: "更新报价含维保"</div>
+                <div class="followup-card-meta">
+                  <span style="color:#f59e0b">P1</span><span>@小王</span><span>2天前</span><span>✈️出差</span>
+                </div>
+                <div class="followup-card-action">
+                  <button class="action-btn primary">🤖 AI起草</button>
+                  <button class="action-btn">→ 开始处理</button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Col 2: 处理中 -->
+            <div class="followup-col">
+              <div class="followup-col-header" style="border-bottom-color:#6c5ce7;color:#6c5ce7">🔧 处理中 <span style="font-weight:400;margin-left:auto">1</span></div>
+              <div class="followup-card">
+                <div style="font-weight:500">技术参数确认</div>
+                <div class="followup-card-meta">
+                  <span style="color:#f59e0b">P1</span><span>@李博</span><span>🟢 AI处理中</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 3: 待审核 -->
+            <div class="followup-col">
+              <div class="followup-col-header" style="border-bottom-color:#f97316;color:#f97316">👀 待审核 <span style="font-weight:400;margin-left:auto">1</span></div>
+              <div class="followup-card">
+                <div style="font-weight:500">合同草案</div>
+                <div style="background:rgba(108,92,231,0.06);padding:4px 6px;border-radius:4px;margin-top:4px;font-size:8px;color:#6c5ce7">
+                  🤖 AI草稿: "张总您好，根据我们此前沟通的技术方案..."
+                </div>
+                <div class="followup-card-meta">
+                  <span>@小王</span><span>等主管审核</span>
+                </div>
+                <div class="followup-card-action">
+                  <button class="action-btn primary">✓ 批准发送</button>
+                  <button class="action-btn">↩ 驳回</button>
+                  <button class="action-btn">✏ 编辑</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 4: 已完成 -->
+            <div class="followup-col">
+              <div class="followup-col-header" style="border-bottom-color:#22c55e;color:#22c55e">✅ 已完成 <span style="font-weight:400;margin-left:auto">2</span></div>
+              <div class="followup-card" style="opacity:0.6">
+                <div style="font-weight:500">初次报价</div>
+                <div class="followup-card-meta">
+                  <span>6/15 已发送</span><span>客户已回复</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="design-note" style="margin-top:16px">
+  <strong>📐 关键设计决策：</strong><br>
+  • <strong>三标签切换</strong>（收件箱/管道/审批）— 共享同一登录态、SSE连接、API封装<br>
+  • <strong>左栏 = 阶段筛选</strong>— 点击快速过滤，带计数徽章。有沉默/超时的高亮<br>
+  • <strong>主区域 = 商机表格</strong>— 管理者一眼看到全貌（客户/金额/把握/沉默天数）<br>
+  • <strong>点击行展开 = 业务员视图</strong>— 四列跟进项。收件箱消息源标注在卡片里<br>
+  • <strong>每个跟进项卡片</strong>— 含来源标注、AI起草按钮、审核操作<br>
+  • <strong>管道统计</strong>— 顶部活跃商机数 + 预测金额 + 达成率
+</div>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>人脉兵法 — 情报循环引擎</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root:#fafafa;--bg-surface:#fff;--bg-subtle:#f5f5f5;
+    --text-primary:#171717;--text-secondary:#4d4d4d;--text-tertiary:#808080;--text-quaternary:#a3a3a3;
+    --accent:#6c5ce7;--accent-hover:#5a4bd1;--accent-soft:rgba(108,92,231,0.06);
+    --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+    --font:'Geist',system-ui,-apple-system,sans-serif;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:24px 36px;max-width:1000px;margin:0 auto;line-height:1.7}
+
+  h1{font-size:22px;font-weight:700;letter-spacing:-0.4px;margin-bottom:4px}
+  h1 span{color:var(--accent)}
+  .sub{font-size:11px;color:var(--text-tertiary);margin-bottom:20px}
+
+  /* ═══════ THE CYCLE ═══════ */
+  .cycle{position:relative;width:100%;max-width:700px;margin:24px auto;aspect-ratio:1}
+  .cycle-node{position:absolute;width:44%;height:44%;border-radius:var(--r-xl);padding:18px 16px;display:flex;flex-direction:column;justify-content:center}
+  .cycle-node .cn-num{font-size:28px;font-weight:800;opacity:.08;position:absolute;top:8px;right:14px}
+  .cycle-node .cn-icon{font-size:22px;margin-bottom:4px}
+  .cycle-node .cn-title{font-size:12px;font-weight:700;margin-bottom:3px}
+  .cycle-node .cn-desc{font-size:9px;color:var(--text-tertiary);line-height:1.5}
+  
+  .cn1{top:0;left:28%;background:var(--bg-surface);box-shadow:0 0 0 1px rgba(108,92,231,0.15)}
+  .cn1 .cn-title{color:var(--accent)}
+  .cn2{top:0;right:0;background:var(--bg-surface);box-shadow:0 0 0 1px rgba(16,185,129,0.15)}
+  .cn2 .cn-title{color:var(--success)}
+  .cn3{bottom:0;right:0;background:var(--bg-surface);box-shadow:0 0 0 1px rgba(245,158,11,0.15)}
+  .cn3 .cn-title{color:var(--warning)}
+  .cn4{bottom:0;left:28%;background:var(--bg-surface);box-shadow:0 0 0 1px rgba(108,92,231,0.15)}
+  .cn4 .cn-title{color:var(--accent)}
+
+  /* Center: AI Engine */
+  .cycle-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32%;aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,rgba(108,92,231,0.08),rgba(108,92,231,0.03));border:2px solid rgba(108,92,231,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .cycle-center .cc-icon{font-size:28px}
+  .cycle-center .cc-title{font-size:10px;font-weight:700;color:var(--accent);margin-top:4px}
+  .cycle-center .cc-desc{font-size:8px;color:var(--text-quaternary);margin-top:2px}
+
+  /* Arrows */
+  .cycle svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  /* ═══════ TABLE ═══════ */
+  .section{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:18px;margin:16px 0}
+  .section h3{font-size:13px;font-weight:600;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:10px}
+  th{text-align:left;padding:6px 10px;border-bottom:1px solid rgba(0,0,0,0.06);font-size:9px;font-weight:500;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.3px}
+  td{padding:7px 10px;border-bottom:1px solid rgba(0,0,0,0.03);color:var(--text-secondary);line-height:1.5}
+
+  /* Example dialog */
+  .dialog{background:var(--bg-subtle);border-radius:var(--r-lg);padding:16px 20px;margin:12px 0;font-size:11px;line-height:1.8}
+  .dialog .d-msg{padding:4px 0}
+  .dialog .d-msg.in{color:var(--text-secondary)}
+  .dialog .d-msg.in::before{content:'张总：';font-weight:600;color:var(--text-primary)}
+  .dialog .d-msg.out{color:var(--accent)}
+  .dialog .d-msg.out::before{content:'你：';font-weight:600;color:var(--accent)}
+  .dialog .d-note{font-size:9px;color:var(--text-quaternary);font-style:italic;padding:2px 0 2px 20px}
+  .dialog .d-note::before{content:'💡 ';font-style:normal}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .insight{background:linear-gradient(135deg,rgba(108,92,231,0.04),rgba(108,92,231,0.01));border:1px solid rgba(108,92,231,0.1);border-radius:var(--r-md);padding:14px 18px;font-size:10px;color:var(--text-secondary);line-height:1.8;margin:16px 0}
+</style>
+</head>
+<body>
+
+<h1><span>情报循环</span> —— 每一次沟通都是情报行动</h1>
+<p class="sub">话术设计 → 情报提取 → 去伪存真 → AI连续分析 → 画像进化 → 下一轮话术</p>
+
+<!-- ═══════ THE CYCLE ═══════ -->
+<div class="cycle">
+  <svg viewBox="0 0 700 700">
+    <defs>
+      <marker id="ac" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6c5ce7"/></marker>
+    </defs>
+    <!-- Arrows between nodes -->
+    <path d="M 490 130 Q 560 180 540 280" stroke="#6c5ce7" stroke-width="2" fill="none" marker-end="url(#ac)" stroke-dasharray="6 3"/>
+    <path d="M 500 520 Q 560 480 540 400" stroke="#6c5ce7" stroke-width="2" fill="none" marker-end="url(#ac)" stroke-dasharray="6 3"/>
+    <path d="M 180 480 Q 140 420 180 360" stroke="#6c5ce7" stroke-width="2" fill="none" marker-end="url(#ac)" stroke-dasharray="6 3"/>
+    <path d="M 160 180 Q 140 250 190 300" stroke="#6c5ce7" stroke-width="2" fill="none" marker-end="url(#ac)" stroke-dasharray="6 3"/>
+  </svg>
+
+  <div class="cycle-node cn1">
+    <div class="cn-num">1</div>
+    <div class="cn-icon">🎯</div>
+    <div class="cn-title">话术引导</div>
+    <div class="cn-desc">AI 分析画像后提示：<br>"这次可以问他对新来副总的看法<br>——开放式问题，不直接问"</div>
+  </div>
+  <div class="cycle-node cn2">
+    <div class="cn-num">2</div>
+    <div class="cn-icon">🔍</div>
+    <div class="cn-title">情报提取</div>
+    <div class="cn-desc">从对话中提取显性+隐性信息<br>"他说'上面还在评估'<br>= 新副总在拖延，不是他"</div>
+  </div>
+  <div class="cycle-node cn3">
+    <div class="cn-num">3</div>
+    <div class="cn-icon">⚗️</div>
+    <div class="cn-title">去伪存真</div>
+    <div class="cn-desc">交叉验证 + 矛盾检测<br>"张总说'预算没问题'<br>但李经理上次说预算紧张<br>→ 标记待验证"</div>
+  </div>
+  <div class="cycle-node cn4">
+    <div class="cn-num">4</div>
+    <div class="cn-icon">📊</div>
+    <div class="cn-title">画像进化</div>
+    <div class="cn-desc">更新认知 + 调整策略<br>"张总的态度从 neutral→champion<br>驱动力：他需要这个项目升VP"</div>
+  </div>
+
+  <div class="cycle-center">
+    <div class="cc-icon">🧠</div>
+    <div class="cc-title">AI 分析引擎</div>
+    <div class="cc-desc">模式识别<br>矛盾检测<br>置信度评估<br>策略建议</div>
+  </div>
+</div>
+
+<!-- ═══════ SCRIPT DESIGN ═══════ -->
+<div class="section">
+  <h3>话术设计：AI 如何帮你问出真信息</h3>
+  
+  <div class="dialog">
+    <div style="font-weight:600;font-size:11px;color:var(--accent);margin-bottom:8px">❌ 直接问（得不到真信息）</div>
+    <div class="d-msg out">张总，你们采购那边现在是什么态度？</div>
+    <div class="d-msg in">还行吧，都在走流程。</div>
+    <div class="d-note">"还行" = 什么都没说。你浪费了一次情报机会。</div>
+  </div>
+
+  <div class="dialog" style="margin-top:12px">
+    <div style="font-weight:600;font-size:11px;color:var(--success);margin-bottom:8px">✅ AI 建议的间接引导（得到真信息）</div>
+    <div class="d-msg out">上次您提到的技术对比文档，采购那边有没有什么反馈？<br>比如他们关心哪些指标？我可以在下次方案里侧重说明。</div>
+    <div style="font-size:9px;color:var(--text-quaternary);padding:2px 0 2px 20px">💡 用"帮他们"的框架提问。人被需要的时候会说实话。</div>
+    <div class="d-msg in">采购那边主要是李经理对交期比较敏感。另外新来的王副总之前用惯了进口品牌，对国产方案有点偏见。不过技术上我是认可的，这个你放心。</div>
+    <div style="font-size:9px;color:var(--text-quaternary);padding:2px 0 2px 20px">💡 一次提问拿到三条关键情报：①李经理关心交期 ②新副总倾向进口 ③张总在技术上站我们这边</div>
+  </div>
+</div>
+
+<!-- ═══════ VERIFICATION TABLE ═══════ -->
+<div class="section">
+  <h3>去伪存真：AI 的连续验证机制</h3>
+  <table>
+    <tr><th>信号</th><th>来源</th><th>时间</th><th>置信度</th><th>验证方式</th></tr>
+    <tr>
+      <td>"预算没问题"</td>
+      <td>张总 · 6/15</td>
+      <td>6/15</td>
+      <td style="color:var(--warning)">⚠ 中</td>
+      <td>李经理提到预算紧张 → <strong style="color:var(--danger)">矛盾，降置信度</strong></td>
+    </tr>
+    <tr>
+      <td>"新副总倾向进口品牌"</td>
+      <td>张总 · 6/20</td>
+      <td style="color:var(--success)">6/20</td>
+      <td style="color:var(--success)">✓ 高</td>
+      <td>展会上王总的助理也提过 → <strong style="color:var(--success)">交叉验证通过</strong></td>
+    </tr>
+    <tr>
+      <td>"内部评审两周内有结果"</td>
+      <td>张总 · 6/18</td>
+      <td>6/18</td>
+      <td style="color:var(--warning)">⚠ 中</td>
+      <td>两周过去了没动静 → <strong style="color:var(--warning)">降置信度，建议试探</strong></td>
+    </tr>
+    <tr>
+      <td>"竞品给了15%折扣"</td>
+      <td>张总 · 6/14</td>
+      <td>6/14</td>
+      <td style="color:var(--text-quaternary)">? 未知</td>
+      <td>无其他来源验证 → <strong>标记待验证</strong></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════ AI MODEL ═══════ -->
+<div class="section">
+  <h3>AI 分析引擎：画像的连续进化</h3>
+  
+  <div class="grid-2">
+    <div style="background:var(--bg-subtle);border-radius:var(--r-md);padding:14px">
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px;color:var(--accent)">每次沟通后 AI 做这些</div>
+      <div style="font-size:10px;color:var(--text-secondary);line-height:2">
+        • 提取新的显性信息<br>
+        • 推断隐性信息（说A但暗示B）<br>
+        • 与历史画像做交叉验证<br>
+        • 标记矛盾点，降低置信度<br>
+        • 标记确认点，提高置信度<br>
+        • 更新画像版本（画像是有版本的，不是覆盖）<br>
+        • 生成下一次沟通的话术建议
+      </div>
+    </div>
+    <div style="background:var(--bg-subtle);border-radius:var(--r-md);padding:14px">
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px;color:var(--accent)">AI 不做这些</div>
+      <div style="font-size:10px;color:var(--text-secondary);line-height:2">
+        • 不编造自己没有看到的信息<br>
+        • 不对低置信度的推断做行动建议<br>
+        • 不替你做沟通决策<br>
+        • 不把推断当作事实记录<br>
+        • 推断和事实永远分开标注
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;background:var(--bg-subtle);border-radius:var(--r-md);padding:14px">
+    <div style="font-size:11px;font-weight:600;margin-bottom:8px;color:var(--accent)">画像版本演进（张总 · 三个月的变化）</div>
+    <div style="font-size:10px;color:var(--text-secondary);line-height:2">
+      <strong>v1（3月）：</strong>技术总监，理性决策，关心可靠性 <span style="color:var(--text-quaternary)">—— 基础画像</span><br>
+      <strong>v2（4月）：</strong>女儿清华，高尔夫，HiFi音响 <span style="color:var(--text-quaternary)">—— 个人层建立</span><br>
+      <strong>v3（5月）：</strong>怕背责（确认度：高），想升VP（确认度：高） <span style="color:var(--text-quaternary)">—— 驱动力层建立</span><br>
+      <strong>v4（6月）：</strong>在内部推动 vs 新副总倾向于竞品。竞品给了15%折扣（待验证）。妈妈需要手术。 <span style="color:var(--text-quaternary)">—— 情境感知 + 资源匹配触发</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FINAL ═══════ -->
+<div class="insight">
+  <strong style="color:var(--accent)">🔑 这个 AI 模型的核心价值：</strong><br><br>
+  它不是为了回复消息。<br>
+  它是为了——<br><br>
+  • 把每一次对话变成一次情报行动<br>
+  • 在散落的碎片信息中发现模式<br>
+  • 告诉你哪些是你以为知道但其实不确定的事<br>
+  • 告诉你哪些信号互相矛盾，需要去验证<br>
+  • 告诉你在下一次沟通中应该试探什么<br>
+  • 让画像不是静态度档案，而是<strong>活的、持续进化的理解</strong><br><br>
+  <strong>这个 AI 的真正名字不是"助手"，是"情报幕僚"。</strong>
+</div>
+
+</body>
+</html>
