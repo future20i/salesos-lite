@@ -17,6 +17,7 @@ class ActionType(str, enum.Enum):
     SEND_TEMPLATE = "send_template"
     SEND_AI_REPLY = "send_ai_reply"
     ASSIGN_TO = "assign_to"
+    SEND_WEBHOOK = "send_webhook"
 
 
 class FollowupRule(Base):

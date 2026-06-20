@@ -10,6 +10,7 @@ from src.models.subscription import Subscription, SubscriptionStatus, Plan
 from src.models.email_connection import EmailConnection, EmailProvider
 from src.models.notification_pref import NotificationPref
 from src.models.followup_rule import FollowupRule, FollowupLog, TriggerType, ActionType
+from src.models.quotation import Quotation
 
 __all__ = [
     "Base",
@@ -23,4 +24,5 @@ __all__ = [
     "EmailConnection", "EmailProvider",
     "NotificationPref",
     "FollowupRule", "FollowupLog", "TriggerType", "ActionType",
+    "Quotation",
 ]

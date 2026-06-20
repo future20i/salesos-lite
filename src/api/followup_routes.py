@@ -12,6 +12,7 @@ from src.database import get_db, AsyncSessionLocal
 from src.models.user import User
 from src.models.lead import Lead, LeadStatus, Intent
 from src.models.message import Message, MessageDirection
+from src.models.lead import Channel
 from src.models.followup_rule import (
     FollowupRule,
     FollowupLog,
@@ -20,6 +21,7 @@ from src.models.followup_rule import (
 )
 from src.models.canned_response import CannedResponse, ResponseCategory
 from src.auth import get_current_user
+from httpx import AsyncClient
 
 router = APIRouter(prefix="/api/followup", tags=["followup"])
 
@@ -273,7 +275,14 @@ async def evaluate_rules_for_tenant(
     rules = result.scalars().all()
 
     now = datetime.now(timezone.utc)
+    
+    # Rate limit: skip if tenant hit daily cap
+    todays_count = await _count_todays_actions(db, tenant_id)
+    if todays_count >= DAILY_LIMIT_PER_TENANT:
+        return []
+    
     created_logs: list[FollowupLog] = []
+    remaining = DAILY_LIMIT_PER_TENANT - todays_count
 
     for rule in rules:
         try:
@@ -317,6 +326,9 @@ async def evaluate_rules_for_tenant(
             )
             db.add(log)
             created_logs.append(log)
+            remaining -= 1
+            if remaining <= 0:
+                break
 
     if created_logs:
         await db.commit()
@@ -407,6 +419,8 @@ async def _execute_action(
     db: AsyncSession, lead: Lead, rule: FollowupRule, now: datetime
 ) -> str:
     """Execute the action of a rule against a lead and return a result string."""
+    from src.services.messaging import send_whatsapp_message, send_email_message
+    
     if rule.action_type == ActionType.SEND_TEMPLATE:
         # Find a canned response matching the action_value (category)
         try:
@@ -414,6 +428,7 @@ async def _execute_action(
         except ValueError:
             category = None
 
+        template_text = rule.action_value  # fallback: use value as raw text
         if category:
             tmpl_result = await db.execute(
                 select(CannedResponse)
@@ -425,20 +440,68 @@ async def _execute_action(
             )
             template = tmpl_result.scalar_one_or_none()
             if template:
-                return f"Would send template '{template.title}' to lead {lead.id}"
-            else:
-                return f"No template found for category '{rule.action_value}'"
+                template_text = template.content
+
+        # Send via the lead's channel
+        if lead.channel == Channel.WHATSAPP:
+            msg_id = await send_whatsapp_message(db, lead, template_text)
+            return f"WhatsApp sent (id={msg_id})" if msg_id else "WhatsApp send failed (not configured)"
+        elif lead.channel == Channel.EMAIL:
+            msg_id = await send_email_message(db, lead, template_text, subject="Follow-up")
+            return f"Email sent (id={msg_id})" if msg_id else "Email send failed (no connection)"
         else:
-            # Try by template ID directly
-            return f"Would send template '{rule.action_value}' to lead {lead.id}"
+            # Web channel — record as outbound message
+            msg = Message(
+                tenant_id=lead.tenant_id, lead_id=lead.id,
+                content=template_text, direction=MessageDirection.OUTBOUND,
+                sender="auto", channel=lead.channel,
+            )
+            db.add(msg)
+            lead.last_activity_at = now
+            return f"Template sent via {lead.channel.value}"
 
     elif rule.action_type == ActionType.SEND_AI_REPLY:
-        return f"Would generate AI reply for lead {lead.id} using prompt '{rule.action_value}'"
+        # Generate AI reply using LLM
+        ai_text = await _generate_ai_reply(db, lead, rule.action_value)
+        if lead.channel == Channel.WHATSAPP:
+            msg_id = await send_whatsapp_message(db, lead, ai_text)
+            return f"AI reply sent via WhatsApp (id={msg_id})" if msg_id else "AI WhatsApp send failed"
+        elif lead.channel == Channel.EMAIL:
+            msg_id = await send_email_message(db, lead, ai_text, subject="Re: Your inquiry")
+            return f"AI reply sent via Email (id={msg_id})" if msg_id else "AI Email send failed"
+        else:
+            msg = Message(
+                tenant_id=lead.tenant_id, lead_id=lead.id,
+                content=ai_text, direction=MessageDirection.OUTBOUND,
+                sender="auto", channel=lead.channel,
+            )
+            db.add(msg)
+            lead.last_activity_at = now
+            return f"AI reply sent via {lead.channel.value}"
 
     elif rule.action_type == ActionType.ASSIGN_TO:
         # action_value is a user_id
-        lead.assigned_to = uuid.UUID(rule.action_value) if rule.action_value else None
+        lead.assigned_to = UUID(rule.action_value) if rule.action_value else None
         return f"Assigned lead {lead.id} to user {rule.action_value}"
+
+    elif rule.action_type == ActionType.SEND_WEBHOOK:
+        try:
+            async with AsyncClient(timeout=15.0) as client:
+                resp = await client.post(
+                    rule.action_value,
+                    json={
+                        "event": "followup_triggered",
+                        "lead_id": str(lead.id),
+                        "lead_name": lead.customer_name,
+                        "rule_id": str(rule.id),
+                        "rule_name": rule.name,
+                        "tenant_id": str(lead.tenant_id),
+                        "timestamp": now.isoformat(),
+                    },
+                )
+            return f"Webhook POST → {rule.action_value} (status={resp.status_code})"
+        except Exception as exc:
+            return f"Webhook failed: {exc}"
 
     return f"Unknown action type: {rule.action_type}"
 
@@ -455,6 +518,60 @@ def _parse_hours(value: str) -> int | None:
         return int(value)
     except ValueError:
         return None
+
+
+async def _generate_ai_reply(
+    db: AsyncSession, lead: Lead, prompt_hint: str
+) -> str:
+    """Generate an AI reply for a lead based on recent conversation context."""
+    # Fetch recent messages for context
+    recent_result = await db.execute(
+        select(Message)
+        .where(Message.lead_id == lead.id)
+        .order_by(Message.created_at.desc())
+        .limit(10)
+    )
+    recent_msgs = list(recent_result.scalars().all())
+    recent_msgs.reverse()
+    
+    context_lines = []
+    for m in recent_msgs:
+        prefix = "Customer" if m.direction == MessageDirection.INBOUND else "Agent"
+        context_lines.append(f"{prefix}: {m.content[:500]}")
+    
+    context = "\n".join(context_lines) if context_lines else f"Customer: {lead.customer_name}\n(no messages yet)"
+    
+    try:
+        from src.llm_client import suggest_reply
+        return await suggest_reply(context)
+    except Exception:
+        return (
+            f"Hi {lead.customer_name}, just checking in — "
+            "is there anything I can help with regarding your inquiry? "
+            "Feel free to reach out anytime!"
+        )
+
+
+# ── Rate limiting ───────────────────────────────────────────────────
+
+DAILY_LIMIT_PER_TENANT = 20
+
+
+async def _count_todays_actions(
+    db: AsyncSession, tenant_id: uuid.UUID
+) -> int:
+    """Count followup actions executed today for a tenant."""
+    from sqlalchemy import func as sa_func
+    today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    result = await db.execute(
+        select(sa_func.count(FollowupLog.id)).where(
+            FollowupLog.tenant_id == tenant_id,
+            FollowupLog.created_at >= today_start,
+        )
+    )
+    return result.scalar() or 0
 
 
 # ── Seed defaults ──────────────────────────────────────────────────

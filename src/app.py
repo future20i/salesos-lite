@@ -35,6 +35,7 @@ from src.api.approval_routes import router as approval_router
 from src.api.email_routes import router as email_router
 from src.api.notification_routes import router as notification_router
 from src.api.followup_routes import router as followup_router, followup_evaluation_loop, seed_default_rules
+from src.api.quotation_routes import router as quotation_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -149,6 +150,7 @@ app.include_router(approval_router)
 app.include_router(email_router)
 app.include_router(notification_router)
 app.include_router(followup_router)
+app.include_router(quotation_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")

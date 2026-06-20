@@ -72,3 +72,6 @@ class Lead(Base):
     messages: Mapped[list["Message"]] = relationship(
         back_populates="lead", order_by="Message.created_at"
     )
+    quotations: Mapped[list["Quotation"]] = relationship(
+        back_populates="lead", order_by="Quotation.created_at"
+    )

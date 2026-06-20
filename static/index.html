@@ -1033,6 +1033,7 @@ async function selectLead(id) {
   renderChatHeader();
   renderMessages();
   renderCustomerPanel();
+  loadQuotations();
   renderLeadList();
   $('chat-header-right').classList.remove('hidden');
   $('#reply-area').classList.remove('hidden');
@@ -1309,7 +1310,14 @@ function renderCustomerPanel() {
   html += '<span class="pill-warn">'+esc(statusLabel)+'</span>';
   html += '<div class="panel-field" style="margin-top:8px;"><div class="panel-fld-lbl">负责人</div><div class="panel-fld-val">'+esc(l.assignee_name||_user.username||'—')+'</div></div>';
   html += '</div><div class="panel-divider"></div>';
-  html += '<button class="btn-panel">生成报价单</button>';
+
+  // Quotation section
+  html += '<div id="quotation-section">';
+  html += '<button class="btn-panel" onclick="extractQuotation()" id="btn-extract-quote" style="margin-bottom:8px;">🔍 AI 提取报价</button>';
+  html += '<div id="quotation-list" style="margin-top:4px;"></div>';
+  html += '</div>';
+
+  html += '<div class="panel-divider"></div>';
   html += '<button class="btn-panel-ghost">添加跟进</button>';
   $('customer-panel').innerHTML = html;
 }
@@ -1604,6 +1612,60 @@ async function toggleNotifPref(key, enabled) {
     });
     _notificationPrefs = await r.json();
   } catch(e) { /* revert UI on error */ }
+}
+
+// ═══════════════════════════════════════════
+// Quotation Extraction
+// ═══════════════════════════════════════════
+async function extractQuotation() {
+  var btn = $('btn-extract-quote');
+  var orig = btn.textContent;
+  btn.textContent = '⏳ 提取中...';
+  btn.disabled = true;
+  try {
+    var r = await api('/api/leads/' + _activeLead.id + '/extract-quotation', { method: 'POST' });
+    var d = await r.json();
+    if (d.status === 'ok' && d.quotation) {
+      loadQuotations();
+    } else {
+      alert('报价提取失败: ' + (d.error || '未知错误'));
+    }
+  } catch(e) {
+    alert('提取失败: ' + e.message);
+  }
+  btn.textContent = orig;
+  btn.disabled = false;
+}
+
+async function loadQuotations() {
+  if (!_activeLead) return;
+  try {
+    var r = await api('/api/leads/' + _activeLead.id + '/quotations');
+    var quotes = await r.json();
+    renderQuotations(quotes);
+  } catch(e) { console.error('Quotations load error', e); }
+}
+
+function renderQuotations(quotes) {
+  var el = $('quotation-list');
+  if (!quotes || !quotes.length) {
+    el.innerHTML = '';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < quotes.length; i++) {
+    var q = quotes[i];
+    html += '<div style="background:var(--bg-hover);border-radius:var(--radius-sm);padding:10px;margin-bottom:6px;">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">'+esc(q.product_name)+'</div>';
+    if (q.quantity) html += '<div style="font-size:11px;color:var(--text-secondary);">数量: '+q.quantity+(q.unit||'')+'</div>';
+    if (q.unit_price) html += '<div style="font-size:11px;color:var(--text-secondary);">单价: '+q.currency+' '+q.unit_price+'</div>';
+    if (q.total) html += '<div style="font-size:12px;font-weight:600;color:var(--accent);">总额: '+q.currency+' '+q.total.toLocaleString()+'</div>';
+    if (q.incoterm) html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">'+esc(q.incoterm)+(q.port?' '+esc(q.port):'')+'</div>';
+    if (q.payment_terms) html += '<div style="font-size:10px;color:var(--text-tertiary);">'+esc(q.payment_terms)+'</div>';
+    if (q.confidence) html += '<div style="font-size:9px;color:var(--text-quaternary);margin-top:4px;">置信度: '+(q.confidence*100).toFixed(0)+'%</div>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 </script>

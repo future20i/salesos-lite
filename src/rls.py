@@ -21,6 +21,7 @@ BUSINESS_TABLES = [
     "users", "leads", "messages", "ai_jobs",
     "approvals", "canned_responses", "subscriptions",
     "email_connections", "notification_prefs", "followup_rules", "followup_logs",
+    "quotations",
 ]
 
 
