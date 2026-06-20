@@ -30,9 +30,12 @@
 
 ## Typography
 
-**Primary:** Geist (Google Fonts CDN)  
+**Primary:** Geist (self-host or Google Fonts CDN)  
 **Mono:** Geist Mono  
 **Features:** `font-feature-settings: 'liga' 1` 全局启用
+
+> ⚠️ Google Fonts CDN 在国内被墙。国内部署必须自托管 Geist 字体文件。
+> 开发阶段可用 CDN，生产环境切换自托管。
 
 | Level | Size | Weight | Tracking | Usage |
 |-------|------|--------|----------|-------|
@@ -105,13 +108,19 @@ Each interactive element MUST cover:
 ## Layout
 
 ```
-Nav (52px) | Sidebar (280px) | Chat (flex:1) | Customer Panel (210px, collapsible)
+Icon Nav (60px) | Inbox List (320px) | Chat (flex:1) | AI Context Sidebar (300px, collapsible)
 ```
 
-- **Nav:** icon-only, brand gradient logo, active state with left accent bar
-- **Sidebar:** search + filter pills + conversation list with channel icons
-- **Chat:** message bubbles + AI suggestion cards + reply box with AI button
-- **Customer Panel:** info → properties → actions → activity timeline
+**Pipeline view (独立标签页):**
+```
+Icon Nav (60px) | Pipeline Board (4 columns, horizontal scroll)
+```
+
+- **Nav:** 60px icon-only sidebar, brand logo at top, active = accent-soft background
+- **Inbox List:** search + conversation list with channel indicators and intent tags
+- **Chat:** message bubbles + composer with AI draft / voice / pipeline quick actions
+- **AI Context:** opportunity card, decision chain, last interaction, related docs, competitor, alerts
+- **Pipeline:** 4 columns (需求确认/技术交流/报价谈判/合同), cards with hover lift + accent border
 
 ## Channel Icons
 

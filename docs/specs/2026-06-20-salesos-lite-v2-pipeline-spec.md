@@ -274,7 +274,7 @@ POST   /api/ai/extract-followup         # 从消息提取跟进需求
 - **AI 限流：** 复用 ai_pipeline.py TIER_LIMITS（starter 5/min, growth 20/min, pro 60/min）
 - **Phase 1 无自动发出：** 所有 AI 起草消息人审后发出。分级审核延至 Phase 2
 - **增量扩展现有 SPA：** 不新建 HTML 文件。管道面板集成到 index.html
-- **字体：** system-ui，不用 Google Fonts
+- **字体：** Geist（开发用 CDN，生产自托管）。见 DESIGN.md
 - **部署验证：** 每次写入后 curl 检查 `***` 计数 = 0
 - **Token 变量命名：** 不用 `TOKEN`/`token`，用 `_tk`
 - **静态文件路径：** `/admin/` 前缀（如适用）

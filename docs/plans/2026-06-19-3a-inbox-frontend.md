@@ -1,4 +1,7 @@
-# SalesOS Lite 3A 级收件箱前端 — 实现计划
+# SalesOS Lite 收件箱前端 3A 实现计划
+
+> ⚠️ **已完成并废弃（2026-06-20）。** SPA 设计已升级为 AI 环境模式。
+> 新设计见 `../specs/2026-06-20-spa-ai-environment-design.md`。
 
 > **For Hermes:** 纯前端项目，无 TDD。使用 curl + browser snapshot 验证。CSS 设计系统和布局由主 Agent 执行，JS 交互逻辑可委托子 Agent。
 

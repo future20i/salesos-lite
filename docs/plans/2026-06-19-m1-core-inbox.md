@@ -1,5 +1,7 @@
 # M1 核心收件箱 — 实现计划
 
+> ⚠️ **已完成并废弃（2026-06-20）。** 新实现计划见 `2026-06-20-pipeline-implementation.md`。
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** 构建基于 PostgreSQL 的 SaaS 统一收件箱核心——单租户可收发 Web/邮件渠道消息，看线索列表。
