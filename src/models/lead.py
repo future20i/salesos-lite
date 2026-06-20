@@ -79,5 +79,5 @@ class Lead(Base):
         back_populates="lead", order_by="Quotation.created_at"
     )
     opportunity: Mapped["Opportunity | None"] = relationship(
-        back_populates="lead", foreign_keys=[opportunity_id]
+        "Opportunity", foreign_keys=[opportunity_id], overlaps="lead"
     )

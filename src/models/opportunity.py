@@ -58,7 +58,7 @@ class Opportunity(Base):
     )
 
     tenant: Mapped["Tenant"] = relationship(back_populates="opportunities")
-    lead: Mapped["Lead | None"] = relationship(back_populates="opportunity")
+    lead: Mapped["Lead | None"] = relationship(foreign_keys=[lead_id])
     followups: Mapped[list["FollowupItem"]] = relationship(
         back_populates="opportunity", order_by="FollowupItem.created_at"
     )
