@@ -10,6 +10,7 @@ import enum
 class MessageDirection(str, enum.Enum):
     INBOUND = "inbound"
     OUTBOUND = "outbound"
+    SYSTEM = "system"
 
 
 class Message(Base):
@@ -32,6 +33,9 @@ class Message(Base):
     channel: Mapped[str] = mapped_column(String(32), nullable=False)
     channel_message_id: Mapped[str | None] = mapped_column(
         String(256), nullable=True
+    )
+    followup_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("followup_items.id"), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

@@ -22,3 +22,4 @@ class Tenant(Base):
 
     users: Mapped[list["User"]] = relationship(back_populates="tenant")
     leads: Mapped[list["Lead"]] = relationship(back_populates="tenant")
+    opportunities: Mapped[list["Opportunity"]] = relationship(back_populates="tenant")

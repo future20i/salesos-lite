@@ -11,6 +11,9 @@ from src.models.email_connection import EmailConnection, EmailProvider
 from src.models.notification_pref import NotificationPref
 from src.models.followup_rule import FollowupRule, FollowupLog, TriggerType, ActionType
 from src.models.quotation import Quotation
+from src.models.opportunity import Opportunity, OpportunityStage
+from src.models.followup import FollowupItem, FollowupStatus, FollowupEvent, ReviewLevel
+from src.models.knowledge import KnowledgeEntry
 
 __all__ = [
     "Base",
@@ -25,4 +28,7 @@ __all__ = [
     "NotificationPref",
     "FollowupRule", "FollowupLog", "TriggerType", "ActionType",
     "Quotation",
+    "Opportunity", "OpportunityStage",
+    "FollowupItem", "FollowupStatus", "FollowupEvent", "ReviewLevel",
+    "KnowledgeEntry",
 ]

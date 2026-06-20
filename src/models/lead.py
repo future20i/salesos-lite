@@ -58,6 +58,9 @@ class Lead(Base):
     competitor: Mapped[str | None] = mapped_column(String(256), nullable=True)
     lead_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
     unread: Mapped[bool] = mapped_column(Boolean, default=True)
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("opportunities.id"), nullable=True, index=True
+    )
     last_activity_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -74,4 +77,7 @@ class Lead(Base):
     )
     quotations: Mapped[list["Quotation"]] = relationship(
         back_populates="lead", order_by="Quotation.created_at"
+    )
+    opportunity: Mapped["Opportunity | None"] = relationship(
+        back_populates="lead", foreign_keys=[opportunity_id]
     )
