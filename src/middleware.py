@@ -11,7 +11,7 @@ async def tenant_context_middleware(request: Request, call_next):
         "/api/inbox/incoming", "/", "/favicon.ico",
         "/api/onboarding/state", "/api/onboarding/advance",
         "/api/billing/status",
-        "/widget.js",
+        "/widget.js", "/pipeline.js",
         "/api/whatsapp/webhook",
         "/api/email/connect", "/api/email/callback",
     ]

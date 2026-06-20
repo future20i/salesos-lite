@@ -15,23 +15,34 @@ from datetime import datetime, timezone
 logger = logging.getLogger(__name__)
 
 
+def _safe_llm_json(response: str) -> dict | None:
+    """Extract JSON from LLM response, returning None on failure."""
+    if not response or response.startswith("(AI"):
+        return None
+    try:
+        text = response.strip()
+        if text.startswith("```"):
+            lines = text.split("\n")
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            text = "\n".join(lines)
+            if text.strip().startswith("json"):
+                text = text[text.index("json") + 4:].strip()
+        return json.loads(text)
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # B1 — 战前简报 (Pre-Battle Briefing)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 async def generate_briefing(person_data: dict, recent_interactions: list[dict] | None = None) -> dict:
-    """Generate a 30-second pre-battle briefing for a contact.
-
-    Args:
-        person_data: decrypted person profile dict (layers 1-4)
-        recent_interactions: last 5 interaction summaries
-
-    Returns:
-        {who, cares_about, last_interaction, personal_touch_points, suggested_opener, risk_zones}
-    """
+    """Generate a 30-second pre-battle briefing for a contact."""
     from src.llm_client import llm_complete
 
-    # Build context
     context_parts = [f"联系人: {person_data.get('full_name', '未知')}"]
     if person_data.get('title'):
         context_parts.append(f"职位: {person_data['title']}")
@@ -42,7 +53,6 @@ async def generate_briefing(person_data: dict, recent_interactions: list[dict] |
     if person_data.get('personality_tags'):
         context_parts.append(f"性格标签: {json.dumps(person_data['personality_tags'], ensure_ascii=False)}")
 
-    # Interests
     interests = person_data.get('interests', [])
     if interests:
         interest_str = ", ".join(
@@ -51,7 +61,6 @@ async def generate_briefing(person_data: dict, recent_interactions: list[dict] |
         )
         context_parts.append(f"兴趣爱好: {interest_str}")
 
-    # Personal details
     if person_data.get('spouse_name'):
         context_parts.append(f"配偶: {person_data['spouse_name']}")
     children = person_data.get('children_info', [])
@@ -62,13 +71,11 @@ async def generate_briefing(person_data: dict, recent_interactions: list[dict] |
         )
         context_parts.append(f"子女: {kids}")
 
-    # Trust foundation (layer 3 — only for briefing requester)
     if person_data.get('trust_foundation'):
         context_parts.append(f"信任基础: {person_data['trust_foundation']}")
     if person_data.get('org_situation'):
         context_parts.append(f"组织处境: {person_data['org_situation']}")
 
-    # Recent interactions
     if recent_interactions:
         interaction_lines = []
         for ix in recent_interactions[:5]:
@@ -98,27 +105,21 @@ async def generate_briefing(person_data: dict, recent_interactions: list[dict] |
 
     try:
         response = await llm_complete(prompt)
-        # Extract JSON from response
-        response = response.strip()
-        if response.startswith("```"):
-            response = response.split("\n", 1)[1]
-            if response.endswith("```"):
-                response = response[:-3]
-            response = response.strip()
-            if response.startswith("json"):
-                response = response[4:].strip()
-        return json.loads(response)
-    except Exception as e:
+        result = _safe_llm_json(response)
+        if result:
+            return result
+    except Exception:
         logger.exception("B1 briefing generation failed")
-        return {
-            "who": f"{person_data.get('full_name', '未知')}，{person_data.get('title', '未知职位')}",
-            "cares_about": [],
-            "last_interaction": "无记录",
-            "personal_touch_points": [],
-            "suggested_opener": f"{person_data.get('full_name','')}你好，最近怎么样？",
-            "risk_zones": [],
-            "relationship_score": 5,
-        }
+
+    return {
+        "who": f"{person_data.get('full_name', '未知')}，{person_data.get('title', '未知职位')}",
+        "cares_about": [],
+        "last_interaction": "无记录",
+        "personal_touch_points": [],
+        "suggested_opener": f"{person_data.get('full_name','')}你好，最近怎么样？",
+        "risk_zones": [],
+        "relationship_score": 5,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -130,18 +131,13 @@ async def generate_strategy_card(
     opportunity_context: str = "",
     message_context: str = "",
 ) -> dict:
-    """Generate a strategy card for composing a message.
-
-    Returns:
-        {say, avoid, hooks, tone, reference_points}
-    """
+    """Generate a strategy card for composing a message."""
     from src.llm_client import llm_complete
 
     parts = [f"联系人: {person_data.get('full_name', '未知')}"]
     if person_data.get('title'):
         parts.append(f"职位: {person_data['title']}")
 
-    # Layer 3-4 intel
     if person_data.get('core_fear'):
         parts.append(f"核心恐惧: {person_data['core_fear']}")
     if person_data.get('core_ambition'):
@@ -149,7 +145,6 @@ async def generate_strategy_card(
     if person_data.get('org_situation'):
         parts.append(f"组织处境: {person_data['org_situation']}")
 
-    # Leverage points
     leverage = person_data.get('leverage_points', [])
     if leverage:
         lev_str = "\n".join(
@@ -158,7 +153,6 @@ async def generate_strategy_card(
         )
         parts.append(f"可用的影响力杠杆:\n{lev_str}")
 
-    # Relationship depth
     if person_data.get('relationship_depth'):
         parts.append(f"关系深度: {person_data['relationship_depth']}/10")
 
@@ -186,24 +180,19 @@ async def generate_strategy_card(
 
     try:
         response = await llm_complete(prompt)
-        response = response.strip()
-        if response.startswith("```"):
-            response = response.split("\n", 1)[1]
-            if response.endswith("```"):
-                response = response[:-3]
-            response = response.strip()
-            if response.startswith("json"):
-                response = response[4:].strip()
-        return json.loads(response)
-    except Exception as e:
+        result = _safe_llm_json(response)
+        if result:
+            return result
+    except Exception:
         logger.exception("B2 strategy card failed")
-        return {
-            "say": ["保持专业", "关注对方需求", "提供价值"],
-            "avoid": ["不要催促", "不要贬低竞品"],
-            "hooks": ["询问最近项目进展"],
-            "tone": "专业友好",
-            "reference_points": [],
-        }
+
+    return {
+        "say": ["保持专业", "关注对方需求", "提供价值"],
+        "avoid": ["不要催促", "不要贬低竞品"],
+        "hooks": ["询问最近项目进展"],
+        "tone": "专业友好",
+        "reference_points": [],
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,15 +204,9 @@ async def auto_retrospect(
     person_data: dict,
     interaction_type: str = "message",
 ) -> dict:
-    """Extract new personal information from a message and suggest profile updates.
-
-    Returns:
-        {extracted_facts: [{field, value, confidence}], suggested_tags: [...],
-         new_interests: [...], relationship_delta: int, follow_up_date: str|None}
-    """
+    """Extract new personal information from a message and suggest profile updates."""
     from src.llm_client import llm_complete
 
-    # Build person summary without layer 3-4 (those are sensitive)
     person_summary_parts = []
     for field in ['full_name', 'title', 'birthday', 'hometown', 'education',
                    'spouse_name', 'spouse_occupation']:
@@ -263,31 +246,23 @@ async def auto_retrospect(
 
     try:
         response = await llm_complete(prompt)
-        response = response.strip()
-        if response.startswith("```"):
-            response = response.split("\n", 1)[1]
-            if response.endswith("```"):
-                response = response[:-3]
-            response = response.strip()
-            if response.startswith("json"):
-                response = response[4:].strip()
-        return json.loads(response)
-    except Exception as e:
+        result = _safe_llm_json(response)
+        if result:
+            return result
+    except Exception:
         logger.exception("B3 auto retrospect failed")
-        return {
-            "extracted_facts": [],
-            "suggested_tags": [],
-            "relationship_delta": 0,
-            "follow_up_date": None,
-            "summary": "",
-        }
+
+    return {
+        "extracted_facts": [],
+        "suggested_tags": [],
+        "relationship_delta": 0,
+        "follow_up_date": None,
+        "summary": "",
+    }
 
 
 async def apply_retrospect_updates(person_profile_id: uuid.UUID, tenant_id: uuid.UUID, retrospect: dict) -> int:
-    """Apply extracted facts from auto retrospect to the person profile.
-
-    Returns number of fields updated.
-    """
+    """Apply extracted facts from auto retrospect to the person profile."""
     from src.database import AsyncSessionLocal
     from src.models.person_profile import PersonProfile
     from sqlalchemy import select
@@ -296,7 +271,6 @@ async def apply_retrospect_updates(person_profile_id: uuid.UUID, tenant_id: uuid
     if not facts:
         return 0
 
-    # Only apply high-confidence facts
     high_conf = [f for f in facts if f.get("confidence", 0) >= 0.8]
     if not high_conf:
         return 0
@@ -320,13 +294,11 @@ async def apply_retrospect_updates(person_profile_id: uuid.UUID, tenant_id: uuid
                 if not hasattr(profile, field):
                     continue
                 current = getattr(profile, field)
-                # Don't overwrite existing data unless new data is richer
                 if current is None or (isinstance(current, str) and len(str(value)) > len(current)):
                     setattr(profile, field, value)
                     updates += 1
 
             if updates:
-                # Update relationship depth if delta is significant
                 delta = retrospect.get("relationship_delta", 0)
                 if delta != 0 and profile.relationship_depth is not None:
                     profile.relationship_depth = max(1, min(10, profile.relationship_depth + delta))
@@ -346,10 +318,7 @@ async def apply_retrospect_updates(person_profile_id: uuid.UUID, tenant_id: uuid
 # ═══════════════════════════════════════════════════════════════════════════════
 
 async def recommend_relationship_actions(tenant_id: uuid.UUID) -> list[dict]:
-    """Scan all person profiles and recommend relationship-deepening actions.
-
-    Returns list of {person_id, person_name, action_type, action_detail, reason, urgency: 1-5}
-    """
+    """Scan all person profiles and recommend relationship-deepening actions."""
     from src.database import AsyncSessionLocal
     from src.models.person_profile import PersonProfile
     from sqlalchemy import select
@@ -368,7 +337,6 @@ async def recommend_relationship_actions(tenant_id: uuid.UUID) -> list[dict]:
             actions = _check_person_triggers(profile)
             recommendations.extend(actions)
 
-        # Sort by urgency descending
         recommendations.sort(key=lambda x: x.get("urgency", 0), reverse=True)
     except Exception:
         logger.exception("B4 resource matching failed")
@@ -395,7 +363,7 @@ def _check_person_triggers(profile) -> list[dict]:
                         "person_name": person_name,
                         "action_type": "personal_milestone",
                         "action_detail": f"生日（{profile.birthday}），还有{days_until_bday}天",
-                        "reason": f"生日祝福是低成本高回报的关系维护",
+                        "reason": "生日祝福是低成本高回报的关系维护",
                         "urgency": 4 if days_until_bday <= 2 else 3,
                     })
         except (ValueError, IndexError):
@@ -414,7 +382,7 @@ def _check_person_triggers(profile) -> list[dict]:
                 "urgency": 3 if days_since > 60 else 2,
             })
 
-    # Trigger 3: Interests match — suggest activity
+    # Trigger 3: Interests match
     interests = profile.interests or []
     if interests:
         interest_categories = [i.get("category", "") for i in interests if isinstance(i, dict)]
@@ -440,7 +408,7 @@ def _check_person_triggers(profile) -> list[dict]:
                 "person_name": person_name,
                 "action_type": "personal_milestone",
                 "action_detail": f"子女里程碑: {child.get('name','子女')} - {milestone}",
-                "reason": f"子女重要人生节点，适合表达关心",
+                "reason": "子女重要人生节点，适合表达关心",
                 "urgency": 4,
             })
 
