@@ -1258,8 +1258,13 @@ async def followup_evaluation_loop(interval_seconds: int = 60) -> None:
                 tenants = result.scalars().all()
                 total = 0
                 for t in tenants:
-                    logs = await evaluate_rules_for_tenant(_db, t.id)
-                    total += len(logs)
+                    try:
+                        async with _db.begin_nested() as _savepoint:
+                            logs = await evaluate_rules_for_tenant(_db, t.id)
+                            total += len(logs)
+                    except Exception:
+                        # Roll back this tenant's savepoint — don't poison the outer session
+                        pass
                 if total:
                     _log.info("Followup: executed %d actions across %d tenants", total, len(tenants))
         except asyncio.CancelledError:

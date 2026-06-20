@@ -41,12 +41,16 @@ async def tenant_context_middleware(request: Request, call_next):
         raise HTTPException(status_code=401, detail="Tenant context required")
 
     # Check subscription status — block expired tenants
-    async with AsyncSessionLocal() as session:
-        await session.execute(
-            text("SELECT set_config('app.current_tenant_id', :tid, true)"),
-            {"tid": str(tenant_id)},
-        )
-        await session.commit()
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute(
+                text("SELECT set_config('app.current_tenant_id', :tid, true)"),
+                {"tid": str(tenant_id)},
+            )
+            await session.commit()
+    except Exception:
+        # Don't poison the connection pool — let the route handle auth
+        pass
 
     # Optional: subscription gate for expired accounts
     # (deferred to route-level checks for now to keep middleware fast)

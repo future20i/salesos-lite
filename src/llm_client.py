@@ -243,3 +243,47 @@ async def generate_followup_draft(
         logger.exception("Followup draft generation failed")
         return f"您好，关于{followup_title}，我已整理好相关资料。方便的话我们可以进一步沟通。谢谢！"
 
+
+# ── Generic LLM completion ────────────────────────────────────────────────
+
+async def llm_complete(prompt: str, system: str = "You are a precise, concise analyst. Respond in Chinese.") -> str:
+    """Call LLM for a generic completion. Returns the text response or fallback."""
+    if not API_KEY:
+        logger.warning("No LLM_API_KEY — llm_complete returning fallback")
+        return "(AI analysis unavailable — no API key configured)"
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{BASE_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": MODEL,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt[:6000]},
+                    ],
+                    "temperature": 0.5,
+                    "max_tokens": 600,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        result = data["choices"][0]["message"]["content"].strip()
+        logger.info("llm_complete generated (%d chars)", len(result))
+        return result
+
+    except httpx.HTTPError as e:
+        logger.error("LLM HTTP error in llm_complete: %s", e)
+        return "(AI analysis unavailable — LLM service error)"
+    except (KeyError, json.JSONDecodeError) as e:
+        logger.error("LLM response parse error in llm_complete: %s", e)
+        return "(AI analysis unavailable — response parse error)"
+    except Exception:
+        logger.exception("Unexpected LLM error in llm_complete")
+        return "(AI analysis unavailable — unexpected error)"
+

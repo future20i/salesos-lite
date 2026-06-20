@@ -38,6 +38,9 @@ from src.api.followup_routes import router as followup_rule_router, items_router
 from src.api.quotation_routes import router as quotation_router
 from src.api.opportunity_routes import router as opportunity_router
 from src.api.knowledge_routes import router as knowledge_router
+from src.api.person_routes import router as person_router
+from src.api.power_routes import router as power_router
+from src.api.interaction_routes import router as interaction_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -171,6 +174,9 @@ app.include_router(followup_item_router)
 app.include_router(quotation_router)
 app.include_router(opportunity_router)
 app.include_router(knowledge_router)
+app.include_router(person_router)
+app.include_router(power_router)
+app.include_router(interaction_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")

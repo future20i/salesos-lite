@@ -14,6 +14,9 @@ from src.models.quotation import Quotation
 from src.models.opportunity import Opportunity, OpportunityStage
 from src.models.followup import FollowupItem, FollowupStatus, FollowupEvent, ReviewLevel
 from src.models.knowledge import KnowledgeEntry
+from src.models.person_profile import PersonProfile
+from src.models.power_map import PowerMap
+from src.models.interaction_log import InteractionLog
 
 __all__ = [
     "Base",
@@ -31,4 +34,7 @@ __all__ = [
     "Opportunity", "OpportunityStage",
     "FollowupItem", "FollowupStatus", "FollowupEvent", "ReviewLevel",
     "KnowledgeEntry",
+    "PersonProfile",
+    "PowerMap",
+    "InteractionLog",
 ]

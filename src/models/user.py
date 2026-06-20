@@ -31,6 +31,12 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    encryption_key: Mapped[str | None] = mapped_column(
+        String(256), nullable=True
+    )
+    encryption_salt: Mapped[str | None] = mapped_column(
+        String(64), nullable=True
+    )
 
     tenant: Mapped["Tenant"] = relationship(back_populates="users")
     assigned_leads: Mapped[list["Lead"]] = relationship(

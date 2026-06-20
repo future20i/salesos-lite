@@ -1,5 +1,7 @@
+import os
 import uuid
 
+from cryptography.fernet import Fernet
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
@@ -71,6 +73,10 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)) ->
         role=UserRole.ADMIN,
     )
     db.add(user)
+
+    # Generate encryption key for person profile layers 3-4
+    user.encryption_key = Fernet.generate_key().decode()
+    user.encryption_salt = os.urandom(32).hex()
 
     # Create trial subscription
     sub = Subscription(tenant_id=tenant.id)
