@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 # ── Background task control ──────────────────────────────────────────────
 _ai_pipeline_task: asyncio.Task | None = None
 _followup_task: asyncio.Task | None = None
+_silence_task: asyncio.Task | None = None
 
 
 @asynccontextmanager
@@ -82,6 +83,12 @@ async def lifespan(app: FastAPI):
     _followup_task = asyncio.create_task(followup_evaluation_loop(interval_seconds=60))
     logger.info("Followup evaluation loop started")
 
+    # Start silence check loop
+    from src.pipeline import silence_check_loop
+    global _silence_task
+    _silence_task = asyncio.create_task(silence_check_loop(interval_seconds=3600))
+    logger.info("Silence check loop started")
+
     yield
 
     # ── Shutdown ─────────────────────────────────────────────────────────
@@ -100,6 +107,14 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
         logger.info("Followup evaluation loop cancelled")
+
+    if _silence_task is not None:
+        _silence_task.cancel()
+        try:
+            await _silence_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Silence check loop cancelled")
 
     await engine.dispose()
     logger.info("Database engine disposed")

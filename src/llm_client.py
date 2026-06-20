@@ -168,3 +168,78 @@ def _stub_result() -> dict[str, Any]:
         "decision_chain": None,
         "summary": "AI analysis unavailable (no API key configured)",
     }
+
+
+# ── Followup draft generation ────────────────────────────────────────────
+
+FOLLOWUP_DRAFT_PROMPT = """You are a professional sales assistant for a Chinese foreign trade company.
+Based on the follow-up context below, draft a concise, natural follow-up message in Chinese.
+
+Context:
+- Opportunity: {opportunity_name}
+- Customer: {customer_name}
+- Stage: {stage}
+- Task: {followup_title}
+- Notes: {followup_body}
+
+Write a message that is:
+- Warm but professional
+- 2-3 sentences
+- Includes specific value (not just "checking in")
+- Has a clear next step
+
+Reply with ONLY the message text. No explanation, no markdown."""
+
+
+async def generate_followup_draft(
+    opportunity_name: str = "",
+    customer_name: str = "",
+    stage: str = "",
+    followup_title: str = "",
+    followup_body: str = "",
+) -> str:
+    """Generate a follow-up message draft using the LLM.
+
+    Falls back to a generic template if the API is unavailable.
+    """
+    if not API_KEY:
+        logger.warning("No LLM_API_KEY — followup draft unavailable")
+        return f"您好，关于{followup_title}，我已整理好相关资料。方便的话我们可以进一步沟通。谢谢！"
+
+    prompt = FOLLOWUP_DRAFT_PROMPT.format(
+        opportunity_name=opportunity_name or "N/A",
+        customer_name=customer_name or "客户",
+        stage=stage or "跟进中",
+        followup_title=followup_title or "跟进",
+        followup_body=followup_body or "无额外说明",
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{BASE_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": MODEL,
+                    "messages": [
+                        {"role": "system", "content": "You are a professional sales assistant. Reply in Chinese only."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 400,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        draft = data["choices"][0]["message"]["content"].strip()
+        logger.info("Followup draft generated (%d chars)", len(draft))
+        return draft
+
+    except Exception:
+        logger.exception("Followup draft generation failed")
+        return f"您好，关于{followup_title}，我已整理好相关资料。方便的话我们可以进一步沟通。谢谢！"
+
