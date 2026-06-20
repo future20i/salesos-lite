@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>外贸CRM竞争格局分析</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:'Inter','Noto Sans SC',system-ui,sans-serif;padding:20px 24px;max-width:1200px;margin:0 auto}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px}
+  .sub{font-size:11px;color:#71717a;margin-bottom:20px}
+  
+  .card{border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;margin-bottom:14px}
+  .card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .card-header .logo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+  .card-header h3{font-size:14px;font-weight:600}
+  .card-header .tag{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:500}
+  
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:800px){.grid-3,.grid-2{grid-template-columns:1fr}}
+  
+  .pro{font-size:9px;color:#22c55e;margin-right:4px}
+  .con{font-size:9px;color:#ef4444;margin-right:4px}
+  .item{font-size:9px;padding:3px 0;color:#a1a1aa;line-height:1.5}
+  
+  .score-bar{height:4px;border-radius:2px;margin-top:4px}
+  
+  .matrix-table{width:100%;border-collapse:collapse;font-size:9px;margin-top:8px}
+  .matrix-table th{text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#71717a;font-weight:500;font-size:9px}
+  .matrix-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#a1a1aa;line-height:1.4}
+  .matrix-table .win{background:rgba(34,197,94,0.08);color:#22c55e}
+  .matrix-table .lose{background:rgba(239,68,68,0.06);color:#ef4444}
+  .matrix-table .mid{background:rgba(245,158,11,0.06);color:#f59e0b}
+  
+  .gap-box{background:linear-gradient(135deg,rgba(108,92,231,0.08),rgba(108,92,231,0.02));border:1px solid rgba(108,92,231,0.15);border-radius:8px;padding:14px 18px;margin-top:14px;font-size:10px;line-height:1.7}
+  .gap-box strong{color:#6c5ce7}
+  
+  .insight-row{display:flex;gap:10px;margin-top:8px;font-size:9px}
+  .insight-chip{padding:4px 10px;border-radius:12px;font-weight:500}
+</style>
+</head>
+<body>
+
+<h2>外贸CRM竞争格局：SalesOS 凭什么不同</h2>
+<p class="sub">分析范围：Pipedrive · HubSpot · Zoho CRM · OKKI(小满) · 纷享销客 · Salesforce</p>
+
+<!-- COMPETITOR CARDS -->
+<div class="grid-3">
+  <!-- Pipedrive -->
+  <div class="card" style="background:rgba(19,20,22,0.5)">
+    <div class="card-header">
+      <div class="logo" style="background:#2563eb">P</div>
+      <div><h3>Pipedrive</h3><span class="tag" style="background:rgba(37,99,235,0.15);color:#3b82f6">销售管道之王</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 最直观的管道视图，上手极快</div>
+    <div class="item"><span class="pro">✓</span> 移动端体验最好</div>
+    <div class="item"><span class="pro">✓</span> 价格可控（$14-99/人/月）</div>
+    <div class="item"><span class="con">✗</span> 纯销售工具，无多渠收件箱</div>
+    <div class="item"><span class="con">✗</span> AI 极弱，仅基础自动化</div>
+    <div class="item"><span class="con">✗</span> 无外贸特定功能（海关数据/汇率）</div>
+    <div class="item"><span class="con">✗</span> 不支持 WhatsApp/FB 集成</div>
+  </div>
+
+  <!-- HubSpot -->
+  <div class="card" style="background:rgba(19,20,22,0.5)">
+    <div class="card-header">
+      <div class="logo" style="background:#f97316">H</div>
+      <div><h3>HubSpot</h3><span class="tag" style="background:rgba(249,115,22,0.15);color:#f97316">营销自动化标杆</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 营销+销售一体，内容工具最强</div>
+    <div class="item"><span class="pro">✓</span> 免费版可用，生态丰富</div>
+    <div class="item"><span class="pro">✓</span> AI 分析较强（归因/预测）</div>
+    <div class="item"><span class="con">✗</span> 扩张后极贵（$90+起）</div>
+    <div class="item"><span class="con">✗</span> 依赖 Google 生态（国内被墙）</div>
+    <div class="item"><span class="con">✗</span> 为 inbound marketing 设计，非外贸</div>
+    <div class="item"><span class="con">✗</span> 太重，小团队用不起来</div>
+  </div>
+
+  <!-- OKKI -->
+  <div class="card" style="background:rgba(19,20,22,0.5);border-color:rgba(108,92,231,0.2)">
+    <div class="card-header">
+      <div class="logo" style="background:#6c5ce7">O</div>
+      <div><h3>OKKI 小满</h3><span class="tag" style="background:rgba(108,92,231,0.15);color:#6c5ce7">⚠ 直接竞品</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 唯一专注外贸B2B的成熟产品</div>
+    <div class="item"><span class="pro">✓</span> 集成海关数据+AI客户背调</div>
+    <div class="item"><span class="pro">✓</span> WhatsApp/FB/邮件多渠道合一</div>
+    <div class="item"><span class="pro">✓</span> AI辅助回复（回复率提升55%）</div>
+    <div class="item"><span class="con">✗</span> 锁定阿里生态（数据不出阿里）</div>
+    <div class="item"><span class="con">✗</span> AI 是功能叠加，不是架构原生</div>
+    <div class="item"><span class="con">✗</span> 价格不透明，小团队门槛高</div>
+    <div class="item"><span class="con">✗</span> 产品复杂，学习曲线陡</div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <!-- Zoho -->
+  <div class="card" style="background:rgba(19,20,22,0.5)">
+    <div class="card-header">
+      <div class="logo" style="background:#ef4444">Z</div>
+      <div><h3>Zoho CRM</h3><span class="tag" style="background:rgba(239,68,68,0.12);color:#ef4444">全家桶</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 最便宜的全功能套件（$14起）</div>
+    <div class="item"><span class="pro">✓</span> 可定制性最强</div>
+    <div class="item"><span class="pro">✓</span> 多语言多币种支持</div>
+    <div class="item"><span class="con">✗</span> 界面老旧，学习曲线巨陡</div>
+    <div class="item"><span class="con">✗</span> 国内访问慢</div>
+    <div class="item"><span class="con">✗</span> AI 功能薄弱</div>
+    <div class="item"><span class="con">✗</span> 非外贸专用，需大量定制</div>
+  </div>
+
+  <!-- 纷享销客 -->
+  <div class="card" style="background:rgba(19,20,22,0.5)">
+    <div class="card-header">
+      <div class="logo" style="background:#22c55e">纷</div>
+      <div><h3>纷享销客</h3><span class="tag" style="background:rgba(34,197,94,0.12);color:#22c55e">国内CRM</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 微信/钉钉/飞书深度集成</div>
+    <div class="item"><span class="pro">✓</span> 价格合理，本地服务好</div>
+    <div class="item"><span class="pro">✓</span> BI报表能力强</div>
+    <div class="item"><span class="con">✗</span> 面向国内销售，非外贸</div>
+    <div class="item"><span class="con">✗</span> 无 WhatsApp/FB/多语言支持</div>
+    <div class="item"><span class="con">✗</span> AI 几乎为零</div>
+  </div>
+
+  <!-- Salesforce -->
+  <div class="card" style="background:rgba(19,20,22,0.5)">
+    <div class="card-header">
+      <div class="logo" style="background:#0ea5e9">S</div>
+      <div><h3>Salesforce</h3><span class="tag" style="background:rgba(14,165,233,0.12);color:#0ea5e9">企业级</span></div>
+    </div>
+    <div class="item"><span class="pro">✓</span> 最强大，无限制定制</div>
+    <div class="item"><span class="pro">✓</span> Einstein AI 成熟</div>
+    <div class="item"><span class="con">✗</span> 极贵（$25-300+/人/月）</div>
+    <div class="item"><span class="con">✗</span> 需要专职管理员</div>
+    <div class="item"><span class="con">✗</span> 实施周期 3-12 个月</div>
+    <div class="item"><span class="con">✗</span> 非外贸场景，需大量开发</div>
+  </div>
+</div>
+
+<!-- CAPABILITY MATRIX -->
+<div class="card" style="background:rgba(19,20,22,0.3)">
+  <div class="card-header"><h3>🎯 外贸场景核心能力矩阵</h3></div>
+  <table class="matrix-table">
+    <tr>
+      <th style="width:160px">能力维度</th>
+      <th style="width:100px">Pipedrive</th>
+      <th style="width:100px">HubSpot</th>
+      <th style="width:100px">OKKI</th>
+      <th style="width:100px">Zoho</th>
+      <th style="width:100px">SalesOS Lite<br><span style="color:#6c5ce7">我们</span></th>
+    </tr>
+    <tr>
+      <td>多渠收件箱(WA/FB/邮件合一)</td>
+      <td class="lose">❌ 无</td>
+      <td class="mid">⚠ 仅邮件</td>
+      <td class="win">✅ 8渠道</td>
+      <td class="mid">⚠ 邮件为主</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ 核心设计</td>
+    </tr>
+    <tr>
+      <td>AI沉默诊断+建议</td>
+      <td class="lose">❌</td>
+      <td class="mid">⚠ 基础</td>
+      <td class="mid">⚠ 基础提醒</td>
+      <td class="lose">❌</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ 诊断+建议+起草</td>
+    </tr>
+    <tr>
+      <td>语音快速捕获</td>
+      <td class="lose">❌</td>
+      <td class="lose">❌</td>
+      <td class="lose">❌</td>
+      <td class="lose">❌</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ 出差/电话场景</td>
+    </tr>
+    <tr>
+      <td>AI起草报价/邮件/方案</td>
+      <td class="mid">⚠ AI邮件</td>
+      <td class="win">✅ 强</td>
+      <td class="win">✅ 强</td>
+      <td class="lose">❌</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ +人工审核门禁</td>
+    </tr>
+    <tr>
+      <td>商机管道+预测</td>
+      <td class="win">✅ 核心</td>
+      <td class="win">✅ 强</td>
+      <td class="win">✅</td>
+      <td class="win">✅</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ +AI预测</td>
+    </tr>
+    <tr>
+      <td>社媒数据整合(海关/LinkedIn)</td>
+      <td class="lose">❌</td>
+      <td class="lose">❌</td>
+      <td class="win">✅ 核心</td>
+      <td class="lose">❌</td>
+      <td class="mid" style="color:#f59e0b">P2接入开放API</td>
+    </tr>
+    <tr>
+      <td>极简上手(10分钟会用)</td>
+      <td class="win">✅</td>
+      <td class="mid">⚠ 中等</td>
+      <td class="lose">❌ 复杂</td>
+      <td class="lose">❌ 很复杂</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ 核心目标</td>
+    </tr>
+    <tr>
+      <td>价格(小团队)</td>
+      <td class="mid">$14起</td>
+      <td class="mid">免费起</td>
+      <td class="lose">不透明</td>
+      <td class="win">$14起</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">¥199-999/月</td>
+    </tr>
+    <tr>
+      <td>数据自主可控(非阿里/非海外)</td>
+      <td class="lose">海外</td>
+      <td class="lose">海外</td>
+      <td class="lose">阿里</td>
+      <td class="lose">海外</td>
+      <td class="win" style="color:#6c5ce7;font-weight:600">✅ 自主部署</td>
+    </tr>
+  </table>
+</div>
+
+<!-- THE GAP — WHAT NO ONE DOES -->
+<div class="gap-box">
+  <strong>🔑 市场缺口：所有人都在做「记录」，没人在做「决策」</strong><br><br>
+  
+  <div style="display:flex;gap:24px;margin-top:8px">
+    <div style="flex:1">
+      <div style="font-weight:600;color:#ededef;margin-bottom:6px">现有CRM做的事</div>
+      <div style="color:#a1a1aa;line-height:1.8;font-size:9px">
+        客户信息存储<br>
+        销售管道可视化<br>
+        邮件追踪 + 提醒<br>
+        报表和仪表盘<br>
+        AI辅助写邮件<br>
+        基础自动化工作流
+      </div>
+      <div style="margin-top:8px;font-size:9px;color:#71717a;font-style:italic">
+        → "发生了什么"的系统
+      </div>
+    </div>
+    <div style="width:2px;background:rgba(108,92,231,0.2)"></div>
+    <div style="flex:1">
+      <div style="font-weight:600;color:#6c5ce7;margin-bottom:6px">SalesOS 要做的事</div>
+      <div style="color:#a1a1aa;line-height:1.8;font-size:9px">
+        客户沉默 → <span style="color:#6c5ce7">AI诊断原因</span>（竞品？流程？忘了？）<br>
+        诊断后 → <span style="color:#6c5ce7">AI建议策略</span>（降价？发案例？找决策人？）<br>
+        建议后 → <span style="color:#6c5ce7">AI起草消息</span>（个性化的跟进文案）<br>
+        起草后 → <span style="color:#f97316">人审核</span>（把关+修改）<br>
+        审核后 → <span style="color:#22c55e">发出</span>（跨平台一站式）<br>
+        发出后 → <span style="color:#6c5ce7">AI监测回复</span>（客户回了自动唤醒）
+      </div>
+      <div style="margin-top:8px;font-size:9px;color:#6c5ce7;font-style:italic;font-weight:500">
+        → "该做什么"的决策引擎
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POSITIONING MAP -->
+<div class="card" style="background:rgba(19,20,22,0.3);margin-top:14px">
+  <div class="card-header"><h3>📍 竞争定位图</h3><span style="font-size:9px;color:#71717a">X轴：AI原生程度 · Y轴：外贸场景深度</span></div>
+  <svg viewBox="0 0 600 340" width="100%" style="max-width:600px;margin:0 auto;display:block">
+    <!-- Axes -->
+    <line x1="80" y1="280" x2="560" y2="280" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <line x1="80" y1="280" x2="80" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <!-- Labels -->
+    <text x="320" y="310" text-anchor="middle" font-size="10" fill="#71717a">AI原生程度 →</text>
+    <text x="70" y="310" text-anchor="end" font-size="9" fill="#52525b">传统CRM</text>
+    <text x="560" y="310" text-anchor="start" font-size="9" fill="#6c5ce7">AI原生</text>
+    
+    <text x="58" y="160" text-anchor="middle" font-size="10" fill="#71717a" transform="rotate(-90,58,160)">外贸深度 ↑</text>
+    <text x="58" y="280" text-anchor="end" font-size="9" fill="#52525b" transform="rotate(-90,58,280)">通用</text>
+    <text x="58" y="80" text-anchor="start" font-size="9" fill="#22c55e" transform="rotate(-90,58,80)">外贸专用</text>
+
+    <!-- Grid -->
+    <line x1="80" y1="155" x2="560" y2="155" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4"/>
+    <line x1="320" y1="30" x2="320" y2="280" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4"/>
+    
+    <!-- Pipedrive: low AI, low trade -->
+    <circle cx="180" cy="240" r="22" fill="none" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="180" y="243" text-anchor="middle" font-size="8" fill="#3b82f6">Pipedrive</text>
+    
+    <!-- HubSpot: mid AI, low trade -->
+    <circle cx="380" cy="250" r="22" fill="none" stroke="rgba(249,115,22,0.4)" stroke-width="1.5"/>
+    <text x="380" y="253" text-anchor="middle" font-size="8" fill="#f97316">HubSpot</text>
+    
+    <!-- Zoho: low AI, low-mid trade -->
+    <circle cx="200" cy="200" r="22" fill="none" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+    <text x="200" y="203" text-anchor="middle" font-size="8" fill="#ef4444">Zoho</text>
+    
+    <!-- OKKI: mid AI, high trade -->
+    <circle cx="350" cy="100" r="28" fill="none" stroke="rgba(108,92,231,0.5)" stroke-width="2"/>
+    <text x="350" y="103" text-anchor="middle" font-size="8" fill="#6c5ce7">OKKI</text>
+    
+    <!-- Salesforce: mid AI, low trade -->
+    <circle cx="400" cy="210" r="22" fill="none" stroke="rgba(14,165,233,0.4)" stroke-width="1.5"/>
+    <text x="400" y="213" text-anchor="middle" font-size="8" fill="#0ea5e9">SF</text>
+    
+    <!-- SalesOS: high AI, high trade — WHERE WE WANT TO BE -->
+    <circle cx="480" cy="80" r="34" fill="rgba(108,92,231,0.08)" stroke="#6c5ce7" stroke-width="2.5" stroke-dasharray="5 3"/>
+    <text x="480" y="77" text-anchor="middle" font-size="10" fill="#6c5ce7" font-weight="700">SalesOS</text>
+    <text x="480" y="90" text-anchor="middle" font-size="7" fill="#6c5ce7">目标位置</text>
+    
+    <!-- Arrow showing movement -->
+    <line x1="480" y1="114" x2="480" y2="130" stroke="#6c5ce7" stroke-width="1" marker-end="url(#arrowPurple)"/>
+    <defs><marker id="arrowPurple" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#6c5ce7"/></marker></defs>
+  </svg>
+</div>
+
+<!-- SUMMARY -->
+<div class="gap-box" style="margin-top:14px">
+  <strong>📊 总结：为什么所有现有系统都不够</strong><br><br>
+  <table style="width:100%;font-size:9px;line-height:1.8;color:#a1a1aa">
+    <tr>
+      <td style="color:#ef4444;width:20px">1</td>
+      <td><strong style="color:#ededef">OKKI是唯一接近的竞品</strong>——但它被阿里锁定，AI是功能叠加不是架构原生。它的AI做的是「辅助回复」，不是「诊断-建议-起草-审核-执行」的完整决策链路。</td>
+    </tr>
+    <tr>
+      <td style="color:#ef4444;width:20px">2</td>
+      <td><strong style="color:#ededef">Pipedrive/HubSpot/Zoho/SF</strong>都是通用CRM，外贸场景需要大量定制。它们面向的是「已有明确销售流程」的企业，不是「需要AI帮你建立流程」的外贸小团队。</td>
+    </tr>
+    <tr>
+      <td style="color:#ef4444;width:20px">3</td>
+      <td><strong style="color:#ededef">没有人做语音快速捕获</strong>——出差/电话/展会场景的信息录入是一块完全空白的市场。这是入口级的差异化。</td>
+    </tr>
+    <tr>
+      <td style="color:#22c55e;width:20px">→</td>
+      <td><strong style="color:#6c5ce7">SalesOS 的竞争定位：外贸AI决策引擎</strong>——不是「又一个CRM」，而是「最先发现该做什么、帮你起草、等你审核、替你发出、监测回复」的AI副驾驶。OKKI是功能对标，但我们在AI原生架构和决策链路上有机会超越。</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

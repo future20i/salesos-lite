@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>外贸跟进系统 — 系统思考分析</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:'Inter','Noto Sans SC',system-ui,sans-serif;padding:24px}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px;color:#ededef}
+  .subtitle{font-size:12px;color:#71717a;margin-bottom:24px}
+  
+  .diagram-container{background:#0f0f10;border-radius:12px;padding:24px;border:1px solid rgba(255,255,255,0.06);overflow-x:auto;margin-bottom:20px}
+  
+  .section-title{font-size:13px;font-weight:600;color:#6c5ce7;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .section-title::before{content:'';width:3px;height:16px;background:#6c5ce7;border-radius:2px}
+  
+  .stock-box{background:rgba(19,20,22,0.8);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;text-align:center;min-width:120px}
+  .stock-box .name{font-size:12px;font-weight:600;color:#ededef}
+  .stock-box .value{font-size:9px;color:#71717a;margin-top:2px}
+  
+  .flow-label{font-size:9px;color:#71717a;text-align:center}
+  .flow-in{color:#22c55e;font-size:10px;font-weight:600}
+  .flow-out{color:#ef4444;font-size:10px;font-weight:600}
+  
+  .loop-label{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
+  .loop-R{background:rgba(108,92,231,0.15);color:#6c5ce7}
+  .loop-B{background:rgba(34,197,94,0.12);color:#22c55e}
+  
+  .delay-tag{font-size:8px;background:rgba(249,115,22,0.15);color:#f97316;padding:1px 5px;border-radius:3px}
+  
+  .boundary{stroke:rgba(255,255,255,0.08);stroke-dasharray:8 4;fill:none}
+  .boundary-label{font-size:9px;fill:#52525b}
+  
+  .leverage-table{width:100%;border-collapse:collapse;font-size:10px;margin-top:12px}
+  .leverage-table th{text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.08);color:#71717a;font-weight:500;font-size:9px}
+  .leverage-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:#a1a1aa;line-height:1.5}
+  .leverage-table tr:nth-child(even) td{background:rgba(255,255,255,0.01)}
+  .leverage-table .rank{color:#6c5ce7;font-weight:600;font-size:11px}
+  .leverage-table .impact{color:#22c55e;font-weight:500}
+  
+  .insight-box{background:linear-gradient(135deg,rgba(108,92,231,0.08),rgba(108,92,231,0.02));border:1px solid rgba(108,92,231,0.15);border-radius:8px;padding:12px 16px;margin-top:16px;font-size:10px;line-height:1.7}
+  .insight-box strong{color:#6c5ce7}
+  
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:800px){.two-col{grid-template-columns:1fr}}
+  
+  .card{background:rgba(19,20,22,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:14px}
+  .card h4{font-size:11px;font-weight:600;margin-bottom:8px;color:#ededef}
+  .card ul{list-style:none;font-size:10px;line-height:1.7;color:#a1a1aa}
+  .card ul li::before{content:'→ ';color:#6c5ce7}
+  
+  .arrow-line{stroke:rgba(255,255,255,0.12);stroke-width:1.5;fill:none;marker-end:url(#arrowhead)}
+  .arrow-R{stroke:#6c5ce7;stroke-width:2}
+  .arrow-B{stroke:#22c55e;stroke-width:2}
+</style>
+</head>
+<body>
+
+<h2>外贸B2B客户跟进系统 — 存量与回路分析</h2>
+<p class="subtitle">系统边界：中国出海制造企业 · 展会+社媒获客 · 长周期高客单价 · 一人多客户</p>
+
+<!-- STRUCTURAL DIAGRAM -->
+<div class="diagram-container">
+  <div class="section-title">结构图：存量、流量、反馈回路</div>
+  
+  <svg viewBox="0 0 1000 580" width="100%" style="max-width:1000px">
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.3)"/>
+      </marker>
+      <marker id="arrowR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#6c5ce7"/>
+      </marker>
+      <marker id="arrowB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#22c55e"/>
+      </marker>
+      <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    
+    <!-- System boundary -->
+    <rect x="40" y="20" width="920" height="530" rx="10" class="boundary"/>
+    <text x="55" y="40" class="boundary-label">系统边界：外贸企业的客户跟进系统</text>
+    
+    <!-- External actors -->
+    <rect x="780" y="50" width="150" height="36" rx="6" fill="none" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 3"/>
+    <text x="855" y="72" text-anchor="middle" font-size="9" fill="#52525b">海外客户（外部）</text>
+    
+    <rect x="780" y="500" width="150" height="36" rx="6" fill="none" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 3"/>
+    <text x="855" y="522" text-anchor="middle" font-size="9" fill="#52525b">社媒平台（外部）</text>
+    
+    <!-- STOCK 1: 潜在线索池 -->
+    <rect x="60" y="60" width="160" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(255,255,255,0.08)"/>
+    <text x="140" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="#ededef">📥 潜在线索池</text>
+    <text x="140" y="104" text-anchor="middle" font-size="9" fill="#71717a">展会名片 · FB询价 · TikTok评论</text>
+    <text x="140" y="118" text-anchor="middle" font-size="9" fill="#52525b">存量：未验证的原始联系人</text>
+    
+    <!-- STOCK 2: 活跃商机 -->
+    <rect x="330" y="60" width="160" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(108,92,231,0.2)"/>
+    <text x="410" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="#6c5ce7">🎯 活跃商机</text>
+    <text x="410" y="104" text-anchor="middle" font-size="9" fill="#71717a">已验证 · 有金额 · 在推进</text>
+    <text x="410" y="118" text-anchor="middle" font-size="9" fill="#52525b">每商机 2-5 个跟进项</text>
+    
+    <!-- STOCK 3: 沉默客户池 -->
+    <rect x="330" y="180" width="160" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(239,68,68,0.15)"/>
+    <text x="410" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#ef4444">⏸️ 沉默客户池</text>
+    <text x="410" y="224" text-anchor="middle" font-size="9" fill="#71717a">已发报价 · 无回复 · 等待中</text>
+    <text x="410" y="238" text-anchor="middle" font-size="9" fill="#52525b">这是系统最大的价值洼地</text>
+    
+    <!-- STOCK 4: 成交客户 -->
+    <rect x="600" y="60" width="140" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(34,197,94,0.15)"/>
+    <text x="670" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="#22c55e">✅ 成交客户</text>
+    <text x="670" y="104" text-anchor="middle" font-size="9" fill="#71717a">已签合同 · 产生收入</text>
+    
+    <!-- STOCK 5: 业务员心力容量 -->
+    <rect x="60" y="300" width="160" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(249,115,22,0.15)"/>
+    <text x="140" y="324" text-anchor="middle" font-size="12" font-weight="600" fill="#f97316">⚡ 业务员心力容量</text>
+    <text x="140" y="344" text-anchor="middle" font-size="9" fill="#71717a">有限的时间 · 注意力 · 精力</text>
+    <text x="140" y="358" text-anchor="middle" font-size="9" fill="#52525b">自然上限：约 15-25 活跃商机</text>
+    
+    <!-- STOCK 6: 客户信任存量 (per customer) -->
+    <rect x="60" y="430" width="160" height="64" rx="8" fill="rgba(19,20,22,0.9)" stroke="rgba(245,158,11,0.15)"/>
+    <text x="140" y="454" text-anchor="middle" font-size="12" font-weight="600" fill="#eab308">🤝 客户信任存量</text>
+    <text x="140" y="474" text-anchor="middle" font-size="9" fill="#71717a">每客户独立积累</text>
+    <text x="140" y="488" text-anchor="middle" font-size="9" fill="#52525b">流失后无法恢复</text>
+    
+    <!-- FLOWS -->
+    <!-- Input to leads -->
+    <line x1="50" y1="50" x2="80" y2="70" class="arrow-line"/>
+    <text x="30" y="48" font-size="8" fill="#22c55e">↓ 社媒/展会流入</text>
+    
+    <!-- Leads → Opportunities (qualification) -->
+    <path d="M 220 80 L 280 80" class="arrow-line" stroke="#22c55e" marker-end="url(#arrowB)"/>
+    <text x="252" y="74" text-anchor="middle" font-size="8" fill="#22c55e">↓ AI评分+转化</text>
+    
+    <!-- Opportunities → Closed -->
+    <path d="M 490 80 L 600 80" class="arrow-line" stroke="#22c55e" marker-end="url(#arrowB)"/>
+    <text x="545" y="74" text-anchor="middle" font-size="8" fill="#22c55e">↓ 成交</text>
+    
+    <!-- Opportunities → Silent (leakage!) -->
+    <path d="M 410 124 L 410 180" class="arrow-line" stroke="#ef4444" marker-end="url(#arrowhead)"/>
+    <text x="420" y="158" font-size="8" fill="#ef4444">↑ 沉默（泄漏）</text>
+    <rect x="425" y="145" width="70" height="14" rx="3" class="delay-tag" fill="rgba(239,68,68,0.12)"/>
+    <text x="460" y="155" text-anchor="middle" font-size="7" fill="#ef4444">延迟：1-4周</text>
+    
+    <!-- Silent → back to Opportunities (reactivation) -->
+    <path d="M 330 210 L 280 210 L 280 100 L 330 100" class="arrow-line" stroke="#6c5ce7" stroke-dasharray="5 3" marker-end="url(#arrowR)"/>
+    <text x="260" y="160" font-size="8" fill="#6c5ce7">↓ AI触达</text>
+    <text x="260" y="172" font-size="8" fill="#6c5ce7">重新激活</text>
+    
+    <!-- Silent → lost forever -->
+    <path d="M 490 210 L 560 210 L 560 380 L 600 380" class="arrow-line" stroke="#ef4444" stroke-dasharray="2 2" marker-end="url(#arrowhead)"/>
+    <text x="570" y="290" font-size="8" fill="#ef4444">永久流失</text>
+    
+    <!-- Rep capacity → constrains flows -->
+    <path d="M 160 364 L 160 400 L 300 400 L 300 244" class="arrow-line" stroke="#f97316" stroke-dasharray="4 2"/>
+    <text x="230" y="395" font-size="8" fill="#f97316">心力过载 → 跟进质量下降 → 更多沉默</text>
+    
+    <!-- FEEDBACK LOOPS (annotated) -->
+    <!-- R1: Trust → Deal → Trust -->
+    <path d="M 140 430 L 140 400 L 500 400 L 500 124" stroke="#6c5ce7" stroke-width="2" fill="none" stroke-dasharray="none" marker-end="url(#arrowR)"/>
+    <rect x="280" y="395" width="180" height="16" rx="3" fill="rgba(108,92,231,0.1)"/>
+    <text x="370" y="407" text-anchor="middle" font-size="8" fill="#6c5ce7" font-weight="600">R1 信任增强回路：成交越多 → 信任越高 → 下次更快</text>
+    
+    <!-- R2: Silence spiral -->
+    <path d="M 410 245 L 410 270 L 250 270 L 250 430 L 220 430" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="6 3"/>
+    <rect x="250" y="262" width="150" height="16" rx="3" fill="rgba(239,68,68,0.1)"/>
+    <text x="325" y="274" text-anchor="middle" font-size="8" fill="#ef4444" font-weight="600">R2 沉默陷阱：没人管 → 更沉默 → 彻底丢</text>
+    
+    <!-- B1: Capacity balancing -->
+    <circle cx="500" cy="340" r="60" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="8 4"/>
+    <rect x="470" y="395" width="100" height="14" rx="3" fill="rgba(34,197,94,0.1)"/>
+    <text x="520" y="405" text-anchor="middle" font-size="8" fill="#22c55e" font-weight="600">B1 心力约束回路</text>
+    
+    <!-- KEY DELAY annotations -->
+    <rect x="700" y="180" width="200" height="40" rx="6" fill="rgba(249,115,22,0.06)" stroke="rgba(249,115,22,0.15)"/>
+    <text x="800" y="198" text-anchor="middle" font-size="9" fill="#f97316" font-weight="600">⚡ 关键延迟：信息延迟</text>
+    <text x="800" y="212" text-anchor="middle" font-size="8" fill="#71717a">客户沉默 → 业务员发现 → 几周后</text>
+    
+    <!-- Legend -->
+    <rect x="700" y="400" width="220" height="130" rx="6" fill="rgba(19,20,22,0.6)" stroke="rgba(255,255,255,0.06)"/>
+    <text x="720" y="420" font-size="10" fill="#71717a" font-weight="600">图例</text>
+    <line x1="720" y1="438" x2="760" y2="438" stroke="#6c5ce7" stroke-width="2"/>
+    <text x="768" y="442" font-size="9" fill="#71717a">R = 增强回路（放大变化）</text>
+    <line x1="720" y1="458" x2="760" y2="458" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="8 4"/>
+    <text x="768" y="462" font-size="9" fill="#71717a">B = 调节回路（抵抗变化）</text>
+    <line x1="720" y1="478" x2="760" y2="478" stroke="#f97316" stroke-width="1" stroke-dasharray="4 2"/>
+    <text x="768" y="482" font-size="9" fill="#71717a">延迟 = 因果之间的时间差</text>
+    <line x1="720" y1="498" x2="760" y2="498" stroke="#ef4444" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="768" y="502" font-size="9" fill="#71717a">虚线 = 流失/退化</text>
+  </svg>
+</div>
+
+<!-- LEVERAGE POINTS -->
+<div class="diagram-container">
+  <div class="section-title">Meadows 12 杠杆点分析 — 从高杠杆到低杠杆</div>
+  
+  <table class="leverage-table">
+    <tr>
+      <th style="width:30px">#</th>
+      <th style="width:180px">杠杆点</th>
+      <th>在这个系统中的体现</th>
+      <th style="width:200px">产品功能映射</th>
+    </tr>
+    <tr>
+      <td class="rank">6</td>
+      <td style="color:#6c5ce7;font-weight:600">信息流结构</td>
+      <td>客户沉默 → 业务员发现 有几周延迟。<br>如果这个延迟从「几周」压缩到「即时」，系统行为完全改变。</td>
+      <td class="impact">⭐ 核心功能：AI 沉默监测<br>→ 自动诊断沉默原因<br>→ 推送「该催了」提醒</td>
+    </tr>
+    <tr>
+      <td class="rank">8</td>
+      <td style="color:#ededef;font-weight:500">调节回路强度</td>
+      <td>B1 心力约束回路现在是被动的（等人崩溃才调整）。<br>需要变成主动的（在过载前就分流）。</td>
+      <td class="impact">⭐ 核心功能：心力过载预警<br>→ 超过 15 活跃商机自动预警<br>→ 建议重新分配</td>
+    </tr>
+    <tr>
+      <td class="rank">7</td>
+      <td style="color:#ededef;font-weight:500">增强回路增益</td>
+      <td>R1 信任增强回路现在靠人脑记忆。<br>加速它的方法是让每次跟进的上下文自动可用。</td>
+      <td>跟进上下文自动注入<br>→ 打开客户卡片，历史全部在</td>
+    </tr>
+    <tr>
+      <td class="rank">4</td>
+      <td style="color:#ededef;font-weight:500">系统结构自组织</td>
+      <td>每成交一个客户，学到的东西只留在业务员脑子里。<br>系统应该自己「长」出更好的模板和策略。</td>
+      <td>成交模式学习<br>→ 从历史成交反推最佳跟进节奏</td>
+    </tr>
+    <tr>
+      <td class="rank">9</td>
+      <td style="color:#ededef;font-weight:500">延迟长度</td>
+      <td>报价→客户回复的延迟无法消除（客户内部流程）。<br>但可以管理——在延迟期间保持「温和存在」。</td>
+      <td>AI 自动温和触达<br>→ N 天无回复自动发送跟进消息<br>→ 人审核后发出</td>
+    </tr>
+    <tr>
+      <td class="rank">5</td>
+      <td style="color:#71717a;font-weight:500">系统规则</td>
+      <td>现在规则是隐式的：谁拿到的线索归谁，跟进靠自己。<br>显式规则：线索超过 N 天无跟进自动回收。</td>
+      <td>线索回收规则<br>→ 超过期限自动回到公共池</td>
+    </tr>
+    <tr>
+      <td class="rank">3</td>
+      <td style="color:#71717a;font-weight:500">系统目标</td>
+      <td>当前隐含目标：「处理尽量多的消息」。<br>应该变成：「在正确的时间做正确的事」。</td>
+      <td>不是处理更多，是处理更准<br>→ 系统告诉你「现在该做什么」</td>
+    </tr>
+  </table>
+  
+  <div class="insight-box">
+    <strong>🔑 核心洞察：</strong>杠杆点 #6（信息流结构）是这个系统里最高杠杆的点。<br><br>
+    一个简单的功能——「客户沉默了 N 天」→ 系统检测到 → 推给业务员一条带上下文的分析——就能<strong>从根本上缩短 R2 沉默陷阱的反馈延迟</strong>。<br><br>
+    这不是「又一个 CRM 功能」。CRM 的沉默检测是「该联系了」的闹钟。<br>
+    SalesOS 的沉默检测是「客户可能因为 X 原因沉默，建议 Y 策略，要我帮你起草一条消息吗？」——<strong>它不只是提醒，它诊断 + 建议 + 执行。</strong>
+  </div>
+</div>
+
+<!-- FROM SYSTEM TO PRODUCT -->
+<div class="two-col">
+  <div class="card">
+    <h4>🎯 从系统分析到产品定位</h4>
+    <ul>
+      <li>SalesOS 不是 CRM —— CRM 记录「发生了什么」</li>
+      <li>SalesOS 是 <strong>外贸销售的 AI 副驾驶</strong></li>
+      <li>核心差异：<strong>系统主动告诉你该做什么</strong></li>
+      <li>CRM 是数据库，SalesOS 是决策引擎</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🧠 AI 的真正角色</h4>
+    <ul>
+      <li><strong>诊断层：</strong>识别沉默原因（竞品/流程/忘了）</li>
+      <li><strong>建议层：</strong>给出具体行动方案</li>
+      <li><strong>执行层：</strong>起草消息/报价/方案（人审核）</li>
+      <li><strong>学习层：</strong>从成交反推最佳实践</li>
+      <li>AI 替人做执行，不替人做决定</li>
+    </ul>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h4>📡 SalesOS Lite ↔ B2BSaleOS 大脑</h4>
+    <ul>
+      <li><strong>Lite（前线）：</strong>消息收发 · 快速捕获 · 跟进提醒 · AI 起草</li>
+      <li><strong>B2BSaleOS（大脑）：</strong>策略优化 · 模式学习 · 多 Agent 协作 · 知识沉淀</li>
+      <li><strong>数据上行：</strong>Lite 的成交/沉默/回复数据 → 大脑学习</li>
+      <li><strong>策略下行：</strong>大脑的最佳实践/模板/节奏 → Lite 执行</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🏗️ 下一步</h4>
+    <ul>
+      <li>竞争分析：HubSpot / Pipedrive / Zoho / OKKI 的优劣势</li>
+      <li>领域语言：订正术语（商机/线索/跟进项/沉默/激活）</li>
+      <li>跨视角审查：批评者→架构师→领域专家→终审</li>
+      <li>规格文档：产品规格 + ADR</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

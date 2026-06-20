@@ -92,12 +92,10 @@ Lead 是未验证的接触，Opportunity 是确认有预算和时限的销售机
 
 ### 项目 (Project)
 
-已成交的商机进入交付阶段。项目有：
-- 交付里程碑 (milestones)
-- 交付物 (deliverables)
-- 时间线 (timeline)
+已成交的商机进入交付阶段。**注意：Phase 1 不实现独立的 Project 模型。**
+成交通过 `Opportunity.stage = 'won'` 标记。交付管理延至 B2BSaleOS 大脑或 Phase 3。
 
-**关系：** 从 Opportunity 转化，属于 Client
+**关系：** 从 Opportunity 转化（阶段推进），非独立表
 
 ### 跟进项 (FollowupItem)
 
@@ -113,13 +111,13 @@ Lead 是未验证的接触，Opportunity 是确认有预算和时限的销售机
 
 **关系：** 属于 Opportunity，可关联 Message
 
-### 客户信任存量 (Trust Stock)
+### 客户关系深度 (Customer Relationship Depth)
 
-每个客户关系中积累的信任度。不是显式评分，而是系统的隐含状态——
-通过历史成交、回复速度、沟通质量等因素反映在 AI 的决策建议中。
-信任积累慢、流失快、换人后可能归零。
+每个客户关系中的综合状态——通过历史成交、回复速度、沟通频次等可度量指标
+反映在系统行为中（提醒优先级、建议话术语气）。非 AI 黑箱——所有影响因子
+可见可解释。
 
-**别名：** 客户关系深度
+**别名：** 客户亲密度
 
 ---
 
@@ -299,8 +297,10 @@ B2BSaleOS 是后方策略大脑。Lite 可以独立运行，接入大脑后获�
 | 用户 | `user` | `users` |
 | 线索 | `lead` | `leads` |
 | 商机 | `opportunity` | `opportunities` |
-| 项目 | `project` | `projects` |
+| 项目 | `project` | —（阶段标记，非独立表） |
 | 跟进项 | `followup_item` | `followup_items` |
+| 跟进事件 | `followup_event` | `followup_events` |
+| 知识条目 | `knowledge_entry` | `knowledge_entries` |
 | 消息 | `message` | `messages` |
 | 渠道 | `channel` | —（枚举） |
 | 报价 | `quotation` | `quotations` |

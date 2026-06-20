@@ -27,36 +27,29 @@ SalesOS Lite 聚焦**项目型外贸销售**。三层销售结构（线索→商
 
 ---
 
-# ADR-0002: 使用分级审核门禁而非一刀切
+# ADR-0002: 审核门禁——Phase 1 全部人审，Phase 2 分级
 
 ## 状态
 
-已接受（2026-06-20）
+已修正（2026-06-20，跨模型审查后）
 
-## 背景
+## 决策变更
 
-AI 起草的消息在发出前需要人工审核。但对项目型销售：
-- 日常跟进消息（"方案有任何需要调整的地方随时说"）风险低，审核浪费人力
-- 商业敏感内容（报价金额、合同条款）必须审核
-- 高价值客户的任何消息都值得审核
+原决策：三级审核门禁（routine 自动发/commercial 人审/critical 强制审），AI 自动判断等级。
 
-一刀切审核 → 业务员每天处理 15+ 跟进项时审核变瓶颈 → 关掉 AI 功能。
+跨模型审查发现问题：
+- AI 无金融风险概念，可能将含价格的技术承诺误判为 routine
+- 误判后果严重——错误消息发出后不可撤回
+- 缺乏真实数据支持 AI 判断 review_level 的边界
 
-## 决策
-
-三级审核门禁：
-- `routine` — AI 自动发出，事后通知。适用于日常跟进、节日问候等
-- `commercial` — 人审核后发出。适用于报价、合同、技术承诺等
-- `critical` — 强制人工审核。适用于高价值客户、首次触达、敏感话题
-
-AI 自动判断 review_level，人可以在任何时候提高等级。
+**修正后决策：Phase 1 全部消息人审后发出。** 没有任何消息 AI 自动发送。
+分级审核（routine/commercial/critical）延至 Phase 2——需积累足够的真实审核记录后
+再训练分类模型。
 
 ## 后果
 
-- ✅ 减少 70%+ 的审核负担（routine 类消息自动发）
-- ✅ 高风险内容仍有门禁保护
-- ❌ AI 误判 routine/commercial 边界的风险 → 需要「事后通知」作为安全网
-- ❌ 增加了 review_level 字段和判断逻辑的复杂度
+- ✅ 消除 AI 误发消息的致命风险
+- ❌ 增加了 Phase 1 的人工审核负担——每条 AI 起草消息都需要人审
 
 ---
 
@@ -86,29 +79,31 @@ SalesOS Lite 的数据模型只到 Opportunity。签约后的 Project 不建独�
 
 ---
 
-# ADR-0004: 使用 SQLite 全量拼接知识库（Phase 1）
+# ADR-0004: 知识库使用 PostgreSQL 统一存储（Phase 1）
 
 ## 状态
 
-已接受（2026-06-20）
+已修正（2026-06-20，跨模型审查后）
 
-## 背景
+## 决策变更
 
-三层知识库需要注入 AI prompt。Tier 1（2000 tokens）+ Tier 2（4000 tokens）
-总量在 DeepSeek 的 64K 上下文窗口内完全可行。Tier 3 在 Phase 1 中条目数预计
-不超过 100 条——全量拼接比向量检索更简单、更快、更可解释。
+原决策：Phase 1 使用 SQLite 表存知识库条目。
 
-## 决策
+跨模型审查发现：项目已有 ADR-0001-postgresql 确定 PostgreSQL 为唯一基础设施依赖。
+引入第二个数据库（SQLite）会带来双连接池、双迁移路径、跨库查询不可用等问题。
 
-Phase 1 使用 SQLite 表存知识库条目，AI 推理时全量拼接到 system prompt。
-Phase 2 当 Tier 3 超过 500 条时引入向量检索。
+**修正后决策：** 知识库使用 PostgreSQL `knowledge_entries` 表，与主库同一连接。
+Tier 1 作为代码内常量（2000 tokens），Tier 2/3 存 PostgreSQL。
+
+Phase 2 当 Tier 3 超过 500 条时，启用 PostgreSQL 的 `pgvector` 扩展做向量检索——
+不需要引入独立数据库。
 
 ## 后果
 
-- ✅ 实现简单，无需引入向量数据库依赖
-- ✅ 全量拼接 = 完全可解释（prompt 里能看到用了哪些知识）
-- ✅ DeepSeek 64K 上下文足够（2000+4000+全量Tier3 ≈ 16K tokens）
-- ❌ Tier 3 超过 500 条后面临 token 限制 → 需要 Phase 2 向量检索升级
+- ✅ 单一数据库，简化运维和迁移
+- ✅ 可以 JOIN knowledge_entries 和 tenants/opportunities 表
+- ✅ Phase 2 向量检索用 pgvector 扩展，零新增依赖
+- ❌ PostgreSQL 的文本搜索能力弱于专用向量数据库——但 500 条内全量拼接更快
 
 ---
 

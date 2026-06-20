@@ -1,0 +1,315 @@
+<div style="max-width:1100px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>销售的三层结构：线索 → 商机 → 项目</h2>
+<p class="subtitle">之前的管道设计把这些全摊平成了任务卡片。真正的销售工作需要分层视图。</p>
+
+<div style="margin:20px 0;padding:16px;background:var(--bg-surface,#fff);border-radius:12px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+  <div style="font-size:11px;line-height:1.8">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="background:rgba(59,130,246,0.1);border-radius:8px;padding:10px 16px;text-align:center;min-width:120px">
+        <div style="font-size:18px">👤</div>
+        <div style="font-weight:600;font-size:11px">线索 Lead</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"有人对这个感兴趣"</div>
+        <div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">不确定能否成交</div>
+      </div>
+      <div style="color:var(--text-tertiary);font-size:18px">→</div>
+      <div style="background:rgba(108,92,231,0.1);border-radius:8px;padding:10px 16px;text-align:center;min-width:120px;border:2px solid rgba(108,92,231,0.3)">
+        <div style="font-size:18px">🎯</div>
+        <div style="font-weight:600;font-size:11px">商机 Opportunity</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"这个单子有预算有时限"</div>
+        <div style="font-size:9px;color:#6c5ce7;margin-top:4px">有金额、有把握、在推进</div>
+      </div>
+      <div style="color:var(--text-tertiary);font-size:18px">→</div>
+      <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:10px 16px;text-align:center;min-width:120px">
+        <div style="font-size:18px">🏗️</div>
+        <div style="font-weight:600;font-size:11px">项目 Project</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"合同签了，开始交付"</div>
+        <div style="font-size:9px;color:#10b981;margin-top:4px">有里程碑、有交付物</div>
+      </div>
+    </div>
+    
+    <div style="background:rgba(245,158,11,0.06);padding:8px 12px;border-radius:6px;font-size:10px;color:#92400e;margin-top:8px">
+      ⚠ <strong>之前的错误：</strong>把「张总要报价」「李总要技术方案」「王总签合同」全部摊平成管道里的卡片，没有体现它们之间的父子关系——<strong>一个商机下有多个跟进项，多个跟进项推动一个商机往前走</strong>。
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>正确的结构：商机是容器，跟进项是子任务</h3>
+</div>
+
+<div style="display:flex;gap:16px;margin-top:12px">
+  <!-- Left: Data model -->
+  <div style="flex:0 0 340px;background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+    <div style="font-weight:600;font-size:11px;margin-bottom:12px">📦 数据关系</div>
+    
+    <div style="background:rgba(59,130,246,0.06);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #3b82f6">
+      <div style="font-weight:600;color:#3b82f6;margin-bottom:4px">Lead 线索</div>
+      <div style="color:var(--text-tertiary);font-size:9px;line-height:1.6">
+        customer_name: 张总<br>
+        company: 台达电子<br>
+        channel: 展会碰面<br>
+        intent: hot<br>
+        <span style="color:#3b82f6">↓ 转化 ↓</span>
+      </div>
+    </div>
+    
+    <div style="background:rgba(108,92,231,0.06);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #6c5ce7">
+      <div style="font-weight:600;color:#6c5ce7;margin-bottom:4px">Opportunity 商机 ⭐ 核心</div>
+      <div style="color:var(--text-tertiary);font-size:9px;line-height:1.6">
+        name: 台达AIDC飞轮项目<br>
+        value: ¥420万<br>
+        probability: 80%<br>
+        stage: 报价中<br>
+        expected_close: 2026-07-15<br>
+        competitor: 某进口品牌<br>
+        decision_maker: 张总(技术总监)<br>
+        <span style="color:#6c5ce7">↓ 包含 ↓</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(16,185,129,0.04);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #10b981;margin-left:12px">
+      <div style="font-weight:500;margin-bottom:4px;font-size:9px">📋 跟进项 FollowupItem × N</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:9px">
+        <div style="background:var(--bg-subtle);padding:3px 6px;border-radius:3px">
+          <span style="font-weight:500">更新报价含维保</span>
+          <span style="color:var(--text-tertiary)"> · 待跟进 · @小王</span>
+        </div>
+        <div style="background:var(--bg-subtle);padding:3px 6px;border-radius:3px">
+          <span style="font-weight:500">技术参数确认</span>
+          <span style="color:var(--text-tertiary)"> · 处理中 · @李博</span>
+        </div>
+        <div style="background:var(--bg-subtle);padding:3px 6px;border-radius:3px">
+          <span style="font-weight:500">合同草案</span>
+          <span style="color:var(--text-tertiary)"> · 待审核 · @小王</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:rgba(16,185,129,0.06);border-radius:8px;padding:10px;border-left:3px solid #10b981">
+      <div style="font-weight:600;color:#10b981;margin-bottom:4px">Project 项目</div>
+      <div style="color:var(--text-tertiary);font-size:9px;line-height:1.6">
+        name: 台达AIDC飞轮交付<br>
+        status: 进行中<br>
+        milestones:<br>
+        · 第一批交付 2026-08<br>
+        · 安装调试 2026-09<br>
+        · 验收 2026-10
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Two views -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+    <!-- Manager view -->
+    <div style="background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+      <div style="font-weight:600;font-size:11px;margin-bottom:10px">👔 管理者视图：商机管道（按阶段 + 金额）</div>
+      <div style="font-size:9px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.08);color:var(--text-tertiary);font-weight:500;font-size:9px">
+            <td style="padding:6px 8px">商机</td><td style="padding:6px 8px">客户</td><td style="padding:6px 8px">阶段</td><td style="padding:6px 8px">金额</td><td style="padding:6px 8px">把握</td><td style="padding:6px 8px">预计成交</td><td style="padding:6px 8px">活跃跟进</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+            <td style="padding:6px 8px;font-weight:500">台达AIDC飞轮</td>
+            <td style="padding:6px 8px">台达电子</td>
+            <td style="padding:6px 8px"><span style="background:rgba(108,92,231,0.1);color:#6c5ce7;padding:1px 6px;border-radius:10px;font-size:8px">报价中</span></td>
+            <td style="padding:6px 8px;font-weight:500">420万</td>
+            <td style="padding:6px 8px;color:#10b981">80%</td>
+            <td style="padding:6px 8px">7/15</td>
+            <td style="padding:6px 8px"><span style="background:rgba(108,92,231,0.08);color:#6c5ce7;padding:1px 4px;border-radius:8px;font-size:8px">3项</span> <span style="color:#6c5ce7;cursor:pointer">展开↓</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+            <td style="padding:6px 8px;font-weight:500">华能储能配套</td>
+            <td style="padding:6px 8px">华能集团</td>
+            <td style="padding:6px 8px"><span style="background:rgba(249,115,22,0.1);color:#f97316;padding:1px 6px;border-radius:10px;font-size:8px">谈判中</span></td>
+            <td style="padding:6px 8px;font-weight:500">230万</td>
+            <td style="padding:6px 8px;color:var(--text-tertiary)">60%</td>
+            <td style="padding:6px 8px">8/1</td>
+            <td style="padding:6px 8px"><span style="background:rgba(108,92,231,0.08);color:#6c5ce7;padding:1px 4px;border-radius:8px;font-size:8px">2项</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+            <td style="padding:6px 8px;font-weight:500">三峡调频项目</td>
+            <td style="padding:6px 8px">三峡集团</td>
+            <td style="padding:6px 8px"><span style="background:rgba(239,68,68,0.08);color:#ef4444;padding:1px 6px;border-radius:10px;font-size:8px">等客户</span></td>
+            <td style="padding:6px 8px;font-weight:500">580万</td>
+            <td style="padding:6px 8px;color:#ef4444">30%</td>
+            <td style="padding:6px 8px">?</td>
+            <td style="padding:6px 8px"><span style="background:rgba(239,68,68,0.06);color:#ef4444;padding:1px 4px;border-radius:8px;font-size:8px">0项</span> <span style="color:#ef4444;font-size:8px">⚠ 7天无动作</span></td>
+          </tr>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:var(--bg-subtle);border-radius:6px;display:flex;justify-content:space-between;font-size:9px">
+          <span>本月可成交预测</span>
+          <span style="font-weight:600">¥320万</span>
+          <span style="color:var(--text-tertiary)">（总数 ¥1,230万 · 3 个活跃商机）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rep view: drill into one opportunity -->
+    <div style="background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+      <div style="font-weight:600;font-size:11px;margin-bottom:10px">💼 业务员视图：点击台达商机 → 展开跟进项</div>
+      <div style="font-size:9px">
+        <div style="background:var(--bg-subtle);padding:8px 10px;border-radius:6px;margin-bottom:8px;display:flex;gap:16px">
+          <div><span style="color:var(--text-tertiary)">商机：</span><span style="font-weight:500">台达AIDC飞轮项目</span></div>
+          <div><span style="color:var(--text-tertiary)">阶段：</span><span style="color:#6c5ce7;font-weight:500">报价中</span></div>
+          <div><span style="color:var(--text-tertiary)">金额：</span><span style="font-weight:500">¥420万</span></div>
+          <div><span style="color:var(--text-tertiary)">把握：</span><span style="color:#10b981;font-weight:500">80%</span></div>
+          <div style="margin-left:auto"><span style="background:#6c5ce7;color:#fff;padding:2px 8px;border-radius:4px;font-size:8px;cursor:pointer">+ 添加跟进</span></div>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+          <div style="background:var(--bg-subtle);border-radius:6px;padding:6px">
+            <div style="font-weight:600;font-size:9px;margin-bottom:4px">📥 待跟进</div>
+            <div style="background:var(--bg-surface);padding:5px 6px;border-radius:4px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+              <div style="font-weight:500">更新报价含维保</div>
+              <div style="color:var(--text-tertiary)">@小王 · 2天前 · ✈️出差</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-subtle);border-radius:6px;padding:6px">
+            <div style="font-weight:600;font-size:9px;margin-bottom:4px">🔧 处理中</div>
+            <div style="background:var(--bg-surface);padding:5px 6px;border-radius:4px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+              <div style="font-weight:500">技术参数确认</div>
+              <div style="color:var(--text-tertiary)">@李博 · 🟢 AI处理中</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-subtle);border-radius:6px;padding:6px">
+            <div style="font-weight:600;font-size:9px;margin-bottom:4px">👀 待审核</div>
+            <div style="background:var(--bg-surface);padding:5px 6px;border-radius:4px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+              <div style="font-weight:500">合同草案</div>
+              <div style="color:var(--text-tertiary)">@小王 · 等主管过</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-subtle);border-radius:6px;padding:6px">
+            <div style="font-weight:600;font-size:9px;margin-bottom:4px">✅ 已完成</div>
+            <div style="background:var(--bg-surface);padding:5px 6px;border-radius:4px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04);opacity:0.6">
+              <div style="font-weight:500">初次报价</div>
+              <div style="color:var(--text-tertiary)">6/15 已发送</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top:8px;font-size:8px;color:var(--text-tertiary);text-align:center">
+          当所有跟进项完成 → 商机阶段自动推进（报价中 → 谈判中）<br>
+          AI 定期检查：7天无新跟进 → 商机标红预警
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>商机状态流转（替代之前的四列任务管道）</h3>
+</div>
+
+<div style="background:var(--bg-surface,#fff);border-radius:10px;padding:16px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px;margin-top:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:0">
+    <div style="text-align:center;flex:1">
+      <div style="background:rgba(59,130,246,0.1);border-radius:8px;padding:10px">
+        <div style="font-weight:600;margin-bottom:2px">🔍 线索验证</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"这人值不值得跟？"</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">AI 从对话中识别意向</div>
+      </div>
+    </div>
+    <div style="color:var(--text-quaternary)">→</div>
+    <div style="text-align:center;flex:1">
+      <div style="background:rgba(108,92,231,0.12);border-radius:8px;padding:10px;border:2px solid rgba(108,92,231,0.3)">
+        <div style="font-weight:600;margin-bottom:2px">📋 需求确认</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"他要什么？预算多少？"</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">跟进项：需求调研 + 报价</div>
+      </div>
+    </div>
+    <div style="color:var(--text-quaternary)">→</div>
+    <div style="text-align:center;flex:1">
+      <div style="background:rgba(249,115,22,0.1);border-radius:8px;padding:10px">
+        <div style="font-weight:600;margin-bottom:2px">💰 报价/谈判</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"价格能不能谈拢？"</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">跟进项：报价/方案/谈判</div>
+      </div>
+    </div>
+    <div style="color:var(--text-quaternary)">→</div>
+    <div style="text-align:center;flex:1">
+      <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:10px">
+        <div style="font-weight:600;margin-bottom:2px">📝 合同</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">"走法务、签章"</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">跟进项：合同 + 审批</div>
+      </div>
+    </div>
+    <div style="color:var(--text-quaternary)">→</div>
+    <div style="text-align:center;flex:1">
+      <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:10px">
+        <div style="font-weight:600;margin-bottom:2px">✅ 成交</div>
+        <div style="font-size:9px;color:var(--text-tertiary)">→ 转为交付项目</div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:10px;font-size:9px;color:var(--text-tertiary)">
+    每个阶段有自己的一组跟进项模板。所有跟进项完成 → 自动推进阶段。<br>
+    <span style="color:#ef4444">流失</span> 和 <span style="color:#71717a">搁置</span> 是两个独立的终态，不是阶段。
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>线索 → 商机的转化判断</h3>
+  <p class="subtitle">不是每个线索都值得开商机。AI 辅助判断，人做决定。</p>
+</div>
+
+<div style="background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px;margin-top:8px">
+  <div style="display:flex;gap:12px">
+    <div style="flex:1;background:var(--bg-subtle);border-radius:8px;padding:12px">
+      <div style="font-weight:600;margin-bottom:8px">🔍 AI 自动评分</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:9px">
+        <div style="display:flex;justify-content:space-between">
+          <span>预算明确</span>
+          <span style="color:#10b981">✓ "大概400-500万"</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>决策人清楚</span>
+          <span style="color:#10b981">✓ 张总·技术总监</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>时间紧迫</span>
+          <span style="color:#f59e0b">△ "下季度前"</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>竞品在比</span>
+          <span style="color:#ef4444">✗ 有进口品牌对比</span>
+        </div>
+        <div style="border-top:1px solid rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;display:flex;justify-content:space-between">
+          <span style="font-weight:600">综合评分</span>
+          <span style="color:#6c5ce7;font-weight:600">72/100 · 建议转化</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;font-size:9px">
+      <div style="background:rgba(16,185,129,0.06);padding:8px 10px;border-radius:6px;border-left:3px solid #10b981">
+        <span style="font-weight:500">转化 → 商机</span><br>
+        <span style="color:var(--text-tertiary)">创建商机卡片，分配跟进模板，入管道</span>
+      </div>
+      <div style="background:rgba(245,158,11,0.06);padding:8px 10px;border-radius:6px;border-left:3px solid #f59e0b">
+        <span style="font-weight:500">保持 → 线索</span><br>
+        <span style="color:var(--text-tertiary)">还不成熟，继续培育。AI 定期提醒跟进</span>
+      </div>
+      <div style="background:rgba(148,163,184,0.08);padding:8px 10px;border-radius:6px;border-left:3px solid #94a3b8">
+        <span style="font-weight:500">放弃 → 归档</span><br>
+        <span style="color:var(--text-tertiary)">明确不感兴趣或预算不匹配</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <div class="cards">
+    <div class="card" data-choice="ok" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>✅ 三层结构对</h3>
+        <p>线索→商机→项目，商机下挂跟进项，两层管道</p>
+      </div>
+    </div>
+    <div class="card" data-choice="adjust" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>🔧 需要调整</h3>
+        <p>阶段划分或模型关系需要改</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

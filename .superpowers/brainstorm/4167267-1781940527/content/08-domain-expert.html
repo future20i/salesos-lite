@@ -1,0 +1,107 @@
+<div style="max-width:1000px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>🔍 领域专家视角：项目型外贸销售的实战匹配</h2>
+<p class="subtitle">以一个做了15年工业设备外贸的老兵视角，审视这个系统能不能活过第一个客户</p>
+
+<div class="section">
+  <h3>问题 1：商机阶段划分漏了最关键的「技术交流」</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+我们之前定的五个阶段：<br><br>
+<code>线索验证 → 需求确认 → 报价/谈判 → 合同 → 成交</code><br><br>
+对于项目型销售，中间的「技术交流」是整个周期里最耗时的环节——方案评审、现场考察、技术答辩、参数确认。<strong>这是跟贸易型最大的区别。</strong><br><br>
+贸易型：客户说要报价 → 你发报价 → 谈价格 → 成交。技术交流几乎不存在。<br>
+项目型：客户说要方案 → 你做方案 → 客户提问题 → 你去现场答辩 → 改方案 → 再审 → 做样机测试 → 再审 → 报价 → 再谈。<br><br>
+<strong style="color:#22c55e">建议修正：</strong><br>
+<code>线索验证 → 需求确认 → <span style="color:#6c5ce7;font-weight:600">技术交流</span> → 报价/谈判 → 合同 → 成交</code><br><br>
+而且「技术交流」阶段要能容纳多个子环节——不是一步完成的。
+  </div>
+</div>
+
+<div class="section">
+  <h3>问题 2：决策链不是一条线，是一张网</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+Opportunity 模型里有一个 decision_maker 字段。实战中，项目型销售的决策链是：<br><br>
+• 技术负责人（提需求、审方案、做技术判断）— 他是「守门员」<br>
+• 采购负责人（比价、谈合同、管流程）— 他是「执行者」<br>
+• 最终决策人（老板/副总裁）— 他是「拨款人」<br><br>
+<strong>关键：这三个人关心的东西完全不同。</strong>你跟技术聊参数，跟采购聊交期，跟老板聊 ROI。同一个人不能同时应对这三种沟通。<br><br>
+<strong style="color:#22c55e">建议：</strong><br>
+decision_maker 改成 decision_chain: JSON 数组——<br>
+<code>[{role: "技术负责人", name: "张总", concerns: "响应时间<5ms"}，<br>
+ {role: "采购", name: "李经理", concerns: "交期+付款条件"}，<br>
+ {role: "最终决策", name: "王总", concerns: "总成本+服务"}]</code><br><br>
+跟进项可以关联到决策链中的具体角色。这样 AI 起草消息时知道对谁说、说什么。
+  </div>
+</div>
+
+<div class="section">
+  <h3>问题 3：缺失「竞争对手」的跟踪</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+项目型销售的竞品信息极其重要——而且是动态的。客户可能同时跟 3 家供应商在谈，
+不同阶段有不同的竞品在比。<br><br>
+Opportunity 模型目前只有 competitor 字段（一个字符串）。实战中：<br>
+• 技术交流阶段：客户说"XX 品牌说他们能做到 3ms"<br>
+• 报价阶段：客户说"XX 比你便宜 15%"<br>
+• 谈判阶段：客户说"XX 提供 5 年免费维保"<br><br>
+<strong>这些竞品信号散落在对话里，但系统应该追踪。</strong>不是只记录「竞争对手是西门子」，而是记录「什么时候客户提到了什么竞品、说了什么、我们怎么应对的」。<br><br>
+<strong style="color:#22c55e">建议：</strong><br>
+competitor 字段改成 competitor_tracking: JSON 数组——<br>
+<code>[{name: "某进口品牌", mentioned_at: "6/15", context: "客户说他们能做到3ms",<br>
+  our_response: "发技术对比文档，说明飞轮vs超级电容的优势"}]</code><br><br>
+这是 AI 诊断沉默原因的关键输入——客户沉默了是不是因为竞品在压价？
+  </div>
+</div>
+
+<div class="section">
+  <h3>问题 4：报价不是一张纸，是一轮谈判</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+贸易型的报价通常是「客户问价→你报→成交或流失」。项目型是多轮报价：<br><br>
+初版方案（技术参数+粗略预算）→ 详细方案（分项报价）→ 最终报价（含商务条款）→ 合同<br><br>
+中间的每次报价调整都有原因——"客户要求交期从 45 天压缩到 30 天，所以加了加急费"。</div>
+</div>
+
+<div class="section" style="margin-top:32px">
+  <h3>领域专家审查结论</h3>
+  <div style="font-size:10px;line-height:1.7">
+    <table style="width:100%;border-collapse:collapse;font-size:9px;color:#a1a1aa">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:6px 8px;font-weight:600;color:#ededef">修正项</td>
+      <td style="padding:6px 8px;font-weight:600;color:#ededef">影响</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+      <td style="padding:6px 8px;color:#6c5ce7">商机阶段+「技术交流」</td>
+      <td style="padding:6px 8px">Stage 枚举 +1。影响管道 visual 和状态流转</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+      <td style="padding:6px 8px;color:#6c5ce7">decision_chain: JSON 数组</td>
+      <td style="padding:6px 8px">模型字段从单值改数组。AI 起草消息时可精确到人</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+      <td style="padding:6px 8px;color:#6c5ce7">competitor_tracking: JSON 数组</td>
+      <td style="padding:6px 8px">动态追踪竞品信号。AI 诊断沉默的关键输入</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;color:#6c5ce7">多轮报价关联</td>
+      <td style="padding:6px 8px">Quotation 之间加 parent/child 引用。Phase 2</td>
+    </tr>
+    </table>
+  </div>
+</div>
+
+<div class="cards" style="margin-top:20px">
+  <div class="card" data-choice="incorporate" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>✅ 三项修正全部纳入</h3><p>加技术交流阶段、决策链数组、竞品追踪</p></div>
+  </div>
+  <div class="card" data-choice="partial" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>🔧 部分纳入</h3><p>有些修正太重了</p></div>
+  </div>
+</div>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:system-ui,-apple-system,sans-serif;padding:24px;max-width:1000px;margin:0 auto}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:11px;color:#71717a;margin-bottom:20px}
+  .section{margin-bottom:20px}
+  .section h3{font-size:13px;font-weight:600;color:#ededef;margin-bottom:8px}
+</style>
+</div>

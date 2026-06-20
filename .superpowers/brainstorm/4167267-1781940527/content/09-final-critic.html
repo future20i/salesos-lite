@@ -1,0 +1,112 @@
+<div style="max-width:1000px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>⚡ 终审批评者：上线第一天会死在什么地方</h2>
+<p class="subtitle">不是"有没有漏洞"——而是"哪类问题会让用户彻底放弃这个产品"</p>
+
+<div class="section">
+  <h3>致命问题 1：空数据下的 AI 无能感</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+新用户注册 → 导入 3 个客户 → 打开系统 → 一片空。<br><br>
+管道视图没有数据，AI 诊断没有历史可以分析，温和触达没有上下文可以引用。<br>
+用户看到的不是"这是一个聪明的系统"而是"这什么都没有"。<br><br>
+<strong style="color:#ef4444">这是 SaaS 产品最常见的死亡模式：</strong>第一天体验决定了用户会不会回来。<br><br>
+<strong style="color:#22c55e">必须做：种子数据策略。</strong><br>
+• 新租户注册后，预置 3 个演示商机（张总/台达、李总/华能、王总/国电投）<br>
+• 每个演示商机有 2-3 条模拟消息 + 1 个跟进项<br>
+• AI 诊断可以在演示数据上跑出结果（"检测到王总 7 天未回复，建议温和触达"）<br>
+• 用户点"转化为真实数据" → 一键清理演示数据<br><br>
+用户第一天打开系统，看到的是一个活着的管道。不是空表格。
+  </div>
+</div>
+
+<div class="section">
+  <h3>致命问题 2：手动建商机是死亡摩擦</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+当前设计中，用户需要"手动创建商机 + 手动创建跟进项"。这意味着：<br><br>
+第一天：用户手动建 5 个商机，填了半天表 → 累了 → 关了<br>
+第二天：用户在 WhatsApp 上跟客户聊了 → 要切回系统记录 → 忘了 → 数据不同步了<br>
+第三天：用户发现管道视图跟实际情况对不上 → 觉得系统没用 → 弃了<br><br>
+<strong style="color:#ef4444">根源问题：</strong>建商机和建跟进项必须有两个路径——手动创建 + 自动提取。<br>
+自动提取路径是留存的基础。如果 80% 的商机和跟进项靠手动，系统就是负担。<br><br>
+<strong style="color:#22c55e">必须做：收件箱消息 → AI 判断 "这条消息产生了跟进需求" → 弹窗 "已自动创建跟进项：确认交期。要关联到哪个商机？" → 一个点击完成。</strong><br><br>
+业务员打开收件箱看到客户消息，聊了几句，系统自动检测到"这是需要跟进的"，在旁边弹出一个轻量卡片。点"加入管道"就完成了。这是创建跟进项的最短路径。
+  </div>
+</div>
+
+<div class="section">
+  <h3>致命问题 3：业务员不信任 AI 写的消息</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+AI 起草了一条温和触达消息：<br><br>
+"张总您好，上次关于飞轮UPS技术方案的讨论非常愉快。我整理了最新的技术参数对比文档，方便的话我们可以约个时间再深入交流。"<br><br>
+业务员看了：说得太客气了、没提到上次他关心的交期问题、语气跟我的风格不一样。<br>
+他删掉重写了一版。下一次 AI 又生成了一条，他又删了。第三次他直接关掉了 AI 起草功能。<br><br>
+<strong style="color:#ef4444">问题：</strong>AI 起草的文案是通用风格 + 有限上下文。如果用户每次都改，就形成了"AI 不靠谱"的第一印象。<br><br>
+<strong style="color:#22c55e">必须做：</strong><br>
+• 每条 AI 起草的消息附带"用了哪些上下文"的来源标注——"引用了 6/15 的对话、上次报价单、客户关心交期"<br>
+• 用户修改 AI 消息后，记录改动 → 逐渐学习该用户的风格<br>
+• 第一版 AI 消息提供一个"简练版/详细版/催促版"切换按钮，给用户掌控感
+  </div>
+</div>
+
+<div class="section">
+  <h3>致命问题 4：设计系统与实际产品断层的死亡螺旋</h3>
+  <div style="color:#a1a1aa;font-size:10px;line-height:1.7">
+我们花了大量时间讨论四列管道、两层视图、设计 token。但 SalesOS Lite 现在的 SPA 是 1673 行单一 HTML 文件。<br><br>
+<strong style="color:#ef4444">Pitfall 40 和 41 反复出现：</strong>Hermes write_file 的安全过滤器会在写入 HTML/JS 时静默注入 ***，导致 JS 语法错误整页失效。Token 变量命名、localStorage key、Google Fonts CDN 被墙——这些都是真实的生产事故。<br><br>
+<strong style="color:#22c55e">必须做：</strong><br>
+• 管道视图不另起一个 HTML 文件——扩展现有 index.html<br>
+• 先确保收件箱稳了再加管道面板（增量迭代，不推倒重来）<br>
+• 部署后 curl 验证 *** 计数 = 0 再报告成功<br>
+• 不要用 Google Fonts
+  </div>
+</div>
+
+<div class="section" style="margin-top:32px">
+  <h3>终审结论：P0 必须在上线前解决的三件事</h3>
+  <div style="font-size:10px;line-height:1.7">
+    <table style="width:100%;border-collapse:collapse;font-size:9px;color:#a1a1aa;margin-top:8px">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:6px 10px;width:24px;color:#ef4444;font-weight:700">1</td>
+      <td style="padding:6px 10px;font-weight:600;color:#ededef">种子数据</td>
+      <td style="padding:6px 10px">新用户注册后看到活着的管道，不是空表格。演示商机 + 模拟对话 + 可一键清除</td>
+      <td style="padding:6px 10px;color:#22c55e">Phase 1</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:6px 10px;color:#ef4444;font-weight:700">2</td>
+      <td style="padding:6px 10px;font-weight:600;color:#ededef">收件箱→管道最短路径</td>
+      <td style="padding:6px 10px">从对话消息中 AI 检测跟进需求 + 一键加入管道。不依赖手动建商机</td>
+      <td style="padding:6px 10px;color:#22c55e">Phase 1</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:6px 10px;color:#ef4444;font-weight:700">3</td>
+      <td style="padding:6px 10px;font-weight:600;color:#ededef">AI文案信任建设</td>
+      <td style="padding:6px 10px">上下文标注 + 风格学习 + 多版本切换</td>
+      <td style="padding:6px 10px;color:#22c55e">Phase 1</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;color:#f59e0b;font-weight:700">4</td>
+      <td style="padding:6px 10px;font-weight:600;color:#ededef">增量部署</td>
+      <td style="padding:6px 10px">扩展现有 index.html，不重建。遵守已知的 pitfall 约束</td>
+      <td style="padding:6px 10px;color:#f59e0b">持续</td>
+    </tr>
+    </table>
+  </div>
+</div>
+
+<div class="cards" style="margin-top:20px">
+  <div class="card" data-choice="proceed" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>✅ 审查通过，进入规格编写</h3><p>四个 P0 项纳入 Phase 1，开始写产品规格文档</p></div>
+  </div>
+  <div class="card" data-choice="more" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>🔧 还有遗漏</h3><p>终审还没找到真正致命的问题</p></div>
+  </div>
+</div>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:system-ui,-apple-system,sans-serif;padding:24px;max-width:1000px;margin:0 auto}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:11px;color:#71717a;margin-bottom:20px}
+  .section{margin-bottom:20px}
+  .section h3{font-size:13px;font-weight:600;color:#ededef;margin-bottom:8px}
+</style>
+</div>

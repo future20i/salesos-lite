@@ -1,0 +1,8 @@
+{"type":"server-started","port":58638,"host":"0.0.0.0","url_host":"198.199.123.43","url":"http://198.199.123.43:58638","screen_dir":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content","state_dir":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/state"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/01-design-direction.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/02-capture-channels.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/03-lead-opp-project.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/04-systems-analysis.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/05-competitive-analysis.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4163031-1781927712/content/06-critic-review.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,231 @@
+<div style="max-width:1100px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>盲区：一半以上的跟进来自「消息系统之外」</h2>
+<p class="subtitle">出差拜访、电话会议、视频会议、展会碰面——这些不会出现在收件箱里，但却是最需要跟进的事务</p>
+
+<div class="split">
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header" style="background:rgba(239,68,68,0.08);color:#ef4444">❌ 原设计的盲区</div>
+    <div class="mockup-body" style="font-size:10px;line-height:1.6;color:#71717a">
+      <div style="margin-bottom:12px;font-weight:500;color:var(--text-primary)">一切从对话中来……</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:rgba(108,92,231,0.06);padding:10px;border-radius:6px;border-left:3px solid #6c5ce7">
+          <div style="font-weight:500;color:var(--text-primary)">WhatsApp 消息 ✓</div>
+          <div style="font-size:9px;color:var(--text-tertiary)">系统自动捕获 → AI 提取 → 加入管道</div>
+        </div>
+        <div style="background:rgba(16,185,129,0.06);padding:10px;border-radius:6px;border-left:3px solid #10b981">
+          <div style="font-weight:500;color:var(--text-primary)">邮件 ✓</div>
+          <div style="font-size:9px;color:var(--text-tertiary)">系统自动捕获 → AI 提取 → 加入管道</div>
+        </div>
+      </div>
+      <div style="margin:16px 0 12px;border-top:1px dashed rgba(239,68,68,0.3);padding-top:12px">
+        <div style="font-weight:500;color:#ef4444;margin-bottom:8px">但下面这些渠道完全漏掉了：</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:rgba(239,68,68,0.04);padding:10px;border-radius:6px;border-left:3px solid #ef4444">
+            <div style="font-weight:500;color:var(--text-primary)">✈️ 出差拜访 ✗</div>
+            <div style="font-size:9px;color:var(--text-tertiary)">坐飞机去客户工厂谈了两小时<br>回来什么都没有记录</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.04);padding:10px;border-radius:6px;border-left:3px solid #ef4444">
+            <div style="font-weight:500;color:var(--text-primary)">📞 电话会议 ✗</div>
+            <div style="font-size:9px;color:var(--text-tertiary)">三方通话讨论技术方案<br>口头约定的交期没人记</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.04);padding:10px;border-radius:6px;border-left:3px solid #ef4444">
+            <div style="font-weight:500;color:var(--text-primary)">🎥 视频会议 ✗</div>
+            <div style="font-size:9px;color:var(--text-tertiary)">Zoom/腾讯会议演示方案<br>客户的反馈和改需求口头说了</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.04);padding:10px;border-radius:6px;border-left:3px solid #ef4444">
+            <div style="font-weight:500;color:var(--text-primary)">🎪 展会碰面 ✗</div>
+            <div style="font-size:9px;color:var(--text-tertiary)">展会上收了一叠名片<br>每个人说了什么全忘了</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" style="flex:1.2">
+    <div class="mockup-header" style="background:rgba(16,185,129,0.08);color:#10b981">✅ 修正：统一「快速捕获」入口</div>
+    <div class="mockup-body" style="font-size:10px;line-height:1.6">
+      <div style="margin-bottom:12px;font-weight:500;color:var(--text-primary)">无论信息来源是什么，业务员只需要一个动作</div>
+      
+      <div style="background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--accent,#6c5ce7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px">+</div>
+          <div>
+            <div style="font-weight:600;font-size:12px">快速捕获</div>
+            <div style="font-size:9px;color:var(--text-tertiary)">系统任意位置一键唤起</div>
+          </div>
+        </div>
+        
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:6px">
+            <div style="flex:1;background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;cursor:pointer;border:2px solid transparent;text-align:center;font-size:10px">
+              <div style="font-size:18px;margin-bottom:2px">✈️</div>
+              <div style="font-weight:500">出差拜访</div>
+            </div>
+            <div style="flex:1;background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;cursor:pointer;text-align:center;font-size:10px">
+              <div style="font-size:18px;margin-bottom:2px">📞</div>
+              <div style="font-weight:500">电话/视频</div>
+            </div>
+            <div style="flex:1;background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;cursor:pointer;text-align:center;font-size:10px">
+              <div style="font-size:18px;margin-bottom:2px">🎪</div>
+              <div style="font-weight:500">展会/活动</div>
+            </div>
+            <div style="flex:1;background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;cursor:pointer;text-align:center;font-size:10px">
+              <div style="font-size:18px;margin-bottom:2px">📝</div>
+              <div style="font-weight:500">其他</div>
+            </div>
+          </div>
+
+          <div style="margin-top:4px;background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:10px">
+            <div style="font-weight:500;margin-bottom:4px;font-size:10px">选客户</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <span style="background:var(--bg-surface,#fff);padding:3px 8px;border-radius:12px;font-size:9px;box-shadow:0 0 0 1px rgba(108,92,231,0.2);color:#6c5ce7">张总 · 台达电子</span>
+              <span style="background:var(--bg-surface,#fff);padding:3px 8px;border-radius:12px;font-size:9px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">李总 · 华能</span>
+              <span style="background:var(--bg-surface,#fff);padding:3px 8px;border-radius:12px;font-size:9px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">+ 新建客户</span>
+            </div>
+          </div>
+
+          <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:10px">
+            <div style="font-weight:500;margin-bottom:4px;font-size:10px">记点什么（语音或文字）</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--bg-surface,#fff);border-radius:6px;padding:8px 10px;font-size:9px;color:var(--text-tertiary)">
+                <span style="font-size:14px">🎤</span>
+                <span>按住说话（出差途中最方便）</span>
+              </div>
+              <span style="color:var(--text-quaternary);font-size:9px">或</span>
+              <div style="background:var(--bg-surface,#fff);border-radius:6px;padding:8px 10px;font-size:9px;color:var(--text-tertiary);cursor:pointer">✏️ 打字</div>
+            </div>
+          </div>
+
+          <div style="font-size:9px;color:var(--text-tertiary);padding:6px 0 2px;text-align:center;color:var(--accent)">
+            AI 自动转文字 → 提取行动项 → 加入跟进管道
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:8px;background:rgba(16,185,129,0.06);border-radius:6px;font-size:10px;color:#10b981">
+        ✅ 关键设计：
+        <ul style="margin:4px 0 0 14px;padding:0">
+          <li><strong>语音优先</strong>——出差路上/刚开完会，打字不方便</li>
+          <li><strong>四种场景一键切换</strong>——不需要填表单，选类型→选客户→说话→完</li>
+          <li><strong>AI 做结构化</strong>——业务员只需要把脑子里的事倒出来，AI 整理成待办</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>完整数据流：所有渠道汇入同一个管道</h3>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:12px;align-items:stretch">
+  <!-- Input channels -->
+  <div style="flex:0 0 220px;background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+    <div style="font-weight:600;font-size:11px;margin-bottom:12px;color:var(--text-primary)">📥 输入源</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:9px">
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(37,211,102,0.08);border-radius:6px">
+        <span>💬</span><span style="font-weight:500">WhatsApp</span><span style="color:#25D366;margin-left:auto">自动</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(91,156,245,0.08);border-radius:6px">
+        <span>📧</span><span style="font-weight:500">邮件</span><span style="color:#5B9CF5;margin-left:auto">自动</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(0,0,0,0.03);border-radius:6px">
+        <span>🌐</span><span style="font-weight:500">网页表单</span><span style="color:var(--text-tertiary);margin-left:auto">自动</span>
+      </div>
+      <div style="border-top:1px dashed rgba(0,0,0,0.1);margin:4px 0"></div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(108,92,231,0.08);border-radius:6px;border:1px dashed rgba(108,92,231,0.3)">
+        <span>✈️</span><span style="font-weight:500">出差拜访</span><span style="color:#6c5ce7;margin-left:auto">语音</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(108,92,231,0.08);border-radius:6px;border:1px dashed rgba(108,92,231,0.3)">
+        <span>📞</span><span style="font-weight:500">电话/视频</span><span style="color:#6c5ce7;margin-left:auto">语音</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(108,92,231,0.08);border-radius:6px;border:1px dashed rgba(108,92,231,0.3)">
+        <span>🎪</span><span style="font-weight:500">展会/活动</span><span style="color:#6c5ce7;margin-left:auto">语音</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(108,92,231,0.08);border-radius:6px;border:1px dashed rgba(108,92,231,0.3)">
+        <span>📝</span><span style="font-weight:500">手动记录</span><span style="color:#6c5ce7;margin-left:auto">打字</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;align-items:center;font-size:20px;color:var(--text-tertiary)">⟶</div>
+
+  <!-- AI Pipeline -->
+  <div style="flex:0 0 180px;background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+    <div style="font-weight:600;font-size:11px;margin-bottom:12px;color:var(--text-primary)">🤖 AI 处理</div>
+    <div style="font-size:9px;line-height:1.8">
+      <div style="padding:4px 8px;background:rgba(108,92,231,0.06);border-radius:4px;margin-bottom:6px">
+        <div style="font-weight:500">语音 → 文字</div>
+        <div style="color:var(--text-tertiary)">自动转写</div>
+      </div>
+      <div style="padding:4px 8px;background:rgba(108,92,231,0.06);border-radius:4px;margin-bottom:6px">
+        <div style="font-weight:500">提取行动项</div>
+        <div style="color:var(--text-tertiary)">识别待办 + 截止日</div>
+      </div>
+      <div style="padding:4px 8px;background:rgba(108,92,231,0.06);border-radius:4px;margin-bottom:6px">
+        <div style="font-weight:500">关联上下文</div>
+        <div style="color:var(--text-tertiary)">绑定客户 + 商机 + 历史</div>
+      </div>
+      <div style="padding:4px 8px;background:rgba(108,92,231,0.06);border-radius:4px">
+        <div style="font-weight:500">建议优先级</div>
+        <div style="color:var(--text-tertiary)">紧急/高/普通</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;align-items:center;font-size:20px;color:var(--text-tertiary)">⟶</div>
+
+  <!-- Pipeline -->
+  <div style="flex:1;background:var(--bg-surface,#fff);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+    <div style="font-weight:600;font-size:11px;margin-bottom:12px;color:var(--text-primary)">📊 跟进管道（统一视图）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:9px">
+      <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+        <div style="font-weight:600;margin-bottom:4px">📥 待跟进 <span style="font-weight:400;color:var(--text-tertiary)">5</span></div>
+        <div style="background:var(--bg-surface);padding:4px 5px;border-radius:3px;margin-bottom:3px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+          <span style="font-weight:500">张总</span> · 更新报价
+          <div style="color:var(--text-tertiary)">💬 WhatsApp · 2天</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:4px 5px;border-radius:3px;margin-bottom:3px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+          <span style="font-weight:500">陈总</span> · 技术方案
+          <div style="color:var(--text-tertiary)">✈️ 出差拜访 · 昨天</div>
+        </div>
+        <div style="background:var(--bg-surface);padding:4px 5px;border-radius:3px;font-size:8px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)">
+          <span style="font-weight:500">吴总</span> · 催款跟进
+          <div style="color:var(--text-tertiary)">📞 电话 · 3天前</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+        <div style="font-weight:600;margin-bottom:4px">🔧 处理中 <span style="font-weight:400;color:var(--text-tertiary)">2</span></div>
+      </div>
+      <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+        <div style="font-weight:600;margin-bottom:4px">👀 待审核 <span style="font-weight:400;color:var(--text-tertiary)">1</span></div>
+      </div>
+      <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+        <div style="font-weight:600;margin-bottom:4px">⏳ 等客户 <span style="font-weight:400;color:var(--text-tertiary)">4</span></div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:9px;color:var(--text-tertiary);text-align:center">
+      无论来自 WhatsApp / 邮件 / 出差 / 电话 — 全部汇入同一管道
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <div class="cards">
+    <div class="card" data-choice="ok" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>✅ 这个方向对</h3>
+        <p>语音优先快速捕获 + 多渠道汇入 + 统一管道</p>
+      </div>
+    </div>
+    <div class="card" data-choice="modify" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>🔧 需要调整</h3>
+        <p>我会具体说哪里需要改</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

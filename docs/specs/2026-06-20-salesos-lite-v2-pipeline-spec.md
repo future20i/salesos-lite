@@ -61,16 +61,27 @@
 
 商机阶段：`线索验证 → 需求确认 → 技术交流 → 报价/谈判 → 合同 → 成交`
 
-### 2.4 AI 沉默诊断 (P0 — 新增)
+### 2.4 AI 沉默提醒 (P0 — 新增)
+
+> ⚠️ Phase 1 定位修正：不做「诊断」，只做「监测 + 提醒」。诊断能力需要历史数据积累，
+> Phase 1 先建立信任基础。
 
 工作流程：
 1. **监测** — 持续追踪所有活跃商机的客户回复状态
-2. **诊断** — 超 N 天无回复时，AI 分析原因（正常流程/竞品威胁/遗忘/流失风险）
-3. **建议** — 结合知识库给出具体行动方案
+2. **提醒** — 超过阈值天数时，系统生成提醒。阈值按商机阶段分级：
+   - 技术交流：14 天无回复 → 提醒
+   - 报价/谈判：7 天无回复 → 提醒
+   - 合同：5 天无回复 → 提醒
+   - 以上默认值，租户可在设置中调整
+3. **建议** — 结合知识库给出跟进话术建议（不分析原因，只提供可用的消息模板）
 4. **起草** — 生成跟进消息，标注上下文来源
-5. **审核** — 业务员审核/修改（分级：日常消息免审，商业敏感必审）
+5. **审核** — Phase 1 **全部消息人审**。没有任何消息 AI 自动发出
 6. **执行** — 跨渠道发出
 7. **追踪** — 监测回复，客户回了自动唤醒
+
+降级行为：LLM API 不可用时 → 纯时间监测 + 通用提醒模板（不依赖 AI）
+
+提醒持久化：所有提醒结果写入 `followup_events` 表。用户登录时批量呈现离线期间的提醒。
 
 ### 2.5 快速捕获 (P0 — 新增)
 
@@ -79,18 +90,19 @@ AI 转文字 → 提取行动项 → 关联客户 → 生成跟进项 → 入管
 
 ### 2.6 三层知识库 (P0 — 新增)
 
-| 层级 | 内容 | 实现 |
-|------|------|------|
-| Tier 1 | 外贸通用基础 | 系统内置 Prompt（2000 tokens） |
-| Tier 2 | 行业细分知识 | B2BSaleOS 维护，租户可编辑 |
-| Tier 3 | 企业专属知识 | SQLite 表，使用中自动积累 |
+| 层级 | 内容 | 存储 | 实现 |
+|------|------|------|------|
+| Tier 1 | 外贸通用基础 | 代码内常量 | 系统内置 Prompt（2000 tokens） |
+| Tier 2 | 行业细分知识 | PostgreSQL `knowledge_entries` | B2BSaleOS 维护，租户可只读查看 |
+| Tier 3 | 企业专属知识 | PostgreSQL `knowledge_entries` | 租户编辑，使用中自动积累 |
 
 ### 2.7 AI 起草 + 审核门禁 (P0 — 新增)
 
-- AI 起草报价/方案/跟进消息，附带上下文标注
-- 分级审核：`routine`（自动发）/ `commercial`（人审）/ `critical`（强制人审）
-- 多版本切换（简练/详细/催促）
-- 用户修改记录 → 风格学习
+- AI 起草跟进消息，附带上下文来源标注
+- **Phase 1 全部消息人审后发出。** 没有任何消息 AI 自动发送
+- 分级审核（`routine`/`commercial`/`critical`）在 Phase 2 引入——需积累真实数据后判断边界
+- 用户修改消息后记录原始版本和最终版本
+- **不做风格学习、不做多版本切换。** 每次只生成一个草稿
 
 ### 2.8 种子管道 (P0 — 新增)
 
@@ -153,18 +165,22 @@ class FollowupItem(Base):
 class FollowupEvent(Base):
     id, followup_id, kind, payload (JSON), created_at
     # kind: created/dispatched/draft_generated/reviewed/
-    #        approved/rejected/sent/responded/done
+    #        approved/rejected/sent/responded/done/
+    #        silence_alert/offline_digest
+    # silence_alert = 沉默提醒已生成，payload 含阈值天数和上下文
+    # offline_digest = 用户登录时批量呈现离线期间的提醒
 ```
 
 ### 3.4 KnowledgeEntry（知识库条目）
 
 ```python
 class KnowledgeEntry(Base):
-    id, tenant_id, tier (1/2/3),
-    category, title, content,
+    __tablename__ = "knowledge_entries"  # PostgreSQL, 与主库同一连接
+    id, tenant_id, tier (SMALLINT: 1/2/3),
+    category, title, content (Text),
     source (manual/ai_extracted/brain_downlink),
-    embedding (可空, Phase 2),
     is_active, created_at, updated_at
+    # 注意：Tier 2 为只读（brain_downlink），Tier 3 为可编辑
 ```
 
 ### 3.5 现有模型扩展
@@ -215,11 +231,13 @@ POST   /api/knowledge/seed             # 初始化种子知识库
 ### 4.4 AI 功能
 
 ```
-POST   /api/ai/silence-diagnosis       # 沉默诊断（异步，结果 SSE 推送）
-POST   /api/ai/draft-message           # AI 起草消息（带上下文标注）
-POST   /api/ai/suggest-priority       # AI 建议优先级
-POST   /api/ai/extract-followup        # 从消息提取跟进需求
+POST   /api/ai/silence-check           # 沉默检测（异步，结果 SSE 推送或持久化到 events）
+POST   /api/ai/draft-message            # AI 起草消息（带上下文标注，全部人审后发出）
+POST   /api/ai/extract-followup         # 从消息提取跟进需求
 ```
+
+> ⚠️ 所有 AI 端点复用 `ai_pipeline.py` 的 `TIER_LIMITS` 限流机制（starter: 5/min, growth: 20/min, pro: 60/min）。
+> Phase 1 不做沉默诊断——只做时间阈值检测 + 通用提醒模板。LLM 不可用时降级为纯时间检测。|
 
 ---
 
@@ -249,16 +267,20 @@ POST   /api/ai/extract-followup        # 从消息提取跟进需求
 
 ---
 
-## 6. 设计约束（来自项目 Pitfall 经验）
+## 6. 设计约束（来自项目 Pitfall 经验 + 跨模型审查修正）
 
+- **数据库：PostgreSQL 统一存储。** 知识库与主库同一连接，不建独立数据库
+- **沉默阈值默认值：** 技术交流 14 天 / 报价谈判 7 天 / 合同 5 天。租户可调
+- **AI 限流：** 复用 ai_pipeline.py TIER_LIMITS（starter 5/min, growth 20/min, pro 60/min）
+- **Phase 1 无自动发出：** 所有 AI 起草消息人审后发出。分级审核延至 Phase 2
 - **增量扩展现有 SPA：** 不新建 HTML 文件。管道面板集成到 index.html
 - **字体：** system-ui，不用 Google Fonts
 - **部署验证：** 每次写入后 curl 检查 `***` 计数 = 0
 - **Token 变量命名：** 不用 `TOKEN`/`token`，用 `_tk`
 - **静态文件路径：** `/admin/` 前缀（如适用）
-- **SQLite check_same_thread=False**
 - **SQLAlchemy create_all 不修改已有表：** 新列需手动 ALTER TABLE
-- **LLM 优雅降级：** API 不可用时退回规则引擎
+- **LLM 优雅降级：** API 不可用时→纯时间检测（不依赖 AI 推理）
+- **离线提醒不丢失：** 沉默提醒持久化到 `followup_events`，登录时批量呈现
 - **后台任务：** 复用 ai_pipeline.py 的 SKIP LOCKED + stale recovery 模式
 
 ---
@@ -268,14 +290,16 @@ POST   /api/ai/extract-followup        # 从消息提取跟进需求
 | 功能 | 优先级 | 状态 |
 |------|--------|------|
 | 多渠收件箱 | P0 | ✅ 已有 |
-| 商机 CRUD + 管道视图 | P0 | 🆕 |
+| 商机 CRUD + 管道视图（含搜索/筛选） | P0 | 🆕 |
 | 跟进项 CRUD + 四列面板 | P0 | 🆕 |
-| AI 沉默诊断 | P0 | 🆕 |
-| AI 起草消息 + 分级审核 | P0 | 🆕 |
+| AI 沉默提醒（时间阈值+通用模板） | P0 | 🆕 |
+| AI 起草消息（全部人审） | P0 | 🆕 |
 | 快速捕获（语音+文字） | P0 | 🆕 |
-| 三层知识库 | P0 | 🆕 |
-| 种子数据/知识库 | P0 | 🆕 |
+| 三层知识库（PostgreSQL 统一存储） | P0 | 🆕 |
+| 种子管道（演示商机+模拟对话） | P0 | 🆕 |
 | 收件箱→管道最短路径 | P0 | 🆕 |
+| AI API 限流（复用 TIER_LIMITS） | P0 | 🆕 |
+| 提醒离线持久化 + 登录批量呈现 | P0 | 🆕 |
 | SSE 实时推送 | P0 | ✅ 已有 |
 | 审批流 | P0 | ✅ 已有 |
 

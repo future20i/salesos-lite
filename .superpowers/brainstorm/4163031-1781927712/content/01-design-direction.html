@@ -1,0 +1,221 @@
+<div style="max-width:1100px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>跟进管道 vs 开发者看板：核心方向</h2>
+<p class="subtitle">从「为 AI agent 调度设计的看板」翻转为「为销售团队设计的跟进管道」</p>
+
+<div class="split">
+  <div class="mockup" style="flex:1.2">
+    <div class="mockup-header" style="background:rgba(239,68,68,0.12);color:#ef4444">❌ 不要这样：六列开发者看板</div>
+    <div class="mockup-body" style="font-size:11px;line-height:1.5;color:#71717a">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#71717a;font-weight:600;margin-bottom:6px">Triage 2</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;margin-bottom:4px;font-size:10px">更新报价<span style="display:block;font-size:9px;color:#52525b">@小王 · 2h</span></div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;font-size:10px">催款<span style="display:block;font-size:9px;color:#52525b">@小李 · 1d</span></div>
+        </div>
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#a1a1aa;font-weight:600;margin-bottom:6px">Todo 5</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;margin-bottom:4px;font-size:10px">确认交期<span style="display:block;font-size:9px;color:#52525b">@小王 · 1d</span></div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;margin-bottom:4px;font-size:10px">技术方案<span style="display:block;font-size:9px;color:#52525b">@李博 · 3d</span></div>
+        </div>
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#6c5ce7;font-weight:600;margin-bottom:6px">Ready 3</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;margin-bottom:4px;font-size:10px">发送合同<span style="display:block;font-size:9px;color:#52525b">@小王 · 2d</span></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#f97316;font-weight:600;margin-bottom:6px">Running 1</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;font-size:10px">⚡ 生成报价<span style="display:block;font-size:9px;color:#f97316">AI 执行中...</span></div>
+        </div>
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#ef4444;font-weight:600;margin-bottom:6px">Blocked 1</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;font-size:10px">🚫 等参数<span style="display:block;font-size:9px;color:#52525b">等待李博回复</span></div>
+        </div>
+        <div style="background:#1a1b1e;border-radius:6px;padding:8px">
+          <div style="color:#22c55e;font-weight:600;margin-bottom:6px">Done 8</div>
+          <div style="background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;margin-bottom:4px;font-size:10px">✓ 报价已发 · 2项</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:8px;background:rgba(239,68,68,0.06);border-radius:6px;font-size:10px;color:#ef4444">
+        ⚠ 业务员的困惑：
+        <ul style="margin:4px 0 0 14px;padding:0">
+          <li>"Triage 和 Todo 有什么区别？"</li>
+          <li>"Ready 是什么意思？谁在执行？"</li>
+          <li>"为什么我不能直接拖到 Done？"</li>
+          <li>"Blocked 是因为我在等客户，还是客户在等我？"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header" style="background:rgba(16,185,129,0.08);color:#10b981">✅ 要做：四列跟进管道</div>
+    <div class="mockup-body" style="font-size:11px;line-height:1.5">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+        <div style="background:var(--bg-subtle, #f5f5f5);border-radius:6px;padding:6px">
+          <div style="font-weight:600;font-size:11px;margin-bottom:4px">📥 待跟进 <span style="font-weight:400;color:var(--text-tertiary,#808080)">3</span></div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;margin-bottom:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">张总 · 台达电子</div>
+            <div style="color:#71717a;font-size:9px">"更新报价含5年维保"</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(108,92,231,0.1);color:#6c5ce7;padding:1px 5px;border-radius:10px;font-size:9px">报价中</span>
+              <span style="color:#a3a3a3;font-size:9px">2天前</span>
+              <span style="margin-left:auto;font-size:9px;color:#f59e0b">⚡</span>
+            </div>
+          </div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">李总 · 华能集团</div>
+            <div style="color:#71717a;font-size:9px">"30天交期能到吗"</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:1px 5px;border-radius:10px;font-size:9px">确认交期</span>
+              <span style="color:#a3a3a3;font-size:9px">今天</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+          <div style="font-weight:600;font-size:11px;margin-bottom:4px">🔧 处理中 <span style="font-weight:400;color:var(--text-tertiary,#808080)">2</span></div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;margin-bottom:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">王总 · 国电投</div>
+            <div style="color:#71717a;font-size:9px">"发合同模板过来"</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(108,92,231,0.15);color:#6c5ce7;padding:1px 5px;border-radius:10px;font-size:9px">AI 起草中</span>
+              <span style="color:#71717a;font-size:9px">🟢 进行中</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+          <div style="font-weight:600;font-size:11px;margin-bottom:4px">👀 待审核 <span style="font-weight:400;color:var(--text-tertiary,#808080)">1</span></div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">赵总 · 中广核</div>
+            <div style="color:#71717a;font-size:9px">项目方案书 v3</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(249,115,22,0.1);color:#f97316;padding:1px 5px;border-radius:10px;font-size:9px">需主管审批</span>
+              <span style="color:#a3a3a3;font-size:9px">3天前</span>
+              <span style="margin-left:auto;font-size:9px;color:#ef4444">⚠ 超时</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--bg-subtle,#f5f5f5);border-radius:6px;padding:6px">
+          <div style="font-weight:600;font-size:11px;margin-bottom:4px">⏳ 等客户 <span style="font-weight:400;color:var(--text-tertiary,#808080)">4</span></div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;margin-bottom:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">陈总 · 南方电网</div>
+            <div style="color:#71717a;font-size:9px">"下周内部讨论完回复"</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(148,163,184,0.12);color:#64748b;padding:1px 5px;border-radius:10px;font-size:9px">客户内部流程</span>
+              <span style="color:#a3a3a3;font-size:9px">5天前</span>
+            </div>
+          </div>
+          <div style="background:var(--bg-surface,#fff);padding:6px;border-radius:4px;box-shadow:0 0 0 1px rgba(0,0,0,0.06);font-size:10px">
+            <div style="font-weight:500">周总 · 三峡</div>
+            <div style="color:#71717a;font-size:9px">已发报价，未回复</div>
+            <div style="margin-top:3px;display:flex;gap:4px;align-items:center">
+              <span style="background:rgba(239,68,68,0.08);color:#ef4444;padding:1px 5px;border-radius:10px;font-size:9px">7天无回复 ⚠</span>
+              <span style="color:#a3a3a3;font-size:9px">7天前</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:8px;background:rgba(16,185,129,0.06);border-radius:6px;font-size:10px;color:#10b981">
+        ✅ 设计原则：
+        <ul style="margin:4px 0 0 14px;padding:0">
+          <li>四列 = 销售的自然心智：待跟进 → 处理中 → 待审核 → 等客户</li>
+          <li>"等客户"是第一公民——销售最大的瓶颈不是内部，是外部</li>
+          <li>卡片上有客户名 + 原文 + 标签 + 等待时长</li>
+          <li>超时自动高亮（红色短线 = 该催了）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:32px">
+  <h3>核心架构：不是新页面，是收件箱的第二种视图</h3>
+  <p class="subtitle">不需要业务员"建任务"——系统从对话中自动提取需要跟进的线索</p>
+</div>
+
+<div style="display:flex;gap:24px;align-items:stretch;margin-top:16px">
+  <div style="flex:1;background:var(--bg-surface,#fff);border-radius:12px;padding:20px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+    <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--text-primary)">📨 收件箱视图（按时间）</div>
+    <div style="font-size:10px;color:var(--text-tertiary,#808080);margin-bottom:12px">业务员的日常视图：看到新消息，回复</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;border-left:3px solid var(--accent,#6c5ce7);font-size:10px">
+        <div style="font-weight:500">张总 · 台达电子 <span style="color:#a3a3a3;font-weight:400">2分钟前</span></div>
+        <div style="color:#71717a;margin-top:2px">"更新一下报价，这次含5年维保"</div>
+        <div style="margin-top:4px;display:flex;gap:6px">
+          <span style="background:var(--accent,#6c5ce7);color:#fff;padding:1px 6px;border-radius:10px;font-size:9px">hot</span>
+          <span style="color:#6c5ce7;font-size:9px;cursor:pointer">+ 添加到跟进</span>
+        </div>
+      </div>
+      <div style="background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;font-size:10px">
+        <div style="font-weight:500">李总 · 华能集团 <span style="color:#a3a3a3;font-weight:400">1小时前</span></div>
+        <div style="color:#71717a;margin-top:2px">"30天能交货吗？我们项目急"</div>
+        <div style="margin-top:4px;display:flex;gap:6px">
+          <span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:1px 6px;border-radius:10px;font-size:9px">warm</span>
+          <span style="color:#6c5ce7;font-size:9px;cursor:pointer">+ 添加到跟进</span>
+        </div>
+      </div>
+      <div style="background:var(--bg-subtle,#f5f5f5);padding:8px 10px;border-radius:6px;font-size:10px;opacity:0.6">
+        <div style="font-weight:500">刘总 · 某某贸易 <span style="color:#a3a3a3;font-weight:400">昨天</span></div>
+        <div style="color:#71717a;margin-top:2px">"谢谢，收到报价了"</div>
+        <div style="margin-top:4px;color:#a3a3a3;font-size:9px">无需跟进</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="display:flex;align-items:center;font-size:24px;color:var(--text-tertiary,#808080)">⟷</div>
+  
+  <div style="flex:1;background:var(--bg-surface,#fff);border-radius:12px;padding:20px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)">
+    <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--text-primary)">📊 管道视图（按状态）</div>
+    <div style="font-size:10px;color:var(--text-tertiary,#808080);margin-bottom:12px">管理者的视角：看瓶颈、看收入预测</div>
+    <div style="font-size:10px">
+      <table style="width:100%;border-collapse:collapse;font-size:10px">
+        <tr style="border-bottom:1px solid rgba(0,0,0,0.06);color:var(--text-tertiary,#808080);font-weight:500">
+          <td style="padding:4px 6px">客户</td><td style="padding:4px 6px">状态</td><td style="padding:4px 6px">等待</td><td style="padding:4px 6px">金额</td><td style="padding:4px 6px">把握</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+          <td style="padding:4px 6px;font-weight:500">张总</td>
+          <td style="padding:4px 6px"><span style="background:rgba(108,92,231,0.1);color:#6c5ce7;padding:1px 5px;border-radius:10px;font-size:9px">报价中</span></td>
+          <td style="padding:4px 6px;color:#f59e0b">2天</td>
+          <td style="padding:4px 6px;font-weight:500">420万</td>
+          <td style="padding:4px 6px;color:#10b981">80%</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+          <td style="padding:4px 6px;font-weight:500">李总</td>
+          <td style="padding:4px 6px"><span style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:1px 5px;border-radius:10px;font-size:9px">确认中</span></td>
+          <td style="padding:4px 6px;color:var(--text-tertiary)">当天</td>
+          <td style="padding:4px 6px;font-weight:500">230万</td>
+          <td style="padding:4px 6px;color:var(--text-tertiary)">60%</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(0,0,0,0.04)">
+          <td style="padding:4px 6px;font-weight:500">周总</td>
+          <td style="padding:4px 6px"><span style="background:rgba(239,68,68,0.08);color:#ef4444;padding:1px 5px;border-radius:10px;font-size:9px">无回复</span></td>
+          <td style="padding:4px 6px;color:#ef4444">7天⚠</td>
+          <td style="padding:4px 6px;font-weight:500">180万</td>
+          <td style="padding:4px 6px;color:#ef4444">30%</td>
+        </tr>
+      </table>
+      <div style="margin-top:10px;padding:6px 8px;background:var(--bg-subtle,#f5f5f5);border-radius:6px;display:flex;justify-content:space-between;font-size:10px">
+        <span>本月预测</span>
+        <span style="font-weight:600;color:var(--accent,#6c5ce7)">¥320万 <span style="color:var(--text-tertiary);font-weight:400">（达成率 71%）</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:28px">
+  <div class="cards">
+    <div class="card" data-choice="direction" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>方向确认：同意这个设计方向</h3>
+        <p>四列管道 + 收件箱双视图 + 自动提取跟进项</p>
+      </div>
+    </div>
+    <div class="card" data-choice="modify" onclick="toggleSelect(this)">
+      <div class="card-body">
+        <h3>方向调整：需要修改某些设计决策</h3>
+        <p>我来在终端中说明需要改动的地方</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

@@ -1,0 +1,86 @@
+<div style="max-width:1000px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>🔴 批评者视角：产品定义的五个结构性问题</h2>
+<p class="subtitle">在开始写代码之前，先问"这个东西在市场上会死在什么地方"</p>
+
+<div class="section">
+  <h3>问题 1：市场定位太窄 —— "外贸B2B"需要更多的细分</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+"中国出海的外贸企业"这个定义太宽。做飞轮UPS的和做纺织品的，销售流程完全不同。前者是项目型销售（6-18个月，技术方案+投标），后者是贸易型销售（2-4周，报价+样品）。<br><br>
+<strong style="color:#ef4444">风险：</strong>试图用一个产品同时服务两种客户，结果两边都不满意。OKKI 成功的一个重要原因是它明确聚焦"贸易型"外贸企业——快节奏、高频率、标准化产品。项目型销售（如飞轮UPS）需要的是完全不同的工具链。<br><br>
+<strong style="color:#22c55e">建议：</strong>Phase 1 明确选择一条赛道。要么是「快节奏贸易型」（蚕食 OKKI 的市场），要么是「长周期项目型」（OKKI 覆盖不到的蓝海）。不要两头都想吃。
+  </p>
+</div>
+
+<div class="section">
+  <h3>问题 2：AI 决策引擎的前提假设不成立</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+"AI 诊断沉默原因"的前提是系统有足够的历史数据来判断。一个新注册的外贸企业，没有任何历史成交记录，AI 怎么判断"客户沉默了是因为在内部审批还是找了竞品"？<br><br>
+<strong style="color:#ef4444">风险：</strong>冷启动问题——新用户进来，AI 给的建议质量很差（瞎猜），用户不再信任 AI，AI 被关掉，产品退化为一个普通收件箱。<br><br>
+<strong style="color:#22c55e">建议：</strong>设计明确的冷启动策略。Phase 1 的 AI 诊断不要承诺太高的准确度——先用规则引擎（N天无回复 = 提醒）建立基础信任，等积累 30+ 成交案例后再开启诊断功能。从"AI 帮你看时间"到"AI 帮你做判断"要有渐进路径。
+  </p>
+</div>
+
+<div class="section">
+  <h3>问题 3：语音快速捕获是差异化入口——但入口不等于留存</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+语音录入确实好用——出差回来对着手机说两句话，比打字快 10 倍。但这是一个"功能"不是"护城河"。OKKI 或者任何一个 CRM 花两周就能加上语音输入。<br><br>
+<strong style="color:#ef4444">风险：</strong>把营销差异化押注在一个很容易被复制的功能上。用户因为语音功能进来，用完发现其他部分跟普通 CRM 差不多，就走了。<br><br>
+<strong style="color:#22c55e">建议：</strong>语音快速捕获是获客钩子，不是留存锚点。真正的留存锚点是「AI 决策引擎 + 数据飞轮」——用得越久，AI 越懂你的客户，建议越准，换了其他系统就丢了这些学习成果。这才是护城河。
+  </p>
+</div>
+
+<div class="section">
+  <h3>问题 4：三层销售结构（线索→商机→项目）对贸易型客户是不是过度设计？</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+一个卖 LED 灯带的外贸公司，客户 WhatsApp 上说"给我报个价"，一天内发报价、谈价格、收款。它的"商机"生命周期就是几个小时到几天。三层结构（线索验证→商机→项目）对它来说太重了——它只需要一个收件箱 + 客户标签。<br><br>
+<strong style="color:#ef4444">风险：</strong>产品复杂度吓跑最大的一类潜在用户。贸易型外贸企业占中国出海企业的 80%+。如果它们觉得"系统太复杂了用不上"，你只剩下 20% 的项目型市场。<br><br>
+<strong style="color:#22c55e">建议：</strong>设计"轻量模式"和"完整模式"。轻量模式下，收件箱就是一切——AI 自动标记意向、提醒跟进、起草回复。不需要显式创建商机和跟进项。当客户关系变得复杂（多次报价、多轮谈判），系统提示"这个客户值得开一个商机"。
+  </p>
+</div>
+
+<div class="section">
+  <h3>问题 5：SalesOS Lite ↔ B2BSaleOS 的连接路径太模糊</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+"策略下行"和"数据上行"听起来很美好，但没有定义具体的通信协议、数据格式、以及 Lite 在没连上大脑时的降级行为。如果大脑服务器挂了（这在 1GB VPS 上经常发生），Lite 是继续正常工作还是罢工？<br><br>
+<strong style="color:#ef4444">风险：</strong>Lite 用户升级到「连接大脑」后，反而比独立使用更不稳定。这会让最愿意付费的核心用户流失。<br><br>
+<strong style="color:#22c55e">建议：</strong>Lite 的大脑连接必须是异步的、无阻塞的、优雅降级的。Lite 的核心功能（收件箱、跟进提醒、AI起草）不依赖大脑连接也能完整运行。大脑连接是"增强"而非"必需"。
+  </p>
+</div>
+
+<div class="section" style="margin-top:32px">
+  <h3>批评者审查结论</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:9px">
+    <div style="background:rgba(239,68,68,0.06);border-radius:6px;padding:10px;border-left:3px solid #ef4444">
+      <strong style="color:#ef4444">必须在设计阶段解决的：</strong><br>
+      ① 明确走贸易型还是项目型<br>
+      ② 设计冷启动策略<br>
+      ③ 提供轻量/完整两种模式
+    </div>
+    <div style="background:rgba(245,158,11,0.06);border-radius:6px;padding:10px;border-left:3px solid #f59e0b">
+      <strong style="color:#f59e0b">Phase 2 再解决的：</strong><br>
+      ④ 数据飞轮护城河<br>
+      ⑤ 大脑连接降级策略
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px">
+  <div class="cards">
+    <div class="card" data-choice="address" onclick="toggleSelect(this)">
+      <div class="card-body"><h3>先解决批评者提出的问题</h3><p>明确赛道、冷启动、双模式后再进架构师审查</p></div>
+    </div>
+    <div class="card" data-choice="continue" onclick="toggleSelect(this)">
+      <div class="card-body"><h3>继续往下走，这些问题留到 Phase 2 解决</h3><p>先把最小可用产品定义清楚，避免过度设计</p></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:system-ui,-apple-system,sans-serif;padding:24px;max-width:1000px;margin:0 auto}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:11px;color:#71717a;margin-bottom:20px}
+  .section{margin-bottom:20px}
+  .section h3{font-size:13px;font-weight:600;color:#ededef;margin-bottom:8px}
+</style>
+</div>

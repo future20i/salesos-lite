@@ -1,0 +1,86 @@
+<div style="max-width:1000px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif">
+<h2>🏗️ 架构师视角：在「轻」和「对」之间找到张力</h2>
+<p class="subtitle">核心约束：SalesOS Lite 是前线工具。不做事后诸葛亮式的策略分析——那是 B2BSaleOS 大脑的事。</p>
+
+<div class="section">
+  <h3>第一条：Lite 的边界到底在哪？</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+项目型销售有一条天然的边界线：<br><br>
+<strong style="color:#6c5ce7">签约之前</strong> — 跟进、报价、谈判、合同 → <strong style="color:#22c55e">这是 SalesOS Lite 的事</strong><br>
+<strong style="color:#6c5ce7">签约之后</strong> — 交付、安装、验收、回款 → <strong style="color:#71717a">这是 ERP/项目管理的事</strong><br><br>
+Lite 不应该做项目管理。Project 这个概念在 Lite 中应该只是一个「商机已成交」的状态标记——指向外部项目管理系统。不要在自己肚子里塞一个 Jira。<br><br>
+<strong style="color:#22c55e">建议：</strong>Lite 的数据模型只到 Opportunity。Project 作为 Opportunity.status=won 的状态，不建独立的 project 表。交付管理留给 B2BSaleOS 大脑或第三方 ERP。
+  </p>
+</div>
+
+<div class="section">
+  <h3>第二条：FollowupItem 要不要独立的表？</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+跟进项是"商机下的子任务"。两种设计方案：<br><br>
+<strong>方案 A — 独立表 followup_items：</strong>结构清晰，可独立查询和统计。但多一张表、多一层 JOIN。<br>
+<strong>方案 B — 消息标记 + 智能分组：</strong>不建独立表，给 messages 加一个 followup_required 标记。AI 自动标记需要跟进的对话，前端按商机分组展示。<br><br>
+<strong style="color:#22c55e">建议走方案 A：</strong>项目型销售中，一个商机的跟进项往往跨数周、跨渠道、多人协作。把"跟进项"压缩成消息标记太脆了——业务员需要一个地方看到"这个商机下还有哪些事没做完"。独立的表带来的结构价值远超多一个 JOIN 的成本。
+  </p>
+</div>
+
+<div class="section">
+  <h3>第三条：审核门禁的粒度和代价</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+"AI 起草→人审核→发出"这个链路对贸易型太重（每封邮件都审核？），
+但对项目型刚好合适——技术方案、报价单、合同草案发错了是真金白银的损失。<br><br>
+<strong style="color:#f97316">但有一个设计陷阱：</strong>如果每次 AI 起草都要人审核，而业务员一天要处理 15 个跟进项，
+审核就变成瓶颈。理想设计应该是：<br><br>
+<strong>分级审核：</strong><br>
+• 日常跟进消息（"张总好，方案有任何需要调整的地方随时说"）→ AI 自动发，事后通知<br>
+• 商业敏感内容（报价金额、合同条款、技术承诺）→ 必须人审<br>
+• 紧急/高价值客户 → 强制人工审核<br><br>
+<strong style="color:#22c55e">建议：</strong>不是一刀切的审核门禁。给每条跟进项打标签（routine/commercial/critical），AI 自动判断标签，routine 类免审。人可以在任何时候提高审核等级。
+  </p>
+</div>
+
+<div class="section">
+  <h3>第四条：数据模型的极简边界</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+SalesOS Lite 目前有 14 个模型。加入跟进管道后，最优是什么？<br><br>
+<strong>必须新增：</strong><br>
+• <code style="color:#6c5ce7">Opportunity</code> — 商机（value, probability, stage, expected_close, competitor, decision_maker）<br>
+• <code style="color:#6c5ce7">FollowupItem</code> — 跟进项（opportunity_id, status, priority, source_type, source_id, review_level）<br>
+• <code style="color:#6c5ce7">FollowupEvent</code> — 跟进事件日志（followup_id, kind, payload）<br><br>
+<strong>不需要新增：</strong><br>
+• <code style="color:#ef4444">❌ PipelineBoard</code> — 管道就是 Opportunities 的聚合视图，不需要独立的"管道"表<br>
+• <code style="color:#ef4444">❌ Project</code> — 交付管理留给大脑<br>
+• <code style="color:#ef4444">❌ SilenceDiagnosis</code> — 这是 AI 推理结果，存在 FollowupEvent 的 payload 里即可<br><br>
+<strong style="color:#22c55e">结论：3 张新表。总模型数从 14 到 17。这是极简的底线。</strong>
+  </p>
+</div>
+
+<div class="section">
+  <h3>第五条：AI 推理的延迟和降级</h3>
+  <p style="color:#a1a1aa;font-size:10px;line-height:1.7">
+AI 诊断需要调 LLM。调 LLM 可能慢（2-8 秒）、可能失败（API 挂了）、可能贵（DeepSeek 便宜但不是免费的）。<br><br>
+<strong>关键设计：</strong><br>
+• AI 诊断是<strong>异步的</strong>——用户不等待。触发一次诊断后，结果通过 SSE 推回前端<br>
+• AI 诊断<strong>优雅降级</strong>——LLM 不可用时，降级为规则引擎（N 天无回复 = 提醒）<br>
+• 跟进项创建<strong>不依赖 AI</strong>——用户手动创建时零延迟。AI 自动提取是增强功能<br><br>
+<strong style="color:#22c55e">建议：</strong>复用现有 ai_pipeline.py 的 SKIP LOCKED + stale recovery 模式。不新建调度框架。
+  </p>
+</div>
+
+<div class="cards" style="margin-top:24px">
+  <div class="card" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>✅ 架构方向正确</h3><p>3表、异步AI、分级审核、Lite止于签约</p></div>
+  </div>
+  <div class="card" data-choice="adjust" onclick="toggleSelect(this)">
+    <div class="card-body"><h3>🔧 需要调整</h3><p>架构决策有不同意见</p></div>
+  </div>
+</div>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0b;color:#ededef;font-family:system-ui,-apple-system,sans-serif;padding:24px;max-width:1000px;margin:0 auto}
+  h2{font-size:20px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:11px;color:#71717a;margin-bottom:20px}
+  .section{margin-bottom:20px}
+  .section h3{font-size:13px;font-weight:600;color:#ededef;margin-bottom:8px}
+</style>
+</div>

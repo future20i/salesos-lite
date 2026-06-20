@@ -1,0 +1,6 @@
+{"type":"server-started","port":56736,"host":"0.0.0.0","url_host":"198.199.123.43","url":"http://198.199.123.43:56736","screen_dir":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/content","state_dir":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/state"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/content/01-architect-review.html"}
+{"source":"user-event","type":"click","text":"✅ 架构方向正确3表、异步AI、分级审核、Lite止于签约","choice":"approve","id":null,"timestamp":1781940597326}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/content/08-domain-expert.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/content/09-final-critic.html"}
+{"type":"screen-added","file":"/root/workspace/salesos-lite/.superpowers/brainstorm/4167267-1781940527/content/10-knowledge-base.html"}
