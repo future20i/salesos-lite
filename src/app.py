@@ -186,6 +186,11 @@ async def root():
 async def widget():
     return Response(content=_static_widget, media_type="application/javascript")
 
+@app.get("/pipeline.js")
+async def pipeline_js():
+    _js = (Path(__file__).parent.parent / "static" / "pipeline.js").read_text(encoding="utf-8")
+    return Response(content=_js, media_type="application/javascript")
+
 
 @app.get("/api/health")
 async def health():

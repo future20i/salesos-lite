@@ -393,9 +393,111 @@
     .panel-close { display: none; }
     .mobile-only { display: none !important; }
   }
+
+  /* ═══════════════════════════════════════════════
+     Pipeline Panel — Kanban Board
+     ═══════════════════════════════════════════════ */
+  #icon-nav{position:fixed;left:0;top:0;bottom:0;width:60px;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;z-index:50;box-shadow:1px 0 0 rgba(0,0,0,0.04)}
+  .nav-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-tertiary);transition:all .15s var(--ease-out);position:relative;background:transparent;border:none;font-family:var(--font-sans)}
+  .nav-icon:hover{background:var(--bg-hover);color:var(--text-primary)}
+  .nav-icon.active{background:var(--accent-soft);color:var(--accent)}
+  .nav-icon svg{width:20px;height:20px}
+  .nav-icon .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .nav-brand{width:26px;height:26px;margin-bottom:18px}
+  #pipeline-panel{position:fixed;left:60px;top:0;right:0;bottom:0;background:var(--bg-root);z-index:40;overflow:hidden;display:flex;flex-direction:column}
+  #pipeline-panel.hidden{display:none}
+  .pipe-top{display:flex;align-items:center;padding:0 28px;height:56px;background:var(--bg-surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);gap:16px;flex-shrink:0}
+  .pipe-top h2{font-size:16px;font-weight:600;letter-spacing:-0.32px}
+  .pipe-board{flex:1;overflow-x:auto;overflow-y:hidden;padding:20px 24px}
+  .pipe-cols{display:flex;gap:16px;height:100%;min-width:max-content;align-items:flex-start}
+  .pipe-col{width:300px;min-width:280px;background:var(--bg-subtle);border-radius:12px;display:flex;flex-direction:column;max-height:100%;overflow:hidden}
+  .pipe-col-head{padding:16px 18px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .pipe-col-head .col-name{font-size:13px;font-weight:600}
+  .pipe-col-head .col-count{font-size:11px;color:var(--text-quaternary);margin-left:auto;background:var(--bg-surface);padding:2px 8px;border-radius:99px;box-shadow:0 0 0 1px rgba(0,0,0,0.04)}
+  .pipe-col-body{padding:0 12px 12px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px}
+  .pipe-card{background:var(--bg-surface);border-radius:8px;padding:14px 16px;box-shadow:0 0 0 1px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.03);cursor:pointer;transition:all .15s var(--ease-out)}
+  .pipe-card:hover{box-shadow:0 0 0 1px rgba(108,92,231,0.15),0 2px 6px rgba(0,0,0,0.06);transform:translateY(-1px)}
+  .pipe-card .pc-cust{font-size:12px;font-weight:500;margin-bottom:3px}
+  .pipe-card .pc-co{font-size:11px;color:var(--text-quaternary);margin-bottom:10px}
+  .pipe-card .pc-body{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px}
+  .pipe-card .pc-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pipe-card .pc-tag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500}
+  .pipe-card .pc-age{font-size:10px;color:var(--text-quaternary);margin-left:auto}
+  .col-bar{width:3px;height:16px;border-radius:2px}
+  .bar-blue{background:var(--info, #3b82f6)} .bar-purple{background:var(--accent)}
+  .bar-orange{background:var(--warning)} .bar-green{background:#10b981}
+  .pipe-empty{text-align:center;padding:40px;color:var(--text-quaternary);font-size:13px}
+
+  /* Opportunity detail overlay */
+  #opp-detail{position:fixed;left:60px;top:56px;right:0;bottom:0;background:var(--bg-root);z-index:45;overflow-y:auto;display:none;padding:24px}
+  #opp-detail.open{display:block}
+  .opp-detail-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .opp-detail-header h3{font-size:18px;font-weight:600}
+  .fu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .fu-col{background:var(--bg-surface);border-radius:10px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,0.06)}
+  .fu-col h5{font-size:11px;font-weight:600;color:var(--text-tertiary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .fu-item{background:var(--bg-subtle);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:12px}
+  .fu-item .fu-title{font-weight:500;margin-bottom:4px}
+  .fu-item .fu-meta{font-size:10px;color:var(--text-tertiary)}
+  .fu-item .fu-actions{display:flex;gap:6px;margin-top:8px}
+  .fu-btn{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:500;cursor:pointer;border:none;font-family:var(--font-sans)}
+  .fu-btn.primary{background:var(--accent);color:#fff}
+  .fu-btn.primary:hover{background:var(--accent-hover)}
+  .fu-btn.ghost{background:transparent;color:var(--text-tertiary)}
+  .fu-btn.ghost:hover{background:var(--bg-hover)}
+  .ai-draft-box{background:rgba(108,92,231,0.04);border:1px solid rgba(108,92,231,0.1);border-radius:4px;padding:8px 10px;margin-top:8px;font-size:11px;color:var(--text-secondary);line-height:1.5}
+
+  @media(max-width:768px){
+    #icon-nav{width:48px;padding:10px 0}
+    .nav-icon{width:32px;height:32px}
+    #pipeline-panel{left:48px}
+    .pipe-col{width:260px;min-width:240px}
+    .fu-grid{grid-template-columns:1fr 1fr}
+  }
 </style>
 </head>
 <body>
+
+<!-- ═══ ICON NAV ═══ -->
+<nav id="icon-nav">
+  <svg class="nav-brand" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="#6c5ce7"/><text x="13" y="17" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Geist">S</text></svg>
+  <button class="nav-icon active" id="nav-inbox" title="收件箱" onclick="switchPanel('inbox')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+  </button>
+  <button class="nav-icon" id="nav-pipeline" title="跟进管道" onclick="switchPanel('pipeline')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/></svg>
+  </button>
+  <button class="nav-icon" id="nav-approvals" title="审批" onclick="switchPanel('approvals')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+  </button>
+  <button class="nav-icon" id="nav-knowledge" title="知识库">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+  </button>
+</nav>
+
+<!-- ═══ PIPELINE PANEL ═══ -->
+<div id="pipeline-panel" class="hidden">
+  <div class="pipe-top">
+    <h2>跟进管道</h2>
+    <span style="flex:1"></span>
+    <button class="btn" onclick="loadPipeline()" style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font-sans)">刷新</button>
+    <button class="btn" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:500;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:var(--font-sans)" onclick="createOppFromLead()">+ 新建商机</button>
+  </div>
+  <div class="pipe-board">
+    <div class="pipe-cols" id="pipeline-cols">
+      <div class="pipe-col"><div class="pipe-col-head"><div class="col-bar bar-blue"></div><span class="col-name">需求确认</span><span class="col-count">0</span></div><div class="pipe-col-body"><div class="pipe-empty">加载中...</div></div></div>
+      <div class="pipe-col"><div class="pipe-col-head"><div class="col-bar bar-purple"></div><span class="col-name">技术交流</span><span class="col-count">0</span></div><div class="pipe-col-body"><div class="pipe-empty">加载中...</div></div></div>
+      <div class="pipe-col"><div class="pipe-col-head"><div class="col-bar bar-orange"></div><span class="col-name">报价/谈判</span><span class="col-count">0</span></div><div class="pipe-col-body"><div class="pipe-empty">加载中...</div></div></div>
+      <div class="pipe-col"><div class="pipe-col-head"><div class="col-bar bar-green"></div><span class="col-name">合同</span><span class="col-count">0</span></div><div class="pipe-col-body"><div class="pipe-empty">加载中...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OPPORTUNITY DETAIL OVERLAY ═══ -->
+<div id="opp-detail"></div>
+
+<!-- ═══ EXISTING CONTENT ═══ -->
+<div id="app-content">
 
 <!-- ═══ LANDING PAGE ═══ -->
 <div id="landing">
@@ -1669,5 +1771,8 @@ function renderQuotations(quotes) {
 }
 
 </script>
+</div><!-- /app-content -->
+
+<script src="/pipeline.js"></script>
 </body>
 </html>
