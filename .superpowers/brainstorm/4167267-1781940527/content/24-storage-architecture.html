@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>人脉画像 — 存储架构</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-root:#fafafa;--bg-surface:#fff;--bg-subtle:#f5f5f5;
+    --text-primary:#171717;--text-secondary:#4d4d4d;--text-tertiary:#808080;--text-quaternary:#a3a3a3;
+    --accent:#6c5ce7;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+    --r-sm:6px;--r-md:8px;--r-lg:12px;
+    --font:'Geist',system-ui,-apple-system,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg-root);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:24px 32px;max-width:1000px;margin:0 auto;line-height:1.7;font-size:12px}
+
+  h1{font-size:22px;font-weight:700;margin-bottom:4px}
+  h1 span{color:var(--accent)}
+  .sub{font-size:11px;color:var(--text-tertiary);margin-bottom:20px}
+
+  .arch{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .layer{background:var(--bg-surface);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(0,0,0,0.06);padding:18px 20px;display:flex;gap:16px;align-items:flex-start}
+  .layer-badge{width:80px;flex-shrink:0;font-size:9px;font-weight:600;padding:4px 8px;border-radius:var(--r-sm);text-align:center}
+  .layer-content{flex:1}
+  .layer-content .lc-title{font-size:12px;font-weight:700;margin-bottom:4px}
+  .layer-content .lc-desc{font-size:10px;color:var(--text-secondary);line-height:1.6}
+  .layer-content .lc-tech{font-size:9px;color:var(--text-quaternary);margin-top:4px;font-family:monospace}
+
+  table{width:100%;border-collapse:collapse;font-size:9px;margin:8px 0}
+  th{text-align:left;padding:5px 8px;border-bottom:1px solid rgba(0,0,0,0.06);color:var(--text-quaternary);font-weight:500}
+  td{padding:5px 8px;border-bottom:1px solid rgba(0,0,0,0.03);color:var(--text-secondary);line-height:1.5}
+
+  .note{background:var(--bg-subtle);border-radius:var(--r-md);padding:12px 16px;font-size:10px;color:var(--text-secondary);line-height:1.7;margin:10px 0}
+  .note strong{color:var(--text-primary)}
+</style>
+</head>
+<body>
+
+<h1>人脉画像的<span>存储架构</span></h1>
+<p class="sub">不是所有东西都进数据库。SQL 存结构，JSON 存叙述，AI 在读取时生成洞察。</p>
+
+<div class="arch">
+
+  <!-- Layer 1 -->
+  <div class="layer">
+    <div class="layer-badge" style="background:rgba(59,130,246,0.08);color:#3b82f6">PostgreSQL<br>结构化</div>
+    <div class="layer-content">
+      <div class="lc-title">第一层：关系型数据 — PostgreSQL 标准列</div>
+      <div class="lc-desc">
+        需要查询、筛选、索引、关联的数据。这是数据库最擅长的事。<br>
+        <strong>规则：能用一个 SQL WHERE 查出来的，放 PostgreSQL 列。</strong>
+      </div>
+      <table>
+        <tr><th>数据</th><th>列类型</th><th>示例</th></tr>
+        <tr><td>姓名、公司、职位</td><td>VARCHAR</td><td>张建国 · 台达电子 · 技术总监</td></tr>
+        <tr><td>生日</td><td>DATE</td><td>1972-03-15（用于日历提醒）</td></tr>
+        <tr><td>关系深度评分</td><td>SMALLINT</td><td>7（用于排序和筛选）</td></tr>
+        <tr><td>最后互动时间</td><td>TIMESTAMP</td><td>用于沉默检测</td></tr>
+        <tr><td>标签</td><td>TEXT[]</td><td>{'技术型','champion','老客户'}</td></tr>
+        <tr><td>权限</td><td>UUID</td><td>created_by, access_list</td></tr>
+        <tr><td>关联</td><td>FK</td><td>lead_id, opportunity_id, tenant_id</td></tr>
+      </table>
+      <div class="lc-tech">PostgreSQL · 标准索引 · RLS 行级安全</div>
+    </div>
+  </div>
+
+  <!-- Layer 2 -->
+  <div class="layer">
+    <div class="layer-badge" style="background:rgba(108,92,231,0.08);color:var(--accent)">PostgreSQL<br>JSONB</div>
+    <div class="layer-content">
+      <div class="lc-title">第二层：叙述型数据 — PostgreSQL JSONB 列</div>
+      <div class="lc-desc">
+        有结构但不需要单独索引的复合数据。比如决策链上的三个人，每个人有不同的关注点。<br>
+        <strong>规则：结构会变、内容因人而异、不参与 SQL 筛选的，放 JSONB。</strong>
+      </div>
+      <table>
+        <tr><th>数据</th><th>原因用 JSONB 而非列</th></tr>
+        <tr><td>家庭信息</td><td>配偶/子女/父母的数量不固定，结构因人而异</td></tr>
+        <tr><td>兴趣爱好</td><td>[{category:"运动", detail:"高尔夫差点12", note:"..."}] — 条目数不固定</td></tr>
+        <tr><td>教育/职业背景</td><td>多段经历，每段结构相同但段数不定</td></tr>
+        <tr><td>决策链成员</td><td>[{role, name, concerns, stance}] — 每个商机人数不同</td></tr>
+        <tr><td>资源网络</td><td>[{name, relationship, expertise, closeness}] — 条目数可变</td></tr>
+      </table>
+      <div class="lc-tech">PostgreSQL JSONB · GIN 索引（如需搜索）· 不参与 RLS（在应用层过滤）</div>
+    </div>
+  </div>
+
+  <!-- Layer 3 -->
+  <div class="layer">
+    <div class="layer-badge" style="background:rgba(239,68,68,0.06);color:var(--danger)">加密存储<br>端到端</div>
+    <div class="layer-content">
+      <div class="lc-title">第三层：敏感叙述 — 端到端加密存储</div>
+      <div class="lc-desc">
+        核心驱动力和影响力杠杆的信息。服务端存储的是密文。只有创建者的客户端可以解密。<br>
+        <strong>规则：如果泄露会导致信任崩塌的数据，端到端加密。服务端永不见明文。</strong>
+      </div>
+      <table>
+        <tr><th>数据</th><th>加密原因</th></tr>
+        <tr><td>核心恐惧</td><td>"技术选型失误背责。上次差点被问责。" — 被老板看到，张总业务关系终结</td></tr>
+        <tr><td>核心野心</td><td>"想升VP，需要这个项目证明自己" — 被同事看到，内部政治风险</td></tr>
+        <tr><td>组织处境</td><td>"新副总倾向竞品，他在替我们打仗" — 泄露则暴露内部分裂</td></tr>
+        <tr><td>影响力杠杆</td><td>"女儿需要实习机会，我们有清华CTO关系" — 被公开则变成利益交换</td></tr>
+        <tr><td>资源匹配记录</td><td>"帮张总妈妈安排了心外科手术" — 外部看到则变成腐败证据</td></tr>
+      </table>
+      <div class="lc-tech">客户端加密 · 创建者私钥 · 服务端存密文 · 解密仅在客户端</div>
+    </div>
+  </div>
+
+  <!-- Layer 4 -->
+  <div class="layer">
+    <div class="layer-badge" style="background:rgba(16,185,129,0.06);color:var(--success)">AI 生成<br>不存储</div>
+    <div class="layer-content">
+      <div class="lc-title">第四层：AI 洞察 — 读取时生成，不存储在数据库</div>
+      <div class="lc-desc">
+        这是最关键的设计决策。<strong>AI 的洞察不是数据，是分析结果。</strong>它应该在用户打开画像页面时实时生成——基于最新的原始数据 + 最新的对话记录 + 最新的上下文。<br><br>
+        <strong>为什么不能存：</strong><br>
+        • 存下来的 AI 洞察会过时。三个月前的"他关心响应时间"今天可能已不适用<br>
+        • 存下来的洞察会被当作"事实"而非"分析"。业务员不会质疑一条存在数据库里的 AI 输出<br>
+        • 存下来的洞察失去了上下文。"AI 说他是 champion"——但基于什么说的？三周前的对话已经变了<br>
+        • 存 = 固化。AI 洞察必须保持"液态"——每次都重新思考
+      </div>
+      <table>
+        <tr><th>AI 生成的内容</th><th>什么时候生成</th><th>存在哪</th></tr>
+        <tr><td>战前简报</td><td>打开对话时</td><td>不存 · 实时生成</td></tr>
+        <tr><td>策略卡（该做/忌做）</td><td>起草回复时</td><td>不存 · 实时生成</td></tr>
+        <tr><td>AI 人脉洞察</td><td>打开画像页时</td><td>不存 · 实时生成</td></tr>
+        <tr><td>反叙事（"如果全错了"）</td><td>触发 B1 时</td><td>缓存 24h · 不固化</td></tr>
+        <tr><td>话术建议（这次该问什么）</td><td>打开对话时</td><td>不存 · 实时生成</td></tr>
+      </table>
+      <div class="lc-tech">LLM API 调用 · Prompt 拼接原始数据 · 输出不持久化 · 每次重新推理</div>
+    </div>
+  </div>
+
+  <!-- Layer 5 -->
+  <div class="layer">
+    <div class="layer-badge" style="background:rgba(245,158,11,0.06);color:var(--warning)">事件日志<br>不可变</div>
+    <div class="layer-content">
+      <div class="lc-title">第五层：互动记录 — PostgreSQL 事件日志（不可变）</div>
+      <div class="lc-desc">
+        所有推理的原材料。对话摘要、观察记录、画像变更。只追加，不修改，不删除。<br>
+        <strong>规则：这是 AI 推理的原始数据源。必须完整、不可变、可回溯。</strong>
+      </div>
+      <table>
+        <tr><th>数据类型</th><th>存储方式</th><th>用途</th></tr>
+        <tr><td>互动摘要</td><td>PostgreSQL · 追加</td><td>"2024年会聊了半小时音响"</td></tr>
+        <tr><td>对话关键信息</td><td>PostgreSQL · 追加</td><td>"张总提到新副总倾向进口品牌"</td></tr>
+        <tr><td>画像版本快照</td><td>PostgreSQL · JSONB · 追加</td><td>每次更新画像时存快照（v1→v2→v3...）</td></tr>
+        <tr><td>置信度变更记录</td><td>PostgreSQL · 追加</td><td>"预算没问题" 置信度: 中→低（李经理矛盾）</td></tr>
+        <tr><td>审计日志</td><td>PostgreSQL · 追加</td><td>谁、何时、访问了什么</td></tr>
+      </table>
+      <div class="lc-tech">PostgreSQL · INSERT-only · 不设 UPDATE/DELETE 权限 · 定期归档</div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>🔑 总原则：</strong><br><br>
+  <strong>能查的存列。</strong> 需要 SQL WHERE / ORDER BY / JOIN 的数据 → PostgreSQL 标准列。<br>
+  <strong>会变的存 JSONB。</strong> 结构不定、条目数不定的叙述数据 → PostgreSQL JSONB。<br>
+  <strong>会致命的加密。</strong> 泄露即信任崩塌的 → 端到端加密，服务端存密文。<br>
+  <strong>会过时的生成。</strong> AI 洞察不存储。每次读取时基于最新原始数据实时生成。<br>
+  <strong>要追溯的追加。</strong> 互动记录和画像变更 → 不可变日志，只 INSERT，不 UPDATE。
+</div>
+
+</body>
+</html>
