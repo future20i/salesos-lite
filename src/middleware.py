@@ -13,6 +13,7 @@ async def tenant_context_middleware(request: Request, call_next):
         "/api/billing/status",
         "/widget.js",
         "/api/whatsapp/webhook",
+        "/api/email/connect", "/api/email/callback",
     ]
     if request.url.path in public_paths or request.url.path.startswith("/api/auth/"):
         return await call_next(request)

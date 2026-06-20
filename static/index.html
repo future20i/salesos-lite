@@ -783,15 +783,17 @@ async function initAfterLogin() {
   // Check billing / trial status
   await checkBilling();
 
-  // Check onboarding state
-  var onboardResp = await fetch('/api/onboarding/state', {headers:{'Authorization':'Bearer '+_tk}});
-  if (onboardResp.ok) {
-    var onboardData = await onboardResp.json();
-    if (onboardData.step < 3) {
-      renderOnboarding(onboardData);
-      return; // don't load leads yet — user is in onboarding
+  // Check onboarding state (non-fatal — skip if unreachable)
+  try {
+    var onboardResp = await fetch('/api/onboarding/state', {headers:{'Authorization':'Bearer '+_tk}});
+    if (onboardResp.ok) {
+      var onboardData = await onboardResp.json();
+      if (onboardData.step < 3) {
+        renderOnboarding(onboardData);
+        return;
+      }
     }
-  }
+  } catch(e) { /* onboarding check failed, continue to inbox */ }
 
   await loadLeads();
   // If brand new (no leads), create a demo lead
@@ -1210,8 +1212,10 @@ function insertTemplate(id) {
 // Close template picker on outside click
 document.addEventListener('click', function(e) {
   var popup = $('#template-popup');
+  if (!popup) return;
   if (!popup.classList.contains('open')) return;
   var btn = $('#btn-templates');
+  if (!btn) return;
   if (!popup.contains(e.target) && !btn.contains(e.target)) {
     popup.classList.remove('open');
   }
@@ -1485,6 +1489,123 @@ selectLead = async function(id) {
 // On mobile, start with leads view
 if (window.innerWidth < 768) { showLeads(); }
 tryRestore();
+
+// ═══════════════════════════════════════════
+// Browser Notifications (via Notification API)
+// ═══════════════════════════════════════════
+var _notificationPermitted = false;
+var _notificationPrefs = { desktop_enabled: true, sound_enabled: false };
+
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    console.log('Browser notifications not supported');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    _notificationPermitted = true;
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(function(perm) {
+      _notificationPermitted = (perm === 'granted');
+    });
+  }
+}
+
+async function loadNotificationPrefs() {
+  try {
+    var r = await api('/api/notifications/preferences');
+    _notificationPrefs = await r.json();
+  } catch(e) {
+    _notificationPrefs = { desktop_enabled: true, sound_enabled: false };
+  }
+}
+
+function showBrowserNotification(title, body) {
+  if (!_notificationPrefs.desktop_enabled) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible' && document.hasFocus()) return;
+  // Don't spam — only show if the page isn't focused
+  var n = new Notification(title, { body: body, icon: '/favicon.ico' });
+  setTimeout(function() { n.close(); }, 8000);
+}
+
+// Establish SSE connection after login
+var _eventSource = null;
+
+function connectSSE() {
+  if (_eventSource) { _eventSource.close(); }
+  if (!_tk) return;
+  _eventSource = new EventSource('/api/inbox/stream');
+
+  _eventSource.addEventListener('message', function(e) {
+    try {
+      var data = JSON.parse(e.data);
+      if (data.type === 'new_message') {
+        showBrowserNotification(
+          '新消息: ' + (data.customer_name || '客户'),
+          data.content || ''
+        );
+        // Reload leads if not currently in a focused chat with this lead
+        if (_activeId !== data.lead_id || document.visibilityState !== 'visible') {
+          loadLeads();
+        }
+      }
+    } catch(err) { /* ignore parse errors */ }
+  });
+
+  _eventSource.onerror = function() {
+    // Reconnect after 3s on error
+    setTimeout(function() { connectSSE(); }, 3000);
+  };
+}
+
+// Extend initAfterLogin to request permission, load prefs, and connect SSE
+var _origInitAfterLogin = initAfterLogin;
+initAfterLogin = async function() {
+  await _origInitAfterLogin.call(this);
+  requestNotificationPermission();
+  await loadNotificationPrefs();
+  connectSSE();
+};
+
+// Add notification prefs toggle to dashboard
+var _origRenderDashboard = renderDashboard;
+renderDashboard = function(d) {
+  _origRenderDashboard(d);
+  // Add notification settings section
+  var panel = $('dashboard-panel');
+  var notifySection = document.createElement('div');
+  notifySection.className = 'dash-section';
+  notifySection.innerHTML = '<h4>🔔 通知设置</h4>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;font-size:13px">' +
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+    '<input type="checkbox" id="notif-desktop"' + (_notificationPrefs.desktop_enabled ? ' checked' : '') + ' onchange="toggleNotifPref(\'desktop\',this.checked)">' +
+    '桌面通知（新消息时弹出）</label>' +
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+    '<input type="checkbox" id="notif-sound"' + (_notificationPrefs.sound_enabled ? ' checked' : '') + ' onchange="toggleNotifPref(\'sound\',this.checked)">' +
+    '声音提示</label></div>';
+  // Insert after the intent section
+  var intentSection = $('dash-intent') ? $('dash-intent').parentNode : null;
+  if (intentSection) {
+    intentSection.parentNode.insertBefore(notifySection, intentSection.nextSibling);
+  } else {
+    panel.appendChild(notifySection);
+  }
+};
+
+async function toggleNotifPref(key, enabled) {
+  var update = {};
+  if (key === 'desktop') update.desktop_enabled = enabled;
+  if (key === 'sound') update.sound_enabled = enabled;
+  try {
+    var r = await api('/api/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(update)
+    });
+    _notificationPrefs = await r.json();
+  } catch(e) { /* revert UI on error */ }
+}
+
 </script>
 </body>
 </html>

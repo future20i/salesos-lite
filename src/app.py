@@ -32,6 +32,9 @@ from src.api.canned_routes import router as canned_router
 from src.api.whatsapp_routes import router as whatsapp_router
 from src.api.suggest_routes import router as suggest_router
 from src.api.approval_routes import router as approval_router
+from src.api.email_routes import router as email_router
+from src.api.notification_routes import router as notification_router
+from src.api.followup_routes import router as followup_router, followup_evaluation_loop, seed_default_rules
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -39,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 # ── Background task control ──────────────────────────────────────────────
 _ai_pipeline_task: asyncio.Task | None = None
+_followup_task: asyncio.Task | None = None
 
 
 @asynccontextmanager
@@ -64,6 +68,17 @@ async def lifespan(app: FastAPI):
     _ai_pipeline_task = asyncio.create_task(_run_ai_pipeline())
     logger.info("AI pipeline background task started")
 
+    # Seed default followup rules + start evaluation loop
+    try:
+        async with AsyncSessionLocal() as session:
+            await seed_default_rules(session)
+    except Exception:
+        logger.exception("Seed default rules failed")
+
+    global _followup_task
+    _followup_task = asyncio.create_task(followup_evaluation_loop(interval_seconds=60))
+    logger.info("Followup evaluation loop started")
+
     yield
 
     # ── Shutdown ─────────────────────────────────────────────────────────
@@ -74,6 +89,14 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
         logger.info("AI pipeline background task cancelled")
+
+    if _followup_task is not None:
+        _followup_task.cancel()
+        try:
+            await _followup_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Followup evaluation loop cancelled")
 
     await engine.dispose()
     logger.info("Database engine disposed")
@@ -123,6 +146,9 @@ app.include_router(canned_router)
 app.include_router(whatsapp_router)
 app.include_router(suggest_router)
 app.include_router(approval_router)
+app.include_router(email_router)
+app.include_router(notification_router)
+app.include_router(followup_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")

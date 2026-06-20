@@ -7,6 +7,9 @@ from src.models.ai_job import AIJob, AIJobStatus
 from src.models.approval import Approval, ApprovalStatus
 from src.models.canned_response import CannedResponse, ResponseCategory
 from src.models.subscription import Subscription, SubscriptionStatus, Plan
+from src.models.email_connection import EmailConnection, EmailProvider
+from src.models.notification_pref import NotificationPref
+from src.models.followup_rule import FollowupRule, FollowupLog, TriggerType, ActionType
 
 __all__ = [
     "Base",
@@ -17,4 +20,7 @@ __all__ = [
     "Approval", "ApprovalStatus",
     "CannedResponse", "ResponseCategory",
     "Subscription", "SubscriptionStatus", "Plan",
+    "EmailConnection", "EmailProvider",
+    "NotificationPref",
+    "FollowupRule", "FollowupLog", "TriggerType", "ActionType",
 ]
