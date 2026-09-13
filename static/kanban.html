@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kanban — SalesOS</title>
+<style>
+:root {
+  --bg-primary: #0a0a0b;
+  --bg-secondary: #121214;
+  --bg-tertiary: #1a1a1e;
+  --bg-elevated: #1f1f24;
+  --border: #26262b;
+  --border-bright: #36363d;
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6b6b7b;
+  --accent: #6c5ce7;
+  --accent-text: #a78bfa;
+  --accent-subtle: rgba(108, 92, 231, 0.12);
+  --success: #34d399;
+  --error: #f87171;
+  --warning: #fbbf24;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --transition: 0.15s ease;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 24px 32px 0;
+}
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.header p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-secondary:hover { color: var(--text-primary); border-color: var(--border-bright); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); transition: all var(--transition); }
+.btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Error */
+.error-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(248,113,113,0.12);
+  border: 1px solid rgba(248,113,113,0.25);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--error);
+  flex-shrink: 0;
+}
+.error-bar button { margin-left: auto; }
+
+/* Columns */
+.columns {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 20px;
+}
+.column {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-height: 0;
+}
+.column.drop-target {
+  background: var(--accent-subtle);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.column-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+.column-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+.column-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.column-empty {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 16px 0;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: grab;
+  transition: border-color var(--transition), opacity var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card:hover { border-color: var(--border-bright); }
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: 0.4; }
+.card-title { font-size: 13px; font-weight: 500; line-height: 1.3; word-break: break-word; }
+.card-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.pill { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--bg-tertiary); color: var(--text-secondary); white-space: nowrap; }
+.pill-prio { background: var(--accent-subtle); color: var(--accent-text); }
+.pill-age { color: var(--text-muted); margin-left: auto; }
+.card-actions { display: flex; gap: 2px; justify-content: flex-end; opacity: 0; transition: opacity var(--transition); }
+.card:hover .card-actions { opacity: 1; }
+.card-action { padding: 2px 6px; font-size: 12px; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; background: none; border: none; transition: all var(--transition); }
+.card-action:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.card-action.danger:hover { color: var(--error); }
+
+/* Loading */
+.loading { flex: 1; display: flex; align-items: center; justify-content: center; }
+.spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-width: 560px; width: 90vw;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-size: 15px; font-weight: 600;
+}
+.modal-body {
+  padding: 18px; overflow-y: auto; flex: 1;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 12px 18px; border-top: 1px solid var(--border);
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.input, textarea, select {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: border-color var(--transition);
+  width: 100%;
+}
+.input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+textarea { resize: vertical; min-height: 80px; }
+select { cursor: pointer; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; text-transform: none; }
+.checkbox-label input { width: auto; }
+
+/* Detail */
+.detail-section { margin-bottom: 14px; }
+.detail-section label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); display: block; margin-bottom: 4px; }
+.detail-pre { font-size: 12.5px; line-height: 1.5; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; color: var(--text-primary); }
+.event-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.event-row:last-child { border-bottom: none; }
+.comment-item { border-left: 2px solid var(--border); padding-left: 10px; margin-bottom: 8px; }
+.comment-author { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
+.comment-body { font-size: 13px; white-space: pre-wrap; }
+
+/* Navigation */
+.nav-back {
+  position: fixed; top: 16px; left: 16px; z-index: 50;
+  font-size: 12px; color: var(--text-muted); cursor: pointer;
+  text-decoration: none; padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+.nav-back:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+
+/* Board info bar */
+.board-info { 
+  display: flex; gap: 8px; margin-bottom: 12px;
+  font-size: 12px; color: var(--text-muted);
+}
+.board-info span { 
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--bg-tertiary); 
+}
+.board-info .count { color: var(--text-primary); font-weight: 600; }
+</style>
+</head>
+<body>
+<a href="/" class="nav-back">← SalesOS</a>
+<div id="app">
+  <div class="header">
+    <div>
+      <h1>📋 Kanban</h1>
+      <p>多 Agent 协作任务板 — triage → todo → ready → in_progress → done</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="loadAll()" id="btn-refresh">🔄 刷新</button>
+      <button class="btn btn-primary" onclick="showCreateModal()">＋ 新建任务</button>
+    </div>
+  </div>
+  <div id="error-bar" style="display:none" class="error-bar">
+    <span id="error-msg"></span>
+    <button class="btn-ghost" onclick="clearError()">✕</button>
+  </div>
+  <div id="board-info" class="board-info"></div>
+  <div id="loading" class="loading"><div class="spinner"></div></div>
+  <div id="columns" class="columns" style="display:none"></div>
+</div>
+<script>
+// ── State ────────────────────────────────────────────────────
+const COLUMNS = ['triage','todo','ready','in_progress','done'];
+const COL_LABELS = { triage:'📥 分类', todo:'📝 待办', ready:'⚡ 就绪', in_progress:'🔄 执行中', done:'✅ 完成' };
+let TOKEN = localStorage.getItem('salesos_token') || '';
+let tasks = [];
+let loading = true;
+let dragTaskId = null;
+
+// ── Helpers ──────────────────────────────────────────────────
+function fmtAge(ts) {
+  if (!ts) return '';
+  const s = Math.max(0, Math.floor(Date.now()/1000 - new Date(ts).getTime()/1000));
+  if (s < 60) return s + 's';
+  if (s < 3600) return Math.floor(s/60) + 'm';
+  if (s < 86400) return Math.floor(s/3600) + 'h';
+  return Math.floor(s/86400) + 'd';
+}
+function prioLabel(p) {
+  if (p >= 10) return 'P0';
+  if (p >= 5) return 'P1';
+  if (p > 0) return 'P2';
+  return '';
+}
+async function api(method, path, body=null) {
+  if (!TOKEN) { showError('请先登录 SalesOS'); return null; }
+  const opts = {
+    method,
+    headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch('/api/kanban' + path, opts);
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(r.status + ': ' + (t.length < 200 ? t : r.statusText));
+    }
+    return r.json();
+  } catch(e) {
+    showError(e.message);
+    return null;
+  }
+}
+function showError(msg) {
+  document.getElementById('error-bar').style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
+function clearError() {
+  document.getElementById('error-bar').style.display = 'none';
+}
+
+// ── Load ─────────────────────────────────────────────────────
+async function loadAll(silent=false) {
+  if (!silent) {
+    loading = true;
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('columns').style.display = 'none';
+  }
+  const board = await api('GET', '/board');
+  if (!board) { loading = false; return; }
+  
+  // Update board info
+  document.getElementById('board-info').innerHTML = 
+    COLUMNS.map(c => '<span>' + COL_LABELS[c] + ' <b class="count">' + (board[c]||0) + '</b></span>').join('');
+  
+  const data = await api('GET', '/tasks');
+  if (data) tasks = data;
+  loading = false;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('columns').style.display = '';
+  render();
+}
+
+// ── Render ───────────────────────────────────────────────────
+function tasksByStatus() {
+  const g = {};
+  for (const c of COLUMNS) g[c] = [];
+  for (const t of tasks) {
+    // Map pending_review→in_progress, blocked→todo for display
+    let col = t.status;
+    if (col === 'pending_review') col = 'in_progress';
+    if (col === 'blocked') col = 'todo';
+    if (!g[col]) col = 'todo';
+    g[col].push(t);
+  }
+  for (const k of Object.keys(g)) {
+    g[k].sort((a,b) => b.priority - a.priority || new Date(a.created_at) - new Date(b.created_at));
+  }
+  return g;
+}
+
+function render() {
+  const grouped = tasksByStatus();
+  const cols = document.getElementById('columns');
+  cols.innerHTML = COLUMNS.map(col => {
+    const items = grouped[col] || [];
+    return '<div class="column" data-col="' + col + '" ' +
+      'ondragover="handleDragOver(event,\'' + col + '\')" ' +
+      'ondragleave="handleDragLeave(event)" ' +
+      'ondrop="handleDrop(event,\'' + col + '\')">' +
+      '<div class="column-header">' +
+        '<span class="column-title">' + COL_LABELS[col] + '</span>' +
+        '<span class="column-count">' + items.length + '</span>' +
+      '</div>' +
+      '<div class="column-body">' +
+        (items.length === 0 ? '<div class="column-empty">—</div>' : items.map(t => renderCard(t)).join('')) +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderCard(t) {
+  const prio = prioLabel(t.priority);
+  const age = fmtAge(t.created_at);
+  let actions = '';
+  const st = t.status;
+  if (st === 'triage') actions += '<button class="card-action" title="AI 展开规格" onclick="event.stopPropagation();specifyTask(\''+t.id+'\')">✨</button>';
+  if (st === 'todo') actions += '<button class="card-action" title="标记就绪" onclick="event.stopPropagation();promoteReady(\''+t.id+'\')">⚡</button>';
+  if (st === 'todo' || st === 'ready') actions += '<button class="card-action" title="阻塞" onclick="event.stopPropagation();blockTask(\''+t.id+'\')">🚫</button>';
+  if (st === 'ready') actions += '<button class="card-action" title="领取执行" onclick="event.stopPropagation();claimTask(\''+t.id+'\')">▶</button>';
+  if (st === 'in_progress') actions += '<button class="card-action" title="回收" onclick="event.stopPropagation();reclaimTask(\''+t.id+'\')">⚠</button>';
+  if (st === 'blocked') actions += '<button class="card-action" title="解阻" onclick="event.stopPropagation();unblockTask(\''+t.id+'\')">🔓</button>';
+  if (st !== 'done') actions += '<button class="card-action danger" title="归档" onclick="event.stopPropagation();archiveTask(\''+t.id+'\')">🗑</button>';
+  if (st === 'in_progress' || st === 'pending_review') actions += '<button class="card-action" title="标记完成" onclick="event.stopPropagation();completeTask(\''+t.id+'\')">✅</button>';
+  
+  return '<div class="card" draggable="true" ' +
+    'ondragstart="handleDragStart(event,\''+t.id+'\')" ondragend="handleDragEnd()" ' +
+    'onclick="showDetail(\''+t.id+'\')">' +
+    '<div class="card-title">' + escapeHtml(t.title) + '</div>' +
+    '<div class="card-meta">' +
+      (prio ? '<span class="pill pill-prio">'+prio+'</span>' : '') +
+      (t.assignee_agent ? '<span class="pill">@'+escapeHtml(t.assignee_agent)+'</span>' : '') +
+      (age ? '<span class="pill pill-age">'+age+'</span>' : '') +
+    '</div>' +
+    '<div class="card-actions">' + actions + '</div>' +
+  '</div>';
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Actions ──────────────────────────────────────────────────
+async function specifyTask(id) {
+  const r = await api('POST', '/tasks/' + id + '/specify');
+  if (r) loadAll(true);
+}
+async function promoteReady(id) {
+  const r = await api('POST', '/tasks/' + id + '/ready');
+  if (r) loadAll(true);
+}
+async function claimTask(id) {
+  const r = await api('POST', '/tasks/' + id + '/claim', { agent_profile: 'default' });
+  if (r) loadAll(true);
+}
+async function completeTask(id) {
+  const r = await api('POST', '/tasks/' + id + '/complete', { result: 'Marked complete from kanban' });
+  if (r) loadAll(true);
+}
+async function blockTask(id) {
+  const reason = prompt('阻塞原因？') || '';
+  const r = await api('POST', '/tasks/' + id + '/block', { reason });
+  if (r) loadAll(true);
+}
+async function unblockTask(id) {
+  const r = await api('POST', '/tasks/' + id + '/unblock');
+  if (r) loadAll(true);
+}
+async function reclaimTask(id) {
+  if (!confirm('回收此任务？将重新进入就绪队列。')) return;
+  const r = await api('POST', '/tasks/' + id + '/reclaim');
+  if (r) loadAll(true);
+}
+async function archiveTask(id) {
+  if (!confirm('归档此任务？')) return;
+  const r = await api('POST', '/tasks/' + id + '/archive');
+  if (r) loadAll(true);
+}
+
+// ── Drag & Drop ──────────────────────────────────────────────
+const VALID_TRANSITIONS = {
+  'triage→todo': true, 'todo→ready': true, 'ready→in_progress': true,
+  'in_progress→done': true, 'blocked→ready': true,
+};
+function canMove(from, to) {
+  if (from === to) return false;
+  if (to === 'done') return true;
+  return !!VALID_TRANSITIONS[from+'→'+to];
+}
+function handleDragStart(e, id) {
+  dragTaskId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  const card = e.target.closest('.card');
+  if (card) card.classList.add('dragging');
+}
+function handleDragEnd() {
+  dragTaskId = null;
+  document.querySelectorAll('.card.dragging').forEach(c => c.classList.remove('dragging'));
+  document.querySelectorAll('.column.drop-target').forEach(c => c.classList.remove('drop-target'));
+}
+function handleDragOver(e, col) {
+  if (!dragTaskId) return;
+  const task = tasks.find(t => t.id === dragTaskId);
+  if (!task || !canMove(task.status, col)) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drop-target');
+}
+function handleDragLeave(e) {
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drop-target');
+}
+async function handleDrop(e, col) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drop-target');
+  if (!dragTaskId) return;
+  const task = tasks.find(t => t.id === dragTaskId);
+  if (!task || !canMove(task.status, col)) return;
+  
+  // Map column to API action
+  const actions = {
+    'todo': () => specifyTask(task.id),
+    'ready': () => promoteReady(task.id),
+    'in_progress': () => claimTask(task.id),
+    'done': () => completeTask(task.id),
+  };
+  if (col === 'done' && !confirm('将「' + task.title + '」标记为完成？')) return;
+  if (actions[col]) await actions[col]();
+  else loadAll(true);
+}
+
+// ── Create Modal ─────────────────────────────────────────────
+function showCreateModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = '<div class="modal" onclick="event.stopPropagation()">' +
+    '<div class="modal-header"><span>新建任务</span><button class="btn-ghost" onclick="this.closest(\'.modal-overlay\').remove()">✕</button></div>' +
+    '<div class="modal-body">' +
+      '<div class="field"><label>标题</label><input id="new-title" class="input" placeholder="需要完成什么？" autofocus></div>' +
+      '<div class="field"><label>内容</label><textarea id="new-body" class="input" placeholder="上下文、验收条件…"></textarea></div>' +
+      '<div class="field"><label>优先级</label><select id="new-prio" class="input"><option value="0">普通</option><option value="1">低 P2</option><option value="5">高 P1</option><option value="10">紧急 P0</option></select></div>' +
+      '<div class="field"><label>指派 Agent</label><input id="new-agent" class="input" placeholder="Agent profile 名称（可选）"></div>' +
+      '<div class="field"><label class="checkbox-label"><input type="checkbox" id="new-triage" checked> 放入分类（AI 展开后再进入待办）</label></div>' +
+    '</div>' +
+    '<div class="modal-footer">' +
+      '<button class="btn btn-secondary" onclick="this.closest(\'.modal-overlay\').remove()">取消</button>' +
+      '<button class="btn btn-primary" onclick="createTask()">创建</button>' +
+    '</div>' +
+  '</div>';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  document.getElementById('new-title').focus();
+}
+
+async function createTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  const body = document.getElementById('new-body').value.trim() || undefined;
+  const priority = parseInt(document.getElementById('new-prio').value);
+  const assignee = document.getElementById('new-agent').value.trim() || undefined;
+  const triage = document.getElementById('new-triage').checked;
+  
+  const r = await api('POST', '/tasks', { title, body, priority, assignee_agent: assignee, triage });
+  if (r) {
+    document.querySelector('.modal-overlay').remove();
+    loadAll(true);
+  }
+}
+
+// ── Detail Modal ─────────────────────────────────────────────
+async function showDetail(id) {
+  const data = await api('GET', '/tasks/' + id);
+  if (!data) return;
+  const t = data.task;
+  const events = data.events || [];
+  const runs = data.runs || [];
+  const comments = data.comments || [];
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = '<div class="modal" style="max-width:680px" onclick="event.stopPropagation()">' +
+    '<div class="modal-header"><span>' + escapeHtml(t.title) + '</span><button class="btn-ghost" onclick="this.closest(\'.modal-overlay\').remove()">✕</button></div>' +
+    '<div class="modal-body">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">' +
+        '<span class="pill pill-prio">' + (prioLabel(t.priority) || 'P--') + '</span>' +
+        '<span class="pill">' + (COL_LABELS[t.status] || t.status) + '</span>' +
+        (t.assignee_agent ? '<span class="pill">@' + escapeHtml(t.assignee_agent) + '</span>' : '') +
+        '<span class="pill" style="font-family:monospace;font-size:9px">' + t.id.substr(0,8) + '</span>' +
+      '</div>' +
+      (t.body ? '<div class="detail-section"><label>内容</label><pre class="detail-pre">' + escapeHtml(t.body) + '</pre></div>' : '') +
+      (t.result ? '<div class="detail-section"><label>结果</label><pre class="detail-pre">' + escapeHtml(t.result) + '</pre></div>' : '') +
+      (runs.length > 0 ? '<div class="detail-section"><label>执行记录 (' + runs.length + ')</label>' +
+        runs.map(r => '<div style="font-size:12px;padding:4px 0">' +
+          '<span class="pill">' + (r.status||'?') + '</span> ' +
+          (r.agent_profile ? '@' + escapeHtml(r.agent_profile) + ' ' : '') +
+          (r.summary ? escapeHtml(r.summary) : '') +
+          (r.error ? ' <span style="color:var(--error)">' + escapeHtml(r.error) + '</span>' : '') +
+        '</div>').join('') + '</div>' : '') +
+      (events.length > 0 ? '<div class="detail-section"><label>事件日志 (' + events.length + ')</label>' +
+        events.slice(-15).reverse().map(e => '<div class="event-row"><span class="pill">' + e.kind + '</span><span style="font-size:11px;color:var(--text-muted)">' + fmtAge(e.created_at) + '</span></div>').join('') +
+      '</div>' : '') +
+      (comments.length > 0 ? '<div class="detail-section"><label>评论 (' + comments.length + ')</label>' +
+        comments.map(c => '<div class="comment-item"><div class="comment-author">' + escapeHtml(c.author||'anon') + '</div><div class="comment-body">' + escapeHtml(c.body) + '</div></div>').join('') +
+      '</div>' : '') +
+      '<div class="detail-section"><label>添加评论</label><textarea id="detail-comment" class="input" rows="2" placeholder="输入评论…"></textarea>' +
+      '<button class="btn btn-secondary" style="margin-top:6px" onclick="addComment(\''+id+'\')">发送</button></div>' +
+    '</div>' +
+  '</div>';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function addComment(id) {
+  const body = document.getElementById('detail-comment').value.trim();
+  if (!body) return;
+  const r = await api('POST', '/tasks/' + id + '/comment', { body });
+  if (r) {
+    document.querySelector('.modal-overlay').remove();
+    loadAll(true);
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────
+async function init() {
+  if (!TOKEN) {
+    // Try to get token from login
+    document.getElementById('loading').innerHTML = 
+      '<div style="text-align:center"><p style="color:var(--text-secondary);margin-bottom:12px">请先登录</p>' +
+      '<a href="/" class="btn btn-primary">返回登录</a></div>';
+    return;
+  }
+  // Verify token
+  try {
+    const r = await fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + TOKEN } });
+    if (!r.ok) throw new Error('invalid');
+  } catch(e) {
+    localStorage.removeItem('salesos_token');
+    TOKEN = '';
+    document.getElementById('loading').innerHTML = 
+      '<div style="text-align:center"><p style="color:var(--error);margin-bottom:12px">登录已过期</p>' +
+      '<a href="/" class="btn btn-primary">重新登录</a></div>';
+    return;
+  }
+  await loadAll();
+  // Poll every 6 seconds
+  setInterval(() => loadAll(true), 6000);
+}
+
+// Save token on login — hook into existing auth
+const origFetch = window.fetch;
+window.fetch = function(...args) {
+  return origFetch.apply(this, args).then(r => {
+    if (args[0] === '/api/auth/login' || args[0].includes('/api/auth/login')) {
+      r.clone().json().then(d => {
+        if (d.token) localStorage.setItem('salesos_token', d.token);
+      }).catch(()=>{});
+    }
+    return r;
+  });
+};
+
+init();
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import os
 import hashlib
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
@@ -11,12 +12,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_db
 from src.models.user import User, UserRole
 
-JWT_SECRET = os.environ.get(
-    "JWT_SECRET",
-    hashlib.sha256(os.urandom(64)).hexdigest(),
-)
+JWT_SECRET_FILE = Path(__file__).parent.parent / ".jwt_secret"
+
+
+def _load_or_create_jwt_secret() -> str:
+    """Load JWT secret from disk, creating it once if it doesn't exist."""
+    if JWT_SECRET_FILE.exists():
+        return JWT_SECRET_FILE.read_text().strip()
+    secret = hashlib.sha256(os.urandom(64)).hexdigest()
+    JWT_SECRET_FILE.write_text(secret)
+    return secret
+
+
+JWT_SECRET = os.environ.get("JWT_SECRET") or _load_or_create_jwt_secret()
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRY_HOURS = 24
+JWT_EXPIRY_HOURS = 876000  # 100 years — session never expires
 
 security_scheme = HTTPBearer(auto_error=False)
 
@@ -75,13 +85,20 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """FastAPI dependency — extract User from JWT Bearer token."""
-    if credentials is None:
+    """FastAPI dependency — extract User from JWT Bearer token or ?token= query param."""
+    token = None
+    if credentials is not None:
+        token = credentials.credentials
+    else:
+        # SSE / EventSource can't send headers — fall back to ?token= query param
+        token = request.query_params.get("token")
+
+    if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
-    payload = decode_token(credentials.credentials)
+    payload = decode_token(token)
     user_id = payload.get("sub")
     if user_id is None:
         raise HTTPException(

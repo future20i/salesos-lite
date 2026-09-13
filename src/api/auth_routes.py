@@ -112,6 +112,10 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)) -> AuthR
         )
 
     token = create_token(str(user.id), str(user.tenant_id), user.role.value)
+    # Update last_login_at for silence digest
+    from datetime import datetime, timezone as tz
+    user.last_login_at = datetime.now(tz.utc)
+    await db.commit()
     return AuthResponse(
         token=token,
         user={

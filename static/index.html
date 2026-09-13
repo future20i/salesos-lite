@@ -41,6 +41,7 @@
 
   /* ── Login ── */
   #login-overlay{position:fixed;inset:0;background:var(--bg-root);display:flex;align-items:center;justify-content:center;z-index:100}
+  #login-overlay.hidden,#onboarding-overlay.hidden,#capture-overlay.hidden,#meeting-overlay.hidden{display:none}
   #login-box{width:380px;padding:40px 36px;background:var(--bg-surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-elevated)}
   #login-box h1{font-size:22px;font-weight:600;letter-spacing:-0.44px;color:var(--text-primary);margin-bottom:6px}
   #login-box .login-sub{font-size:13px;color:var(--text-tertiary);margin-bottom:28px}
@@ -473,6 +474,12 @@
   <button class="nav-icon" id="nav-knowledge" title="知识库">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
   </button>
+  <button class="nav-icon" id="nav-meeting" title="会议策略" onclick="openMeetingStrategy()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+  </button>
+  <button class="nav-icon" id="nav-capture" title="快速捕获" onclick="openQuickCapture()" style="margin-top:auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  </button>
 </nav>
 
 <!-- ═══ PIPELINE PANEL ═══ -->
@@ -482,6 +489,7 @@
     <span style="flex:1"></span>
     <button class="btn" onclick="loadPipeline()" style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font-sans)">刷新</button>
     <button class="btn" style="padding:6px 16px;border-radius:8px;font-size:12px;font-weight:500;border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:var(--font-sans)" onclick="createOppFromLead()">+ 新建商机</button>
+    <button class="btn" id="btn-seed" onclick="seedPipeline()" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:500;border:1px solid var(--text-disabled);background:transparent;color:var(--text-tertiary);cursor:pointer;font-family:var(--font-sans);margin-left:6px" title="生成演示数据">🎲 演示</button>
   </div>
   <div class="pipe-board">
     <div class="pipe-cols" id="pipeline-cols">
@@ -500,7 +508,7 @@
 <div id="app-content">
 
 <!-- ═══ LANDING PAGE ═══ -->
-<div id="landing">
+<div id="landing" class="hidden">
   <div class="landing-container">
     <!-- Hero -->
     <section class="landing-hero">
@@ -583,10 +591,10 @@
 </div>
 
 <!-- ═══ LOGIN OVERLAY ═══ -->
-<div id="login-overlay" class="hidden">
+<div id="login-overlay">
   <div id="login-box">
     <h1>SalesOS Lite</h1>
-    <div class="login-sub">外贸 SME 统一收件箱</div>
+    <div class="login-sub">登录</div>
 
     <!-- Mode tabs -->
     <div class="login-tabs">
@@ -604,7 +612,6 @@
     <input id="login-pass" type="password" placeholder="密码" autocomplete="off">
     <button class="btn-login" id="btn-auth" onclick="doAuth()">登录</button>
     <p id="login-error"></p>
-    <div class="login-hint" id="login-hint">测试: admin@test.com / admin123</div>
   </div>
 </div>
 
@@ -624,11 +631,69 @@
   </div>
 </div>
 
+<!-- ═══ QUICK CAPTURE OVERLAY ═══ -->
+<div id="capture-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:110" onclick="if(event.target===this)closeQuickCapture()">
+  <div id="capture-panel" style="width:500px;max-width:90vw;max-height:85vh;background:var(--bg-surface);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-elevated);overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-size:16px;font-weight:600;margin:0">📝 快速捕获</h3>
+      <button onclick="closeQuickCapture()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-tertiary);padding:4px">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-tertiary);margin:0">拜访、电话、展会后的快速记录。AI 自动提取行动项并生成跟进。</p>
+    <div style="display:flex;gap:8px">
+      <input id="capture-hint" placeholder="关联客户（可选）" style="flex:1;padding:8px 12px;border:1px solid var(--bg-hover);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-sans);background:var(--bg-subtle)" autocomplete="off">
+      <input id="capture-opp-hint" placeholder="关联商机（可选）" style="flex:1;padding:8px 12px;border:1px solid var(--bg-hover);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-sans);background:var(--bg-subtle)" autocomplete="off">
+    </div>
+    <textarea id="capture-text" placeholder="输入拜访/电话/展会的关键信息…&#10;&#10;例如：&#10;- 客户对 TL-8000 报价表示认可&#10;- 需要下周提供 CE 认证文件&#10;- 联系人：Markus，采购总监&#10;- 预计下单时间：7月中旬" style="width:100%;min-height:160px;padding:12px;border:1px solid var(--bg-hover);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-sans);resize:vertical;line-height:1.6;background:var(--bg-subtle)"></textarea>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="capture-voice-btn" onclick="startVoiceCapture()" style="padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--text-disabled);background:transparent;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px">🎤 语音输入</button>
+      <div id="capture-status" style="font-size:12px;color:var(--text-tertiary);flex:1"></div>
+      <button onclick="submitCapture()" style="padding:10px 24px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font-sans)">✈️ 捕获并解析</button>
+    </div>
+    <div id="capture-result" style="display:none;background:var(--bg-subtle);border-radius:var(--radius-sm);padding:12px;font-size:12px;max-height:200px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- ═══ MEETING STRATEGY OVERLAY ═══ -->
+<div id="meeting-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:110" onclick="if(event.target===this)closeMeetingStrategy()">
+  <div id="meeting-panel" style="width:640px;max-width:95vw;max-height:90vh;background:var(--bg-surface);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-elevated);overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-size:16px;font-weight:600;margin:0">🎯 会议策略</h3>
+      <button onclick="closeMeetingStrategy()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-tertiary);padding:4px">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-tertiary);margin:0">选择商机和与会者，系统根据每人当前决策阶段生成一条整合会议策略。</p>
+
+    <!-- Step 1: Select Opportunity -->
+    <div>
+      <label style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;display:block">选择商机</label>
+      <select id="meeting-opp" onchange="loadMeetingPersons()" style="width:100%;padding:8px 12px;border:1px solid var(--bg-hover);border-radius:var(--radius-sm);font-size:13px;background:var(--bg-subtle);color:var(--text-primary)">
+        <option value="">— 选择商机 —</option>
+      </select>
+    </div>
+
+    <!-- Step 2: Select Attendees -->
+    <div>
+      <label style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;display:block">
+        选择与会者 <span id="meeting-person-count" style="color:var(--text-tertiary);font-weight:400"></span>
+      </label>
+      <div id="meeting-persons" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+        <div style="font-size:12px;color:var(--text-tertiary);padding:8px">请先选择商机</div>
+      </div>
+    </div>
+
+    <!-- Generate Button -->
+    <button id="meeting-generate-btn" onclick="generateMeetingBriefing()" disabled
+      style="padding:12px 24px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:500;opacity:0.5">
+      ⚡ 生成会议策略
+    </button>
+    <div id="meeting-status" style="font-size:12px;color:var(--text-tertiary)"></div>
+
+    <!-- Result -->
+    <div id="meeting-result" style="display:none"></div>
+  </div>
+</div>
+
 <!-- ═══ APP ═══ -->
 <div id="app" class="hidden">
-  <div id="trial-banner" class="hidden">
-    14 天免费试用 · <strong id="trial-days">14</strong> 天剩余 &nbsp;<a class="trial-upgrade" onclick="alert('支付功能即将上线')">升级付费 →</a>
-  </div>
   <nav id="nav">
     <div class="nav-brand">S</div>
     <div class="nav-icon active" title="收件箱">
@@ -751,6 +816,10 @@
       <h4>意向分布</h4>
       <div id="dash-intent"></div>
     </div>
+    <div class="dash-section" id="dash-silence-section" style="display:none">
+      <h4>🔔 沉默提醒</h4>
+      <div id="dash-silence"></div>
+    </div>
   </div>
 </div>
 
@@ -797,7 +866,7 @@ var _authMode = 'login';
 function showAuth(mode) {
   $('landing').classList.add('hidden');
   $('onboarding-overlay').classList.add('hidden');
-  $('login-overlay').classList.remove('hidden');
+  $('login-overlay').style.display = '';
   if (mode) switchAuthMode(mode);
 }
 
@@ -808,15 +877,12 @@ function switchAuthMode(mode) {
   event.target.classList.add('active');
   var regFields = $('reg-fields');
   var btn = $('btn-auth');
-  var hint = $('login-hint');
   if (mode === 'register') {
     regFields.classList.remove('hidden');
     btn.textContent = '注册';
-    hint.textContent = '注册即表示同意服务条款';
   } else {
     regFields.classList.add('hidden');
     btn.textContent = '登录';
-    hint.textContent = '测试: admin@test.com / admin123';
   }
   $('login-error').style.display = 'none';
   $('login-error').textContent = '';
@@ -850,7 +916,7 @@ async function doRegister() {
   // Auto-login after registration
   _tk = d.token;
   localStorage.setItem('salesos_lite_sess', JSON.stringify({tk:_tk}));
-  $('login-overlay').classList.add('hidden');
+  $('login-overlay').style.display = 'none';
   $('app').classList.remove('hidden');
   await initAfterLogin();
 }
@@ -869,47 +935,22 @@ async function doLogin() {
   }
   _tk = d.token;
   localStorage.setItem('salesos_lite_sess', JSON.stringify({tk:_tk}));
-  $('login-overlay').classList.add('hidden');
+  $('login-overlay').style.display = 'none';
   $('app').classList.remove('hidden');
   await initAfterLogin();
 }
 
 async function initAfterLogin() {
   $('landing').classList.add('hidden');
-  $('login-overlay').classList.add('hidden');
+  $('login-overlay').style.display = 'none';
   $('app').classList.remove('hidden');
 
   var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+_tk}});
   _user = await me.json();
 
-  // Check billing / trial status
-  await checkBilling();
-
-  // Check onboarding state (non-fatal — skip if unreachable)
-  try {
-    var onboardResp = await fetch('/api/onboarding/state', {headers:{'Authorization':'Bearer '+_tk}});
-    if (onboardResp.ok) {
-      var onboardData = await onboardResp.json();
-      if (onboardData.step < 3) {
-        renderOnboarding(onboardData);
-        return;
-      }
-    }
-  } catch(e) { /* onboarding check failed, continue to inbox */ }
-
+  // Skip onboarding, skip demo, skip trial — go straight to inbox
   await loadLeads();
-  // If brand new (no leads), create a demo lead
-  if (!_leads.length) {
-    await api('/api/inbox/incoming', {
-      method:'POST',
-      body:JSON.stringify({
-        source:'web', customer_name:'欢迎使用 SalesOS Lite',
-        customer_email:'demo@salesos.io',
-        content:'👋 你好！这是你的第一条演示消息。试试回复我，体验完整的收件箱功能。'
-      })
-    });
-    await loadLeads();
-  }
+  if (typeof loadPipeline === 'function') { loadPipeline(); }
 }
 
 function doLogout() {
@@ -925,7 +966,8 @@ async function tryRestore() {
   var r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+d.tk}});
   if (!r.ok) { localStorage.removeItem('salesos_lite_sess'); return; }
   _tk = d.tk;
-  $('login-overlay').classList.add('hidden');
+  $('landing').classList.add('hidden');
+  $('login-overlay').style.display = 'none';
   $('app').classList.remove('hidden');
   await initAfterLogin();
 }
@@ -955,6 +997,7 @@ async function checkBilling() {
 // ═══════════════════════════════════════════
 var _onboardData = null;
 var _onboardStep = 0;
+var _onboardingFinishing = false;  // guard against double-click
 
 function renderOnboarding(data) {
   _onboardData = data;
@@ -1036,10 +1079,17 @@ async function advanceOnboarding(step) {
 }
 
 function skipOnboarding() {
+  if (_onboardingFinishing) return;
+  _onboardingFinishing = true;
   advanceOnboarding(3).then(function() { finishOnboarding(); });
 }
 
 async function finishOnboarding() {
+  if (_onboardingFinishing) return;
+  _onboardingFinishing = true;
+  // Disable button immediately to prevent double-click
+  var btn = document.querySelector('#onboard-actions .onboard-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 处理中...'; }
   // Advance to done step (4)
   try {
     await fetch('/api/onboarding/advance', {
@@ -1594,6 +1644,238 @@ selectLead = async function(id) {
 };
 
 // ═══════════════════════════════════════════
+// Silence Alert — digest + dashboard integration
+// ═══════════════════════════════════════════
+var _silenceCount = 0;
+
+async function loadSilenceDigest() {
+  try {
+    var r = await api('/api/ai/silence-digest');
+    var d = await r.json();
+    _silenceCount = d.unread_count || 0;
+    updateSilenceBadge();
+  } catch(e) { /* silence check may not be available yet */ }
+}
+
+function updateSilenceBadge() {
+  var badge = document.getElementById('silence-badge');
+  if (_silenceCount > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'silence-badge';
+      badge.style.cssText = 'position:absolute;top:-4px;right:-8px;background:var(--danger);color:#fff;font-size:10px;font-weight:600;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;';
+      var navDash = document.querySelector('[title="数据"]');
+      if (navDash) { navDash.style.position = 'relative'; navDash.appendChild(badge); }
+    }
+    badge.textContent = _silenceCount > 99 ? '99+' : _silenceCount;
+    badge.style.display = 'flex';
+  } else if (badge) {
+    badge.style.display = 'none';
+  }
+}
+
+async function loadSilenceAlerts() {
+  var section = $('dash-silence-section');
+  var el = $('dash-silence');
+  if (!section || !el) return;
+  el.innerHTML = '<p style="color:var(--text-quaternary);font-size:12px">加载中…</p>';
+  try {
+    var r = await api('/api/ai/silence-alerts?unread_only=false&limit=10');
+    var alerts = await r.json();
+    renderSilenceAlerts(alerts);
+  } catch(e) {
+    el.innerHTML = '<p style="color:var(--text-quaternary);font-size:12px">暂无沉默提醒</p>';
+  }
+}
+
+function renderSilenceAlerts(alerts) {
+  var section = $('dash-silence-section');
+  var el = $('dash-silence');
+  if (!Array.isArray(alerts) || alerts.length === 0) {
+    section.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  section.style.display = '';
+  var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+  for (var i = 0; i < alerts.length; i++) {
+    var a = alerts[i];
+    var stageNames = {
+      'lead_validation':'线索验证','needs_confirmation':'需求确认',
+      'technical_exchange':'技术交流','quotation_negotiation':'报价/谈判',
+      'contract':'合同'
+    };
+    var stageLabel = stageNames[a.stage] || a.stage;
+    var severity = a.days_silent >= a.threshold * 2 ? '🔴' : a.days_silent >= a.threshold * 1.5 ? '🟠' : '🟡';
+    html += '<div style="background:var(--bg-hover);border-radius:var(--radius-sm);padding:10px;font-size:12px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+    html += '<strong style="color:var(--text-primary)">'+esc(a.opportunity_name)+'</strong>';
+    html += '<span style="font-size:10px;color:var(--text-tertiary)">'+stageLabel+'</span></div>';
+    html += '<div style="color:var(--text-secondary)">'+severity+' 客户 <strong>'+a.days_silent+'</strong> 天未回复（阈值 '+a.threshold+' 天）</div>';
+    html += '<div style="margin-top:6px;display:flex;gap:8px;justify-content:flex-end">';
+    html += '<button onclick="ackSilenceAlert('+a.event_id+',this)" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--text-disabled);background:transparent;color:var(--text-secondary);cursor:pointer">已读</button>';
+    html += '<button onclick="openOppFromAlert(\''+a.opportunity_id+'\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer">查看商机</button></div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function ackSilenceAlert(eventId, btn) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    await api('/api/ai/silence-alerts/'+eventId+'/acknowledge', {method:'POST'});
+    btn.parentElement.parentElement.style.opacity = '0.4';
+    btn.textContent = '✓';
+    _silenceCount = Math.max(0, _silenceCount - 1);
+    updateSilenceBadge();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '重试';
+  }
+}
+
+function openOppFromAlert(oppId) {
+  closeDashboard();
+  if (typeof showOppDetail === 'function') {
+    showOppDetail(oppId);
+  }
+}
+
+// Extend initAfterLogin and openDashboard
+var _origInitAfterLogin2 = initAfterLogin;
+initAfterLogin = async function() {
+  await _origInitAfterLogin2.call(this);
+  loadSilenceDigest();
+};
+
+var _origOpenDashboard = openDashboard;
+openDashboard = async function() {
+  _origOpenDashboard();
+  loadSilenceAlerts();
+  loadSilenceDigest();
+};
+
+// ═══════════════════════════════════════════
+// Quick Capture — voice + text note capture
+// ═══════════════════════════════════════════
+var _captureRecognition = null;
+
+function openQuickCapture() {
+  $('capture-overlay').classList.remove('hidden');
+  $('capture-text').value = '';
+  $('capture-hint').value = '';
+  $('capture-opp-hint').value = '';
+  $('capture-result').style.display = 'none';
+  $('capture-status').textContent = '';
+  setTimeout(function() { $('capture-text').focus(); }, 100);
+}
+
+function closeQuickCapture() {
+  $('capture-overlay').classList.add('hidden');
+  stopVoiceCapture();
+}
+
+function startVoiceCapture() {
+  var btn = $('capture-voice-btn');
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    $('capture-status').textContent = '⚠️ 浏览器不支持语音识别（请用 Chrome）';
+    return;
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  _captureRecognition = new SR();
+  _captureRecognition.lang = 'zh-CN';
+  _captureRecognition.interimResults = true;
+  _captureRecognition.continuous = true;
+  _captureRecognition.onstart = function() {
+    btn.textContent = '🔴 录音中…';
+    btn.style.borderColor = 'var(--danger)';
+    btn.style.color = 'var(--danger)';
+    $('capture-status').textContent = '正在聆听…';
+  };
+  _captureRecognition.onresult = function(e) {
+    var text = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      text += e.results[i][0].transcript;
+    }
+    $('capture-text').value = ($('capture-text').value + ' ' + text).trim();
+  };
+  _captureRecognition.onerror = function(e) {
+    $('capture-status').textContent = '语音错误: ' + e.error;
+    stopVoiceCapture();
+  };
+  _captureRecognition.onend = function() {
+    stopVoiceCapture();
+  };
+  _captureRecognition.start();
+}
+
+function stopVoiceCapture() {
+  if (_captureRecognition) {
+    try { _captureRecognition.stop(); } catch(e) {}
+    _captureRecognition = null;
+  }
+  var btn = $('capture-voice-btn');
+  btn.textContent = '🎤 语音输入';
+  btn.style.borderColor = 'var(--text-disabled)';
+  btn.style.color = '';
+}
+
+async function submitCapture() {
+  var text = $('capture-text').value.trim();
+  if (!text) { $('capture-status').textContent = '请输入内容'; return; }
+  
+  var btn = document.querySelector('#capture-panel button[onclick*=\"submitCapture\"]');
+  btn.disabled = true;
+  btn.textContent = '⏳ 解析中…';
+  $('capture-status').textContent = '';
+  
+  try {
+    var hint = $('capture-hint').value.trim() || null;
+    var oppHint = $('capture-opp-hint').value.trim() || null;
+    
+    // Step 1: Create capture
+    var r = await api('/api/quick-capture', {
+      method: 'POST',
+      body: JSON.stringify({
+        raw_text: text,
+        source_type: 'text',
+        customer_hint: hint,
+        opportunity_hint: oppHint
+      })
+    });
+    var cap = await r.json();
+    
+    // Step 2: Process (AI parse)
+    $('capture-status').textContent = 'AI 解析中…';
+    var r2 = await api('/api/quick-capture/' + cap.id + '/process', { method: 'POST' });
+    var result = await r2.json();
+    
+    // Show result
+    var res = $('capture-result');
+    res.style.display = 'block';
+    var parsed = result.parsed || {};
+    var items = (parsed.action_items || []).map(function(it, i) {
+      return '<div style="padding:4px 0">'+(i+1)+'. '+esc(it.title)+' <span style="color:var(--text-tertiary);font-size:10px">优先级:'+(it.priority||1)+'</span></div>';
+    }).join('');
+    res.innerHTML = 
+      '<div style="margin-bottom:8px"><strong>✅ 解析完成</strong> — 创建了 <strong>'+result.followup_count+'</strong> 个跟进项</div>' +
+      (parsed.summary ? '<div style="margin-bottom:6px;color:var(--text-secondary)">📌 '+esc(parsed.summary)+'</div>' : '') +
+      (parsed.customer_match ? '<div style="margin-bottom:4px;font-size:11px">👤 客户: '+esc(parsed.customer_match)+'</div>' : '') +
+      (parsed.sentiment ? '<div style="margin-bottom:4px;font-size:11px">😊 情绪: '+esc(parsed.sentiment)+'</div>' : '') +
+      '<div style="margin-top:8px">'+items+'</div>' +
+      '<button onclick="closeQuickCapture();switchPanel(\'pipeline\');" style="margin-top:8px;padding:6px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:11px">查看管道 →</button>';
+    
+    $('capture-status').textContent = '✅ 完成';
+  } catch(e) {
+    $('capture-status').textContent = '❌ 失败: ' + e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = '✈️ 捕获并解析';
+}
+
+// ═══════════════════════════════════════════
 // Init
 // ═══════════════════════════════════════════
 // On mobile, start with leads view
@@ -1645,7 +1927,7 @@ var _eventSource = null;
 function connectSSE() {
   if (_eventSource) { _eventSource.close(); }
   if (!_tk) return;
-  _eventSource = new EventSource('/api/inbox/stream');
+  _eventSource = new EventSource('/api/inbox/stream?token=' + encodeURIComponent(_tk));
 
   _eventSource.addEventListener('message', function(e) {
     try {
@@ -1768,6 +2050,242 @@ function renderQuotations(quotes) {
     html += '</div>';
   }
   el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// MEETING STRATEGY
+// ═══════════════════════════════════════════
+var _meetingOpps = [];
+var _meetingPersons = [];
+var _meetingSelected = {};
+
+async function openMeetingStrategy() {
+  $('meeting-overlay').classList.remove('hidden');
+  $('meeting-overlay').style.display = 'flex';
+  $('meeting-result').style.display = 'none';
+  $('meeting-status').textContent = '';
+  _meetingSelected = {};
+  updateMeetingGenerateBtn();
+  await loadMeetingOpps();
+}
+
+function closeMeetingStrategy() {
+  $('meeting-overlay').classList.add('hidden');
+  $('meeting-overlay').style.display = '';
+}
+
+async function loadMeetingOpps() {
+  var r = await api('/api/opportunities');
+  _meetingOpps = Array.isArray(r) ? r : (r.items || []);
+  var sel = $('meeting-opp');
+  sel.innerHTML = '<option value="">— 选择商机 —</option>';
+  for (var i = 0; i < _meetingOpps.length; i++) {
+    var o = _meetingOpps[i];
+    sel.innerHTML += '<option value="' + o.id + '">' + escHtml(o.name || o.id) + ' (' + (o.stage || '?') + ')</option>';
+  }
+  $('meeting-persons').innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px">请先选择商机</div>';
+  updateMeetingGenerateBtn();
+}
+
+async function loadMeetingPersons() {
+  var oppId = $('meeting-opp').value;
+  if (!oppId) {
+    $('meeting-persons').innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px">请先选择商机</div>';
+    updateMeetingGenerateBtn();
+    return;
+  }
+  var r = await api('/api/persons');
+  _meetingPersons = Array.isArray(r) ? r : [];
+  _meetingSelected = {};
+
+  var html = '';
+  for (var i = 0; i < _meetingPersons.length; i++) {
+    var p = _meetingPersons[i];
+    var pid = p.id;
+    // Fetch latest diagnosis
+    var diagR = null;
+    try {
+      // Use person briefing to get stage
+      diagR = await api('/api/intel/briefing', 'POST', { person_id: pid });
+    } catch(e) {}
+    
+    var stage = (diagR && diagR.diagnosis) ? diagR.diagnosis.stage : 'unknown';
+    var stageLabel = stage === 'stage_b_fear_of_failure' ? '阶段B ⚠️' :
+                     stage === 'stage_a_problem_unawareness' ? '阶段A 🔴' :
+                     stage === 'stage_c_status_quo_bias' ? '阶段C 🔵' : '未知 ❓';
+    var conf = (diagR && diagR.diagnosis) ? diagR.diagnosis.confidence : '?';
+
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--bg-hover);border-radius:var(--radius-sm);cursor:pointer;font-size:13px" onclick="toggleMeetingAttendee(\'' + pid + '\', this)">' +
+      '<input type="checkbox" style="margin:0" id="meeting-chk-' + pid + '" onchange="toggleMeetingAttendee(\'' + pid + '\', this.parentNode)">' +
+      '<span style="flex:1;font-weight:500">' + escHtml(p.full_name || p.name || '未知') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-tertiary)">' + (p.title || '') + '</span>' +
+      '<span style="font-size:11px;padding:2px 8px;border-radius:999px;background:var(--bg-subtle)">' + stageLabel + '</span>' +
+      '<span style="font-size:10px;color:var(--text-tertiary)">置信:' + conf + '</span>' +
+    '</label>';
+  }
+  if (!html) html = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px">该商机下没有联系人。请先在联系人管理中创建。</div>';
+  $('meeting-persons').innerHTML = html;
+  updateMeetingGenerateBtn();
+}
+
+function toggleMeetingAttendee(pid, el) {
+  var chk = $('meeting-chk-' + pid);
+  if (chk.checked) {
+    _meetingSelected[pid] = true;
+    el.style.borderColor = 'var(--accent)';
+    el.style.background = 'var(--accent-soft)';
+  } else {
+    delete _meetingSelected[pid];
+    el.style.borderColor = 'var(--bg-hover)';
+    el.style.background = 'transparent';
+  }
+  updateMeetingGenerateBtn();
+}
+
+function updateMeetingGenerateBtn() {
+  var btn = $('meeting-generate-btn');
+  var oppId = $('meeting-opp').value;
+  var count = Object.keys(_meetingSelected).length;
+  $('meeting-person-count').textContent = count > 0 ? '(' + count + '人已选)' : '';
+  if (oppId && count >= 1) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+  }
+}
+
+async function generateMeetingBriefing() {
+  var oppId = $('meeting-opp').value;
+  var ids = Object.keys(_meetingSelected);
+  if (!oppId || ids.length === 0) return;
+
+  var btn = $('meeting-generate-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 生成中…';
+  $('meeting-status').textContent = '正在分析决策阶段并生成会议策略…';
+
+  var r = await api('/api/intel/meeting-briefing', 'POST', {
+    opportunity_id: oppId,
+    attendee_ids: ids
+  });
+
+  btn.disabled = false;
+  btn.textContent = '⚡ 重新生成';
+
+  if (r.error || r.detail) {
+    $('meeting-status').textContent = '❌ ' + (r.detail || r.error || '请求失败');
+    return;
+  }
+
+  $('meeting-status').textContent = '✅ 策略已生成';
+  renderMeetingResult(r);
+}
+
+function renderMeetingResult(data) {
+  var el = $('meeting-result');
+  el.style.display = 'block';
+
+  var html = '';
+
+  // Objective
+  html += '<div style="background:var(--accent-soft);border-left:3px solid var(--accent);padding:12px 14px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-bottom:16px">';
+  html += '<div style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px">🎯 ' + escHtml(data.meeting_objective || '') + '</div>';
+  html += '</div>';
+
+  // Primary target
+  var p = data.primary_target || {};
+  html += '<div style="margin-bottom:12px">';
+  html += '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">👤 主攻对象</div>';
+  html += '<div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px">';
+  html += '<strong>' + escHtml(p.name || '?') + '</strong> <span style="color:var(--text-tertiary)">' + escHtml(p.role || '') + '</span>';
+  html += '<span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)">' + escHtml(p.stage || '?') + '</span>';
+  html += '<div style="margin-top:4px;color:var(--text-secondary)">' + escHtml(p.why_primary || '') + '</div>';
+  html += '</div></div>';
+
+  // Secondary attendees
+  var sec = data.secondary_attendees || [];
+  if (sec.length > 0) {
+    html += '<div style="margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">👥 其他与会者</div>';
+    for (var i = 0; i < sec.length; i++) {
+      var s = sec[i];
+      html += '<div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;margin-bottom:4px">';
+      html += '<strong>' + escHtml(s.name || '?') + '</strong> <span style="color:var(--text-tertiary)">' + escHtml(s.role || '') + '</span>';
+      html += '<span style="margin-left:8px;font-size:10px;padding:1px 6px;border-radius:999px;background:var(--bg-elevated)">' + escHtml(s.stage || '?') + '</span>';
+      if (s.constraint) {
+        html += '<div style="margin-top:3px;color:var(--warning, #d97706);font-size:11px">⚠️ ' + escHtml(s.constraint) + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Pre-meeting actions
+  var pre = data.pre_meeting_actions || [];
+  if (pre.length > 0) {
+    html += '<div style="margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">📋 会前准备</div>';
+    for (var i = 0; i < pre.length; i++) {
+      var a = pre[i];
+      html += '<div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;margin-bottom:4px">';
+      html += '<span style="font-weight:600">' + escHtml(a.type || '') + '</span>: ' + escHtml(a.action || '');
+      if (a.sample_phrasing) {
+        html += '<div style="margin-top:4px;color:var(--accent);font-style:italic">💬 ' + escHtml(a.sample_phrasing) + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // In-meeting arcs
+  var arcs = data.in_meeting_arcs || [];
+  if (arcs.length > 0) {
+    html += '<div style="margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">⏱ 会议节奏</div>';
+    for (var i = 0; i < arcs.length; i++) {
+      var arc = arcs[i];
+      html += '<div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;margin-bottom:4px;border-left:3px solid var(--accent)">';
+      html += '<div style="font-weight:600;margin-bottom:2px">' + escHtml(arc.phase || '') + '</div>';
+      html += '<div style="color:var(--text-secondary)">' + escHtml(arc.purpose || '') + '</div>';
+      if (arc.sample_phrasing) {
+        html += '<div style="margin-top:4px;color:var(--accent);font-style:italic">💬 ' + escHtml(arc.sample_phrasing) + '</div>';
+      }
+      if (arc.caution) {
+        html += '<div style="margin-top:3px;color:var(--warning, #d97706);font-size:11px">⚠️ ' + escHtml(arc.caution) + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Red lines
+  var red = data.red_lines || [];
+  if (red.length > 0) {
+    html += '<div style="margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--danger, #dc2626);margin-bottom:4px">🚫 雷区</div>';
+    html += '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-sm);padding:10px 12px;font-size:12px">';
+    for (var i = 0; i < red.length; i++) {
+      html += '<div style="margin-bottom:3px">• ' + escHtml(red[i]) + '</div>';
+    }
+    html += '</div></div>';
+  }
+
+  // Post-meeting
+  var post = data.post_meeting || {};
+  if (post.immediate) {
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">📬 会后跟进</div>';
+    html += '<div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;margin-bottom:4px">';
+    html += escHtml(post.immediate);
+    if (post.followup_signal) {
+      html += '<div style="margin-top:4px;color:var(--text-tertiary)">' + escHtml(post.followup_signal) + '</div>';
+    }
+    html += '</div>';
+  }
+
+  el.innerHTML = html;
+  el.scrollIntoView({behavior:'smooth'});
 }
 
 </script>

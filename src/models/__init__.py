@@ -12,11 +12,17 @@ from src.models.notification_pref import NotificationPref
 from src.models.followup_rule import FollowupRule, FollowupLog, TriggerType, ActionType
 from src.models.quotation import Quotation
 from src.models.opportunity import Opportunity, OpportunityStage
-from src.models.followup import FollowupItem, FollowupStatus, FollowupEvent, ReviewLevel
+from src.models.followup import FollowupItem, FollowupStatus, FollowupEvent, ReviewLevel, FollowupRun, FollowupComment
 from src.models.knowledge import KnowledgeEntry
 from src.models.person_profile import PersonProfile
 from src.models.power_map import PowerMap
 from src.models.interaction_log import InteractionLog
+from src.models.quick_capture import QuickCapture
+from src.models.decision_stage import (
+    DecisionStageRecord,
+    CommunicationObservation,
+    SignalExtraction,
+)
 
 __all__ = [
     "Base",
@@ -32,9 +38,11 @@ __all__ = [
     "FollowupRule", "FollowupLog", "TriggerType", "ActionType",
     "Quotation",
     "Opportunity", "OpportunityStage",
-    "FollowupItem", "FollowupStatus", "FollowupEvent", "ReviewLevel",
+    "FollowupItem", "FollowupStatus", "FollowupEvent", "ReviewLevel", "FollowupRun", "FollowupComment",
     "KnowledgeEntry",
     "PersonProfile",
     "PowerMap",
     "InteractionLog",
+    "QuickCapture",
+    "DecisionStageRecord", "CommunicationObservation", "SignalExtraction",
 ]

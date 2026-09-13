@@ -7,6 +7,7 @@ Routers:
 """
 
 import uuid
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -24,7 +25,11 @@ from src.models.followup import (
     FollowupEvent,
     ReviewLevel,
 )
-from src.models.message import Message
+from src.models.message import Message, MessageDirection
+from src.models.opportunity import Opportunity
+from src.models.lead import Lead
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PART 1 — FollowupItem Schemas
@@ -73,7 +78,7 @@ class FollowupEventOut(BaseModel):
 
 class FollowupResponse(BaseModel):
     id: str
-    opportunity_id: str
+    opportunity_id: str | None = None
     tenant_id: str
     title: str
     body: str | None = None
@@ -98,7 +103,7 @@ class FollowupResponse(BaseModel):
     def from_orm(cls, obj: FollowupItem) -> "FollowupResponse":
         return cls(
             id=str(obj.id),
-            opportunity_id=str(obj.opportunity_id),
+            opportunity_id=str(obj.opportunity_id) if obj.opportunity_id else None,
             tenant_id=str(obj.tenant_id),
             title=obj.title,
             body=obj.body,
@@ -541,6 +546,130 @@ async def review_followup(
     await db.refresh(item)
 
     return FollowupResponse.from_orm(item)
+
+
+# ── POST /api/followups/{id}/send ──────────────────────────────────────────
+
+class FollowupSendRequest(BaseModel):
+    channel: str | None = None  # override channel; uses lead's channel if unset
+    content: str | None = None  # override content; uses ai_draft if unset
+
+
+@items_router.post("/{followup_id}/send")
+async def send_followup(
+    followup_id: uuid.UUID,
+    body: FollowupSendRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Send an approved followup message to the customer.
+
+    Requirements:
+    - followup must be in DONE status (approved)
+    - followup must be linked to an opportunity with a lead
+
+    Creates an outbound Message, a FollowupEvent, and updates the lead's
+    last_activity_at. If channel integration is configured (WhatsApp/email),
+    attempts actual delivery.
+    """
+    body = body or FollowupSendRequest()
+    item = await _get_followup_or_404(db, followup_id, current_user.tenant_id)
+
+    if item.status != FollowupStatus.DONE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Followup must be approved (DONE) before sending. Current status: {item.status.value if hasattr(item.status, 'value') else item.status}",
+        )
+
+    # Get the opportunity → lead chain
+    opp_result = await db.execute(
+        select(Opportunity).where(Opportunity.id == item.opportunity_id)
+    )
+    opp = opp_result.scalar_one_or_none()
+    if opp is None or opp.lead_id is None:
+        raise HTTPException(status_code=400, detail="Followup is not linked to a lead")
+
+    lead_result = await db.execute(
+        select(Lead).where(Lead.id == opp.lead_id, Lead.tenant_id == current_user.tenant_id)
+    )
+    lead = lead_result.scalar_one_or_none()
+    if lead is None:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    # Determine content and channel
+    content = body.content or item.ai_draft or item.body or item.title
+    channel = body.channel or (lead.channel.value if hasattr(lead.channel, 'value') else str(lead.channel))
+
+    now = datetime.now(timezone.utc)
+
+    # Create outbound Message
+    msg = Message(
+        tenant_id=current_user.tenant_id,
+        lead_id=lead.id,
+        sender=current_user.username,
+        content=content,
+        direction=MessageDirection.OUTBOUND,
+        channel=channel,
+        followup_id=item.id,
+    )
+    db.add(msg)
+    await db.flush()
+
+    # Try actual channel delivery
+    delivery_result = None
+    if channel == "whatsapp":
+        try:
+            from src.services.messaging import send_whatsapp_message
+            delivery_result = await send_whatsapp_message(db, lead, content)
+        except Exception as e:
+            logger.warning("WhatsApp delivery attempt failed: %s", e)
+            delivery_result = f"error: {e}"
+    elif channel == "email":
+        try:
+            from src.services.messaging import send_email_message
+            subject = item.title or "Follow-up"
+            delivery_result = await send_email_message(db, lead, content, subject=subject)
+        except Exception as e:
+            logger.warning("Email delivery attempt failed: %s", e)
+            delivery_result = f"error: {e}"
+
+    # Update lead
+    lead.last_activity_at = now
+
+    # Create event
+    await _add_event(db, item.id, "sent", {
+        "by": str(current_user.id),
+        "channel": channel,
+        "message_id": str(msg.id),
+        "delivery_result": delivery_result,
+    })
+
+    await db.commit()
+
+    # SSE broadcast
+    try:
+        from src.api.inbox_routes import sse_broadcast
+        await sse_broadcast(
+            str(current_user.tenant_id),
+            {
+                "type": "new_message",
+                "lead_id": str(lead.id),
+                "message_id": str(msg.id),
+                "customer_name": lead.customer_name,
+                "content": content,
+                "direction": "outbound",
+            },
+        )
+    except Exception:
+        pass
+
+    return {
+        "status": "sent",
+        "followup_id": str(item.id),
+        "message_id": str(msg.id),
+        "channel": channel,
+        "delivery": delivery_result,
+    }
 
 
 # ── POST /api/followups/from-message ────────────────────────────────────────

@@ -12,20 +12,28 @@ async def tenant_context_middleware(request: Request, call_next):
         "/api/onboarding/state", "/api/onboarding/advance",
         "/api/billing/status",
         "/widget.js", "/pipeline.js",
+        "/kanban",  # Static SPA — auth handled client-side via JWT in localStorage
         "/api/whatsapp/webhook",
         "/api/email/connect", "/api/email/callback",
+        "/api/inbox/stream",  # SSE: auth via ?token= query param (EventSource can't send headers)
     ]
-    if request.url.path in public_paths or request.url.path.startswith("/api/auth/"):
+    if request.url.path in public_paths or request.url.path.startswith(("/api/auth/", "/static/")):
         return await call_next(request)
 
     # Try to get tenant_id from request.state (set by get_current_user dependency)
     tenant_id = getattr(request.state, "tenant_id", None)
 
-    # If not set yet, try to extract from JWT in Authorization header
+    # If not set yet, try to extract from JWT in Authorization header or ?token= query param
     if tenant_id is None:
+        token = None
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
             token = auth_header[7:]
+        else:
+            # SSE / EventSource can't send headers — fall back to ?token= query param
+            token = request.query_params.get("token")
+
+        if token:
             try:
                 from src.auth import decode_token
                 payload = decode_token(token)

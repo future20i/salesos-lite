@@ -41,6 +41,11 @@ from src.api.knowledge_routes import router as knowledge_router
 from src.api.person_routes import router as person_router
 from src.api.power_routes import router as power_router
 from src.api.interaction_routes import router as interaction_router
+from src.api.silence_routes import router as silence_router
+from src.api.seed_routes import router as seed_router
+from src.api.quick_capture_routes import router as quick_capture_router
+from src.api.briefing_routes import router as briefing_router
+from src.api.kanban_routes import router as kanban_router
 from src.health import health_endpoint
 from src.ai_pipeline import poll_and_process, recover_stale_jobs
 
@@ -50,6 +55,34 @@ logger = logging.getLogger(__name__)
 _ai_pipeline_task: asyncio.Task | None = None
 _followup_task: asyncio.Task | None = None
 _silence_task: asyncio.Task | None = None
+
+
+def _ensure_schema_migrations(conn):
+    """Apply schema changes that create_all won't handle (existing tables)."""
+    from sqlalchemy import text as sa_text
+    migrations = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ",
+        "ALTER TABLE leads ADD COLUMN IF NOT EXISTS opportunity_id UUID REFERENCES opportunities(id)",
+        "ALTER TABLE messages ADD COLUMN IF NOT EXISTS followup_id UUID REFERENCES followup_items(id)",
+        # Kanban: extend FollowupStatus enum with new values
+        "ALTER TYPE followupstatus ADD VALUE 'triage'",
+        "ALTER TYPE followupstatus ADD VALUE 'ready'",
+        "ALTER TYPE followupstatus ADD VALUE 'blocked'",
+        # Kanban: new columns on followup_items (kanban agent support)
+        "ALTER TABLE followup_items ADD COLUMN IF NOT EXISTS assignee_agent VARCHAR(128)",
+        "ALTER TABLE followup_items ADD COLUMN IF NOT EXISTS triage BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE followup_items ADD COLUMN IF NOT EXISTS result TEXT",
+        "ALTER TABLE followup_items ADD COLUMN IF NOT EXISTS max_retries INTEGER",
+        "ALTER TABLE followup_items ALTER COLUMN opportunity_id DROP NOT NULL",
+        "ALTER TABLE followup_events ADD COLUMN IF NOT EXISTS run_id INTEGER",
+        # Kanban: new tables (followup_runs, followup_comments) auto-created by create_all
+    ]
+    for m in migrations:
+        try:
+            conn.execute(sa_text(m))
+            conn.commit()
+        except Exception:
+            pass  # column may already exist or table doesn't exist yet
 
 
 @asynccontextmanager
@@ -69,6 +102,13 @@ async def lifespan(app: FastAPI):
                 logger.info("Recovered %d stale AI jobs on startup", recovered)
     except Exception:
         logger.exception("Startup stale-job recovery failed")
+
+    # Ensure last_login_at column exists (create_all won't add to existing tables)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(_ensure_schema_migrations)
+    except Exception:
+        logger.exception("Schema migration check failed")
 
     # Start the AI pipeline as a background task
     global _ai_pipeline_task
@@ -177,6 +217,11 @@ app.include_router(knowledge_router)
 app.include_router(person_router)
 app.include_router(power_router)
 app.include_router(interaction_router)
+app.include_router(silence_router)
+app.include_router(seed_router)
+app.include_router(quick_capture_router)
+app.include_router(briefing_router)
+app.include_router(kanban_router)
 
 # Static SPA — serve index.html at root
 _static_index = (Path(__file__).parent.parent / "static" / "index.html").read_text(encoding="utf-8")
@@ -196,6 +241,11 @@ async def widget():
 async def pipeline_js():
     _js = (Path(__file__).parent.parent / "static" / "pipeline.js").read_text(encoding="utf-8")
     return Response(content=_js, media_type="application/javascript")
+
+@app.get("/kanban", response_class=HTMLResponse)
+async def kanban_page():
+    kanban_path = Path(__file__).parent.parent / "static" / "kanban.html"
+    return kanban_path.read_text(encoding="utf-8")
 
 
 @app.get("/api/health")

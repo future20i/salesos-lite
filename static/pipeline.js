@@ -309,6 +309,12 @@ function renderFollowupCard(fu) {
       'onmouseenter="this.style.background=\'rgba(239,68,68,0.1)\'" onmouseleave="this.style.background=\'rgba(239,68,68,0.04)\'">❌ 拒绝</button>';
   }
 
+  if (fu.status === 'done') {
+    html += '<button onclick="doFollowupSend(\'' + fu.id + '\')" ' +
+      'style="padding:2px 10px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:9999px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 150ms" ' +
+      'onmouseenter="this.style.background=\'var(--accent-hover)\'" onmouseleave="this.style.background=\'var(--accent)\'">📨 发送</button>';
+  }
+
   html += '</div>';
   html += '</div>';
   return html;
@@ -388,6 +394,31 @@ async function doFollowupReview(fuId, action) {
     }
   } catch (e) {
     console.error('followup review error', e);
+  }
+}
+
+async function doFollowupSend(fuId) {
+  if (!confirm('确认发送此消息给客户？')) return;
+  var btn = event.target;
+  var origText = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    var r = await api('/api/followups/' + fuId + '/send', {method: 'POST'});
+    var d = await r.json();
+    if (d.status === 'sent') {
+      btn.textContent = '✅ 已发送';
+      // Reload details to refresh UI
+      setTimeout(function() { loadOpportunityDetail(_currentOppId); }, 500);
+    } else {
+      alert('发送失败: ' + (d.detail || '未知错误'));
+      btn.textContent = origText;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    console.error('send error', e);
+    btn.textContent = origText;
+    btn.disabled = false;
   }
 }
 
@@ -562,5 +593,69 @@ if (typeof _tk !== 'undefined' && _tk) {
 
 // Also expose for manual connection by parent
 // connectPipelineSSE() — callable from parent SPA
+
+// ═══════════════════════════════════════════
+// Seed Pipeline — demo data management
+// ═══════════════════════════════════════════
+async function seedPipeline() {
+  var btn = document.getElementById('btn-seed');
+  if (!btn) return;
+  var orig = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    var r = await api('/api/seed/pipeline', { method: 'POST' });
+    var d = await r.json();
+    if (d.status === 'already_seeded') {
+      if (confirm('演示数据已存在。是否清除后重新生成？')) {
+        await clearSeedPipeline();
+        // Retry seed
+        var r2 = await api('/api/seed/pipeline', { method: 'POST' });
+        var d2 = await r2.json();
+        btn.textContent = d2.status === 'seeded' ? '✅ 已生成' : '❌ 失败';
+        loadPipeline();
+      } else {
+        btn.textContent = orig;
+        btn.disabled = false;
+        return;
+      }
+    } else {
+      btn.textContent = '✅ 已生成';
+    }
+    // Reload pipeline to show the new data
+    loadPipeline();
+  } catch(e) {
+    btn.textContent = '❌ 失败';
+    console.error('Seed failed:', e);
+  }
+  btn.disabled = false;
+  setTimeout(function() { btn.textContent = '🎲 演示'; }, 3000);
+}
+
+async function clearSeedPipeline() {
+  try {
+    var r = await api('/api/seed/pipeline', { method: 'DELETE' });
+    var d = await r.json();
+    loadPipeline();
+    return d;
+  } catch(e) {
+    console.error('Clear seed failed:', e);
+  }
+}
+
+async function seedPipelineIfEmpty() {
+  // Check if any opportunities exist for this tenant
+  try {
+    var r = await api('/api/opportunities/?limit=1');
+    var opps = await r.json();
+    if (!Array.isArray(opps) || opps.length === 0) {
+      // Auto-seed silently
+      await api('/api/seed/pipeline', { method: 'POST' });
+      loadPipeline();
+    }
+  } catch(e) {
+    // Silently fail — seed is optional
+  }
+}
 
 console.log('SalesOS Pipeline JS loaded — functions: loadPipeline, loadOpportunityDetail, doFollowupDraft, doFollowupMove, doFollowupReview, createOppFromLead, switchPanel, connectPipelineSSE');
